@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="TK.NodalEditor.Compound" Collapsed="true">
+    <Position X="0.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAkECAABAAAAAkAAAAABAACAoBAQAAmAAAPgADIAAA=</HashCode>
+      <FileName>NodesFramework\Compound.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="TK.NodalEditor.Node" Collapsed="true">
+    <Position X="0.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>NhcFRCAYCMQwIyZKhwIdVIwG03NBYUABEQyuhHAJeAM=</HashCode>
+      <FileName>NodesFramework\Node.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="TK.NodalEditor.Link" Collapsed="true">
+    <Position X="5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAkAIAAACAAgABCCGQwFAAQAAAEB4ggAQAAA=</HashCode>
+      <FileName>NodesFramework\Ports\Link.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="TK.NodalEditor.Port" Collapsed="true">
+    <Position X="7.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ADAAgACAAIQAEICEAAAiJAACAjBZAQAIIAEAgQAEAEQ=</HashCode>
+      <FileName>NodesFramework\Ports\Port.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="TK.NodalEditor.PortInstance" Collapsed="true">
+    <Position X="7.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAEAABAAAAAAACAgBQAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>NodesFramework\Ports\PortInstance.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="TK.NodalEditor.PortObj" Collapsed="true">
+    <Position X="2.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABQAgACAgIQABoBEAAAAJAAHAiJAEMAAAEAAgAAEGAA=</HashCode>
+      <FileName>NodesFramework\Ports\PortObj.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="TK.NodalEditor.NodeBase" Collapsed="true">
+    <Position X="3.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAaAEAAAAAARAAAAAAAEJAAAIAAAABAY=</HashCode>
+      <FileName>NodesFramework\NodeBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

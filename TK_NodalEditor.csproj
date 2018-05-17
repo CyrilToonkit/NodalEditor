@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{FC8965CA-11CD-41C8-BBE3-B5C6FD3118F4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TK.NodalEditor</RootNamespace>
+    <AssemblyName>TK_NodalEditor</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <StartupObject>
+    </StartupObject>
+    <TargetFrameworkVersion>v3.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Out\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Out\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CustomMenus\LinkContextTag.cs" />
+    <Compile Include="CustomMenus\PortContextTag.cs" />
+    <Compile Include="INodalEditorCommands.cs" />
+    <Compile Include="NodalDirector.cs" />
+    <Compile Include="NodesFramework\AlphaSorter.cs" />
+    <Compile Include="NodesFramework\LevelSorter.cs" />
+    <Compile Include="NodesFramework\NodeConnexions.cs" />
+    <Compile Include="NodesLayout\DataMap.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NodesLayout\DataMap.Designer.cs">
+      <DependentUpon>DataMap.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Log\Log.cs" />
+    <Compile Include="Log\LogSystem.cs" />
+    <Compile Include="NodesLayout\newPort.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NodesLayout\newPort.Designer.cs">
+      <DependentUpon>newPort.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NodesFramework\Manager\ManagerCompanion.cs" />
+    <Compile Include="NodesFramework\NodeBase.cs" />
+    <Compile Include="NodesFramework\CustomField.cs" />
+    <Compile Include="NodesFramework\Node.cs" />
+    <Compile Include="NodesFramework\Compound.cs" />
+    <Compile Include="NodesFramework\Manager\NodesFactory.cs" />
+    <Compile Include="NodesFramework\Manager\NodesManager.cs" />
+    <Compile Include="NodesFramework\Ports\PortModifications.cs" />
+    <Compile Include="NodesFramework\Ports\Link.cs" />
+    <Compile Include="NodesFramework\Ports\Port.cs" />
+    <Compile Include="NodesFramework\Ports\PortContract.cs" />
+    <Compile Include="NodesFramework\Ports\PortObj.cs" />
+    <Compile Include="NodesFramework\Ports\PortInstance.cs" />
+    <Compile Include="NodesFramework\Manager\NodesSerializer.cs" />
+    <Compile Include="NodesLayout\NodalEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="NodesLayout\NodalEditor.Designer.cs">
+      <DependentUpon>NodalEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NodesLayout\NodePreview.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CustomMenus\NodeContextTag.cs" />
+    <Compile Include="NodesLayout\CompoundPortPad.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="NodesLayout\CompoundPortPad.Designer.cs">
+      <DependentUpon>CompoundPortPad.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NodesLayout\NodeSelection.cs" />
+    <Compile Include="NodesLayout\Overlay.cs" />
+    <Compile Include="NodesLayout\SavedLayout.cs" />
+    <Compile Include="NodesLayout\SelectionChanged.cs" />
+    <Compile Include="Preferences\Category.cs" />
+    <Compile Include="Preferences\LinkState.cs" />
+    <Compile Include="Preferences\NodalEditorPreferences.cs" />
+    <Compile Include="NodesLayout\NodesLayout.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="NodesLayout\NodesLayout.Designer.cs">
+      <DependentUpon>NodesLayout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Preferences\State.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="NodesLayout\NodesLayout.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>NodesLayout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Preferences\SelectableCategory.cs" />
+    <Compile Include="TK_INFO.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="NodesLayout\DataMap.resx">
+      <DependentUpon>DataMap.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NodesLayout\newPort.resx">
+      <DependentUpon>newPort.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\DisplayIcon.png" />
+    <None Include="Nodes_Inheritance.cd" />
+    <None Include="Resources\Hide.png" />
+    <EmbeddedResource Include="NodesLayout\CompoundPortPad.resx">
+      <DependentUpon>CompoundPortPad.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NodesLayout\NodalEditor.resx">
+      <DependentUpon>NodalEditor.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ExplodeCompound.bmp" />
+    <EmbeddedResource Include="Resources\EnterCompound.bmp" />
+    <EmbeddedResource Include="Resources\Disconnect.bmp" />
+    <EmbeddedResource Include="Resources\DeleteNodes.bmp" />
+    <EmbeddedResource Include="Resources\DeleteNode.bmp" />
+    <EmbeddedResource Include="Resources\CreateCompound.bmp" />
+    <EmbeddedResource Include="Resources\Instance.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Copie.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Paste.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TK_NodalEditor.XML" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\TK_BaseLib\TK_BaseLib.csproj">
+      <Project>{cff5e0e3-f458-4053-a599-74f3453c6392}</Project>
+      <Name>TK_BaseLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\TK_GraphComponents\TK_GraphComponents.csproj">
+      <Project>{ac2979f7-d4d6-4b8a-8b29-fb27d722e3d4}</Project>
+      <Name>TK_GraphComponents</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\TK_Logger\MiniLogger\MiniLogger.csproj">
+      <Project>{9e82f54d-7df2-4bb5-836c-53a22048aa95}</Project>
+      <Name>MiniLogger</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
