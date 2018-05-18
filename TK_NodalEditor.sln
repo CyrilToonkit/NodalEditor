@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Desktop
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TK_NodalEditor", "TK_NodalEditor.csproj", "{FC8965CA-11CD-41C8-BBE3-B5C6FD3118F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TK_GraphComponents", "..\TK_GraphComponents\TK_GraphComponents.csproj", "{AC2979F7-D4D6-4B8A-8B29-FB27D722E3D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TK_BaseLib", "..\TK_GraphComponents\TK_BaseLib\TK_BaseLib.csproj", "{CFF5E0E3-F458-4053-A599-74F3453C6392}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniLogger", "TK_Logger\MiniLogger\MiniLogger.csproj", "{9E82F54D-7DF2-4BB5-836C-53A22048AA95}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC8965CA-11CD-41C8-BBE3-B5C6FD3118F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC8965CA-11CD-41C8-BBE3-B5C6FD3118F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC8965CA-11CD-41C8-BBE3-B5C6FD3118F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC8965CA-11CD-41C8-BBE3-B5C6FD3118F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC2979F7-D4D6-4B8A-8B29-FB27D722E3D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC2979F7-D4D6-4B8A-8B29-FB27D722E3D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC2979F7-D4D6-4B8A-8B29-FB27D722E3D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC2979F7-D4D6-4B8A-8B29-FB27D722E3D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFF5E0E3-F458-4053-A599-74F3453C6392}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFF5E0E3-F458-4053-A599-74F3453C6392}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFF5E0E3-F458-4053-A599-74F3453C6392}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFF5E0E3-F458-4053-A599-74F3453C6392}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E82F54D-7DF2-4BB5-836C-53A22048AA95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E82F54D-7DF2-4BB5-836C-53A22048AA95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E82F54D-7DF2-4BB5-836C-53A22048AA95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E82F54D-7DF2-4BB5-836C-53A22048AA95}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

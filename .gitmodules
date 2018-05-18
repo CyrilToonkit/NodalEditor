@@ -1,0 +1,8 @@
+[submodule "TK_GraphComponents"]
+	path = TK_GraphComponents
+	url = https://github.com/CyrilToonkit/TK_GraphComponents.git
+	branch = master
+[submodule "TK_Logger"]
+	path = TK_Logger
+	url = https://github.com/CyrilToonkit/TK_Logger.git
+	branch = master
