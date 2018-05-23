@@ -176,11 +176,11 @@
     <EmbeddedResource Include="Resources\Paste.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TK_GraphComponents\TK_BaseLib\TK_BaseLib.csproj">
+    <ProjectReference Include="TK_GraphComponents\TK_BaseLib\TK_BaseLib.csproj">
       <Project>{cff5e0e3-f458-4053-a599-74f3453c6392}</Project>
       <Name>TK_BaseLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TK_GraphComponents\TK_GraphComponents.csproj">
+    <ProjectReference Include="TK_GraphComponents\TK_GraphComponents.csproj">
       <Project>{ac2979f7-d4d6-4b8a-8b29-fb27d722e3d4}</Project>
       <Name>TK_GraphComponents</Name>
     </ProjectReference>
