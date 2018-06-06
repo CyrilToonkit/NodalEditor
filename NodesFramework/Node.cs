@@ -1905,6 +1905,10 @@ namespace TK.NodalEditor
                     reader.ReadEndElement();
                 }
             }
+            else
+            {
+                throw new Exception(string.Format("'PortContracts' Xml element not found !! (line : {0})", (reader as XmlTextReader).LineNumber));
+            }
 
             mUser = reader.ReadElementString();
             mExportDate = long.Parse(reader.ReadElementString());
@@ -1946,6 +1950,10 @@ namespace TK.NodalEditor
                     reader.ReadEndElement();
                 }
             }
+            else
+            {
+                throw new Exception(string.Format("'PortObjs' Xml element not found !! (line : {0})", (reader as XmlTextReader).LineNumber));
+            }
 
             if (reader.MoveToContent() == XmlNodeType.Element && reader.LocalName == "Inputs")
             {
@@ -1963,6 +1971,10 @@ namespace TK.NodalEditor
                     reader.ReadEndElement();
                 }
             }
+            else
+            {
+                throw new Exception(string.Format("'Inputs' Xml element not found !! (line : {0})", (reader as XmlTextReader).LineNumber));
+            }
 
             if (reader.MoveToContent() == XmlNodeType.Element && reader.LocalName == "Outputs")
             {
@@ -1979,6 +1991,10 @@ namespace TK.NodalEditor
                     reader.ReadEndElement();
                 }
             }
+            else
+            {
+                throw new Exception(string.Format("'Outputs' Xml element not found !! (line : {0})", (reader as XmlTextReader).LineNumber));
+            }
 
             if (reader.MoveToContent() == XmlNodeType.Element && reader.LocalName == "CustomFields")
             {
@@ -1992,6 +2008,10 @@ namespace TK.NodalEditor
                 {
                     reader.ReadEndElement();
                 }
+            }
+            else
+            {
+                throw new Exception(string.Format("'CustomFields' Xml element not found !! (line : {0})", (reader as XmlTextReader).LineNumber));
             }
 
             reader.ReadEndElement();
