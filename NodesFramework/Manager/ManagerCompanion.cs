@@ -208,10 +208,13 @@ namespace TK.NodalEditor
                         }
                         _postPonedProcesses.Clear();
                     }
-                    
-                    RestoreEnvironment();
-                    HideProgressBar();
-                    ProgressBarIsShowing = false;
+
+                    if (_postPonedProcesses.Count == 0)
+                    {
+                        RestoreEnvironment();
+                        HideProgressBar();
+                        ProgressBarIsShowing = false;
+                    }
                 }
 
                 LogSteps(proc.End());
