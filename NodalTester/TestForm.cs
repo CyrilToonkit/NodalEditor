@@ -9,6 +9,8 @@ using System.Windows.Forms;
 using TK.NodalEditor;
 using TK.BaseLib;
 using TK.BaseLib.CustomData;
+using TK.NodalEditor.NodesLayout;
+using System.IO;
 
 namespace NodalTester
 {
@@ -16,12 +18,19 @@ namespace NodalTester
     {
         NodesManager manager;
 
+        public NodesManager Manager { get => manager; set => manager = value; }
+
+        public NodesLayout NodalLayout { get => tK_NodalEditorUCtrl1.Layout; }
+        
         public TestForm()
         {
             InitializeComponent();
             
-            NodesSerializer.GetInstance().AddSerializer(NodeElement.Node, "Default", typeof(CustomNode));
-            manager = new NodesManager();
+            NodesSerializer.GetInstance().AddSerializer(NodeElement.Node, "CustomNode", typeof(CustomNode));
+            manager = new NodesManager(new ManagerCompanion());
+            NodalDirector.RegisterManager(manager);
+            NodalDirector.RegisterLayout(tK_NodalEditorUCtrl1.Layout);
+
             manager.AvailableCompound = new Compound();
 
             CustomNode node = new CustomNode();
@@ -30,44 +39,82 @@ namespace NodalTester
             node.Name = node.NativeName = "testNode";
 
             PortObj obj = new PortObj();
-            obj.Name = "TestObj";
-            obj.NativeName = "TestObj";
+            obj.Name = "testNode_TestObj";
+            obj.NativeName = "testNode_TestObj";
 
             PortObj obj1 = new PortObj();
-            obj1.Name = "TestObj1";
-            obj1.NativeName = "TestObj1";
+            obj1.Name = "testNode_TestObj1";
+            obj1.NativeName = "testNode_TestObj1";
 
             PortObj obj2 = new PortObj();
-            obj2.Name = "TestObj2";
-            obj2.NativeName = "TestObj2";
+            obj2.Name = "testNode_TestObj2";
+            obj2.NativeName = "testNode_TestObj2";
 
             NodesFactory.AddPortObj(node, obj);
             NodesFactory.AddPortObj(node, obj1);
             NodesFactory.AddPortObj(node, obj2);
 
-            node.CustomText = "Zobi la mouche";
+            node.CustomText = "Custom Text";
 
             manager.AvailableNodes.Add(node);
             manager.NewLayout();
             manager.AddNode(0, manager.Root, 50, 50);
             tK_NodalEditorUCtrl1.Init("C:\\Rigs\\NodesLayout", manager);
-
-            stringNode categs = new stringNode("Available Nodes");
-
-            categs.AddNode("Chain", "Rigs that can be attached to same instances to create chains");
-            categs.AddNode("Control", "Rigs that create mainly Controls");
-            categs.AddNode("Behaviour", "Rigs used to add pecific behaviours between ports (switchs, constraints...)");
-            categs.AddNode("Deformation", "Rigs that create mainly Defomers");
-            categs.AddNode("Parameters", "Rigs that manages parameters");
-
-            stringNode BodyParts = categs.AddNode("BodyParts", "Compounds used to generate characters");
-            BodyParts.AddNode("Leg", "Compounds used as legs or limbs");
-            BodyParts.AddNode("Spine", "Compounds used as spines");
-
-            categs.AddNode("Mechanical", "Rigs that stands for mechanical elements");
-            categs.AddNode("Debug", "Nodes with special behaviour used to Debug the graph");
-
-            stringNodesTreeView1.Set(categs, false);
         }
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Manager.NewLayout();
+            NodalLayout.Invalidate();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult rslt = openFileDialog1.ShowDialog();
+
+            if(rslt == DialogResult.OK)
+            {
+                Compound openedComp = null;
+
+                using (FileStream fileStream = new FileStream(openFileDialog1.FileName, FileMode.Open))
+                {
+                    openedComp = NodesSerializer.GetInstance().CompoundSerializers["Default"].Deserialize(fileStream) as Compound;
+                }
+
+                if (openedComp != null)
+                {
+                    Manager.NewLayout(openedComp, false);
+                    NodalLayout.Invalidate(); 
+                }
+            }
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult rslt = saveFileDialog1.ShowDialog();
+
+            if (rslt == DialogResult.OK)
+            {
+                StreamWriter myWriter = null;
+
+                try
+                {
+                    myWriter = new StreamWriter(saveFileDialog1.FileName);
+
+                    NodesSerializer.GetInstance().CompoundSerializers["Default"].Serialize(myWriter, Manager.Root);
+                }
+                finally
+                {
+                    if(myWriter != null)
+                        myWriter.Close();
+                }
+                /*
+                using (StreamWriter myWriter = new StreamWriter(saveFileDialog1.FileName))
+                {
+                    
+                }*/
+            }
+        }
+
     }
 }

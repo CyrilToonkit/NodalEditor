@@ -369,12 +369,14 @@ namespace TK.NodalEditor
         /// Real name of the element, in case we use external modifiers
         /// </summary>
         [BrowsableAttribute(false)]
-        public virtual string FullName
+        public override string FullName
         {
             get { return Name; }
             set
             {
-                Name = value;
+                UpdateName(value);
+                _name = value;
+
                 if (Companion != null)
                 {
                     Companion.Manager.OnNodesChanged(new NodesChangedEventArgs(Operations.NodeRenamed, new List<Node> { this }));
@@ -740,6 +742,56 @@ namespace TK.NodalEditor
         public virtual void UpdateBeforeCopy()
         {
 
+        }
+
+        protected override void UpdateName(string value)
+        {
+            if (_name != null && FullName != value)
+            {
+                RenameElements(FullName, value);
+            }
+        }
+
+        public virtual void RenameElements(string Name, string value)
+        {
+            foreach (PortObj element in Elements)
+            {
+                element.Name = element.Name.Replace(Name + "_", value + "_");
+            }
+
+            foreach (Port port in Inputs)
+            {
+                //if the name is not overwritten, change it
+                if (port.Name == port.NativeName)
+                {
+                    port.Name = port.NativeName = port.PortObj.Name;
+                }
+                else //if overwritten, change AccessName only
+                {
+                    port.NativeName = port.PortObj.Name;
+                }
+            }
+
+            foreach (Port port in Outputs)
+            {
+                string oldName = port.Name;
+
+                //if the name is not overwritten, change it
+                if (oldName == port.NativeName)
+                {
+                    port.Name = port.NativeName = port.PortObj.Name;
+                }
+                else //if overwritten, change AccessName only
+                {
+                    port.NativeName = port.PortObj.Name;
+                }
+            }
+
+            if (Parent != null)
+            {
+                Parent.RenamePorts(this, Name, value);
+                Parent.RefreshPorts();
+            }
         }
 
         #endregion        

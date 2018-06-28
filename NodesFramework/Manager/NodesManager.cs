@@ -26,13 +26,14 @@ namespace TK.NodalEditor
 
         #region CONSTRUCTORS
 
+        /*DEPRECATE
         /// <summary>
         /// Empty constructor. Should not be used appart for testing because it lacks a ManagerCompanion
         /// </summary>
         public NodesManager()
         {
 
-        }
+        }*/
 
         /// <summary>
         /// Base constructor
@@ -42,6 +43,13 @@ namespace TK.NodalEditor
         {
             Companion = companion;
             CreateMode = true;
+
+            //Add empty event handlers
+            NodesChangedEvent += NodesManager_NodesChangedEvent;
+        }
+
+        private void NodesManager_NodesChangedEvent(object sender, NodesChangedEventArgs e)
+        {
         }
 
         #endregion
@@ -185,7 +193,7 @@ namespace TK.NodalEditor
 
                     foreach (Port port in ports)
                     {
-                        if (port.Name.Substring(curNode.FullName.Length).ToLower().Contains(suffixedName.ToLower()))
+                        if (port.Name.Length > curNode.FullName.Length && port.Name.Substring(curNode.FullName.Length).ToLower().Contains(suffixedName.ToLower()))
                         {
                             increment++;
                             safe = false;

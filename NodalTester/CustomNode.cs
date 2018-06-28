@@ -13,6 +13,14 @@ namespace NodalTester
     {
         public string CustomText;
 
+        public override string NodeElementType
+        {
+            get
+            {
+                return "CustomNode";
+            }
+        }
+
         protected override List<CustomField> GetCustomFields()
         {
             List<CustomField> Fields = new List<CustomField>();
@@ -36,9 +44,16 @@ namespace NodalTester
             }
         }
 
+        public override void CopyCustomFields(Node inNode, bool Resolve)
+        {
+            CustomNode node = inNode as CustomNode;
+
+            CustomText = node.CustomText;
+        }
+
         public override string ToString()
         {
-            return "Coucou";
+            return CustomText;
         }
     }
 }
