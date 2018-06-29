@@ -201,7 +201,6 @@ namespace TK.NodalEditor.NodesFramework
                                 //Ready to connect
                                 string conError = "";
                                 bool valid = true;
-                                Link oldCon = null;
 
                                 List<Link> incompatibleLinks = new List<Link>();
 
