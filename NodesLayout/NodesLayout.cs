@@ -375,7 +375,6 @@ namespace TK.NodalEditor.NodesLayout
 
                 if (hitNode == null)
                 {
-
                     HitPoint = e.Location;
                     Hit = PointToScreen(HitPoint);
 
@@ -439,6 +438,7 @@ namespace TK.NodalEditor.NodesLayout
 
                         if (HitLink != null)
                         {
+                            Console.WriteLine("ici !");
                             Selection.DeselectAll();
                             OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(HitLink));
 
@@ -637,6 +637,252 @@ namespace TK.NodalEditor.NodesLayout
             }
         }
 
+        //void Node_MouseUp(object sender, MouseEventArgs e)
+        //{
+        //    if (hitNode != null)
+        //    {
+        //        Node Node = sender as Node;
+        //        bool doubleClicked = (e.Button == MouseButtons.Left && WasDoubleClicked());
+
+        //        switch (e.Button)
+        //        {
+        //            case MouseButtons.Left:
+        //            if (CurConnection != -1)
+        //            {
+        //                Port connectPort = connectPort = Node.GetPort(CurConnection);
+
+        //                if (doubleClicked)
+        //                {
+        //                    PortClickEvent(Node, new PortClickEventArgs(connectPort.Index, connectPort.IsOutput));
+        //                }
+        //                else  // Connecting
+        //                {
+        //                    Node HitCtrl = GetHitNode(e.Location);
+
+        //                    if (HitCtrl != null)
+        //                    {
+        //                        Point TransPos = new Point(e.Location.X - (int)(HitCtrl.UIx * LayoutSize), e.Location.Y - (int)(HitCtrl.UIy * LayoutSize));
+
+        //                        int portIndex = GetPortClick(HitCtrl, TransPos.X, TransPos.Y);
+        //                        if (portIndex > -1)
+        //                        {
+        //                            //Check
+        //                            Port depositPort = HitCtrl.GetPort(portIndex);
+
+        //                            string Error = "";
+        //                            if (depositPort != null)
+        //                            {
+
+        //                                if (!depositPort.IsOutput && connectPort.IsOutput)
+        //                                {
+        //                                    HitCtrl.Connect(depositPort.Index, Node, connectPort.Index, ModifierKeys.ToString(), out Error, Preferences.CheckCycles);
+        //                                }
+        //                                else
+        //                                {
+        //                                    if (depositPort.IsOutput && !connectPort.IsOutput)
+        //                                    {
+        //                                        Node.Connect(connectPort.Index, HitCtrl, depositPort.Index, ModifierKeys.ToString(), out Error, Preferences.CheckCycles);
+        //                                    }
+        //                                }
+        //                            }
+        //                            else
+        //                            {
+        //                                //plug in new Port
+        //                                if (HitCtrl.GetPortTypes().Contains(connectPort.NodeElementType))
+        //                                {
+        //                                    if (connectPort.IsOutput)
+        //                                    {
+
+        //                                        DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
+        //                                        if (result == DialogResult.OK)
+        //                                        {
+        //                                            depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, true, newPortForm.CustomParams, newPortForm.TypeMetaData);
+        //                                            if (depositPort != null)
+        //                                            {
+        //                                                HitCtrl.Connect(depositPort.Index, Node, connectPort.Index, ModifierKeys.ToString(), out Error, Preferences.CheckCycles);
+        //                                            }
+        //                                        }
+        //                                    }
+        //                                    else
+        //                                    {
+        //                                        DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
+        //                                        if (result == DialogResult.OK)
+        //                                        {
+        //                                            depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, false, newPortForm.CustomParams, newPortForm.TypeMetaData);
+        //                                            if (depositPort != null)
+        //                                            {
+        //                                                Node.Connect(connectPort.Index, HitCtrl, depositPort.Index, ModifierKeys.ToString(), out Error, Preferences.CheckCycles);
+        //                                            }
+        //                                        }
+        //                                    }
+        //                                }
+        //                                else
+        //                                {
+        //                                    log.AddLog(HitCtrl.Name + " disallow adding ports of type " + connectPort.NodeElementType, 15, 2);
+        //                                }
+        //                            }                                       
+
+        //                            if (Error != "")
+        //                            {
+        //                                log.AddLog(Error, 15, 2);
+        //                            }
+        //                        }
+        //                    }
+        //                    else //Expose
+        //                    {
+        //                        CompoundPortPad pad = GetHitPad(e.Location);
+
+        //                        if (pad != null)
+        //                        {
+        //                            if (CurConnection >= 1000)
+        //                            {
+        //                                if (pad.righty)
+        //                                {
+        //                                    pad.ExposePort(Node.GetPort(CurConnection));
+        //                                }
+        //                            }
+        //                            else
+        //                            {
+        //                                if (!pad.righty)
+        //                                {
+        //                                    pad.ExposePort(Node.GetPort(CurConnection));
+        //                                }
+        //                            }
+        //                        }
+        //                    }
+        //                }
+
+        //                overlay.ConnectArrow = new Point[0];
+        //                CurConnection = -1;
+        //                Invalidate();
+        //            }
+        //            else
+        //            {
+        //                if (!HasMoved) // Select
+        //                {
+        //                    if (HitDisplay(Node, e.Location))
+        //                    {
+        //                        switch (Node.DisplayState)
+        //                        {
+        //                            case NodeState.Normal:
+        //                                Node.DisplayState = NodeState.Minimal;
+        //                                break;
+        //                            case NodeState.Minimal:
+        //                                Node.DisplayState = NodeState.Collapsed;
+        //                                break;
+        //                            default:
+        //                                Node.DisplayState = NodeState.Normal;
+        //                                break;
+        //                        }
+        //                        Invalidate();
+        //                    }
+        //                    else
+        //                    {
+
+        //                        if (doubleClicked && Node is Compound)
+        //                        {
+
+        //                            Manager.EnterCompound(Node as Compound);
+        //                            ChangeFocus(true);
+
+        //                            Frame(Manager.CurCompound.Nodes);
+        //                        }
+        //                        else
+        //                        {
+        //                            Selection.Modify(Node, ModifierKeys);
+        //                        }
+
+        //                        OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
+        //                        OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
+        //                        Invalidate();
+
+        //                    }
+        //                }
+        //            }
+        //        break;
+
+        //            case MouseButtons.Middle:
+        //                //Branch select
+        //        List<Node> depend = Manager.GetBranch(Node);
+
+        //        Selection.Modify(depend, ModifierKeys);
+
+        //        OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
+        //        OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
+        //        Invalidate();
+
+        //        break;
+
+        //        case MouseButtons.Right:  // ContextMenu
+        //            bool hitPort = false;
+
+        //            if (!Node.Selected)
+        //            {
+        //                Selection.Modify(Node, ModifierKeys);
+        //                Invalidate();
+        //            }
+
+        //            if (Node.DynamicInputs || Node.DynamicOutputs)
+        //            {
+        //                Point TransPos = new Point(e.Location.X - (int)(Node.UIx * LayoutSize), e.Location.Y - (int)(Node.UIy * LayoutSize));
+        //                int click = GetPortClick(Node, TransPos.X, TransPos.Y);
+
+        //                if (click != -1)
+        //                {
+        //                    Port clickedPort = Node.GetPort(click);
+        //                    foreach (ToolStripItem item in customPortMenuStrip.Items)
+        //                    {
+        //                        item.Visible = false;
+        //                    }
+
+        //                    if (clickedPort != null && !clickedPort.Default)
+        //                    {
+        //                        hitPort = true;
+
+        //                        deletePortToolStripMenuItem.Visible = true;
+        //                        deletePortToolStripMenuItem.Tag = clickedPort;
+        //                        customPortMenuStrip.Show(PointToScreen(e.Location));
+        //                    }
+        //                    else
+        //                    {
+        //                        foreach (ToolStripItem item in customPortMenuStrip.Items)
+        //                        {
+        //                            if (item != deletePortToolStripMenuItem)
+        //                            {
+        //                                PortContextTag tag = item.Tag as PortContextTag;
+        //                                if (tag != null)
+        //                                {
+        //                                    if (tag.isContextConsistent(clickedPort))
+        //                                    {
+        //                                        item.Visible = true;
+        //                                        hitPort = true;
+        //                                        tag.port = clickedPort;
+        //                                    }
+        //                                }
+        //                            }
+        //                        }
+
+        //                        if (hitPort)
+        //                        {
+        //                            customPortMenuStrip.Show(PointToScreen(e.Location));
+        //                        }
+        //                    }
+        //                }
+        //            }
+
+        //            if (!hitPort)
+        //            {
+        //                ShowNodeContextMenu(Node, PointToScreen(e.Location));
+        //            }
+        //            break;
+        //        }
+
+        //        hitNode = null;
+        //    }
+        //    IsDragging = false;
+        //    HasMoved = false;
+        //}
+
         void Node_MouseUp(object sender, MouseEventArgs e)
         {
             if (hitNode != null)
@@ -647,234 +893,234 @@ namespace TK.NodalEditor.NodesLayout
                 switch (e.Button)
                 {
                     case MouseButtons.Left:
-                    if (CurConnection != -1)
-                    {
-                        Port connectPort = connectPort = Node.GetPort(CurConnection);
-
-                        if (doubleClicked)
+                        if (CurConnection != -1)
                         {
-                            PortClickEvent(Node, new PortClickEventArgs(connectPort.Index, connectPort.IsOutput));
-                        }
-                        else  // Connecting
-                        {
-                            Node HitCtrl = GetHitNode(e.Location);
+                            Port connectPort = connectPort = Node.GetPort(CurConnection);
 
-                            if (HitCtrl != null)
+                            if (doubleClicked)
                             {
-                                Point TransPos = new Point(e.Location.X - (int)(HitCtrl.UIx * LayoutSize), e.Location.Y - (int)(HitCtrl.UIy * LayoutSize));
+                                PortClickEvent(Node, new PortClickEventArgs(connectPort.Index, connectPort.IsOutput));
+                            }
+                            else  // Connecting
+                            {
+                                Node HitCtrl = GetHitNode(e.Location);
 
-                                int portIndex = GetPortClick(HitCtrl, TransPos.X, TransPos.Y);
-                                if (portIndex > -1)
+                                if (HitCtrl != null)
                                 {
-                                    //Check
-                                    Port depositPort = HitCtrl.GetPort(portIndex);
+                                    Point TransPos = new Point(e.Location.X - (int)(HitCtrl.UIx * LayoutSize), e.Location.Y - (int)(HitCtrl.UIy * LayoutSize));
 
-                                    string Error = "";
-                                    if (depositPort != null)
+                                    int portIndex = GetPortClick(HitCtrl, TransPos.X, TransPos.Y);
+                                    if (portIndex > -1)
                                     {
+                                        //Check
+                                        Port depositPort = HitCtrl.GetPort(portIndex);
 
-                                        if (!depositPort.IsOutput && connectPort.IsOutput)
+                                        string Error = "";
+                                        if (depositPort != null)
                                         {
-                                            HitCtrl.Connect(depositPort.Index, Node, connectPort.Index, ModifierKeys.ToString(), out Error, Preferences.CheckCycles);
+
+                                            if (!depositPort.IsOutput && connectPort.IsOutput)
+                                            {                                            
+                                                NodalDirector.Connect(HitCtrl.FullName, depositPort.FullName, Node.FullName, connectPort.FullName);
+                                            }
+                                            else
+                                            {
+                                                if (depositPort.IsOutput && !connectPort.IsOutput)
+                                                {
+                                                    NodalDirector.Connect(Node.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                }
+                                            }
                                         }
                                         else
                                         {
-                                            if (depositPort.IsOutput && !connectPort.IsOutput)
+                                            //plug in new Port
+                                            if (HitCtrl.GetPortTypes().Contains(connectPort.NodeElementType))
                                             {
-                                                Node.Connect(connectPort.Index, HitCtrl, depositPort.Index, ModifierKeys.ToString(), out Error, Preferences.CheckCycles);
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        //plug in new Port
-                                        if (HitCtrl.GetPortTypes().Contains(connectPort.NodeElementType))
-                                        {
-                                            if (connectPort.IsOutput)
-                                            {
-
-                                                DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
-                                                if (result == DialogResult.OK)
+                                                if (connectPort.IsOutput)
                                                 {
-                                                    depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, true, newPortForm.CustomParams, newPortForm.TypeMetaData);
-                                                    if (depositPort != null)
+
+                                                    DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
+                                                    if (result == DialogResult.OK)
                                                     {
-                                                        HitCtrl.Connect(depositPort.Index, Node, connectPort.Index, ModifierKeys.ToString(), out Error, Preferences.CheckCycles);
+                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, true, newPortForm.CustomParams, newPortForm.TypeMetaData);
+                                                        if (depositPort != null)
+                                                        {
+                                                            NodalDirector.Connect(HitCtrl.FullName, depositPort.FullName, Node.FullName, connectPort.FullName);
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
+                                                    if (result == DialogResult.OK)
+                                                    {
+                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, false, newPortForm.CustomParams, newPortForm.TypeMetaData);
+                                                        if (depositPort != null)
+                                                        {
+                                                            NodalDirector.Connect(Node.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                        }
                                                     }
                                                 }
                                             }
                                             else
                                             {
-                                                DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
-                                                if (result == DialogResult.OK)
-                                                {
-                                                    depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, false, newPortForm.CustomParams, newPortForm.TypeMetaData);
-                                                    if (depositPort != null)
-                                                    {
-                                                        Node.Connect(connectPort.Index, HitCtrl, depositPort.Index, ModifierKeys.ToString(), out Error, Preferences.CheckCycles);
-                                                    }
-                                                }
+                                                log.AddLog(HitCtrl.Name + " disallow adding ports of type " + connectPort.NodeElementType, 15, 2);
+                                            }
+                                        }
+
+                                        if (Error != "")
+                                        {
+                                            log.AddLog(Error, 15, 2);
+                                        }
+                                    }
+                                }
+                                else //Expose
+                                {
+                                    CompoundPortPad pad = GetHitPad(e.Location);
+
+                                    if (pad != null)
+                                    {
+                                        if (CurConnection >= 1000)
+                                        {
+                                            if (pad.righty)
+                                            {
+                                                pad.ExposePort(Node.GetPort(CurConnection));
                                             }
                                         }
                                         else
                                         {
-                                            log.AddLog(HitCtrl.Name + " disallow adding ports of type " + connectPort.NodeElementType, 15, 2);
-                                        }
-                                    }                                       
-
-                                    if (Error != "")
-                                    {
-                                        log.AddLog(Error, 15, 2);
-                                    }
-                                }
-                            }
-                            else //Expose
-                            {
-                                CompoundPortPad pad = GetHitPad(e.Location);
-
-                                if (pad != null)
-                                {
-                                    if (CurConnection >= 1000)
-                                    {
-                                        if (pad.righty)
-                                        {
-                                            pad.ExposePort(Node.GetPort(CurConnection));
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (!pad.righty)
-                                        {
-                                            pad.ExposePort(Node.GetPort(CurConnection));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        overlay.ConnectArrow = new Point[0];
-                        CurConnection = -1;
-                        Invalidate();
-                    }
-                    else
-                    {
-                        if (!HasMoved) // Select
-                        {
-                            if (HitDisplay(Node, e.Location))
-                            {
-                                switch (Node.DisplayState)
-                                {
-                                    case NodeState.Normal:
-                                        Node.DisplayState = NodeState.Minimal;
-                                        break;
-                                    case NodeState.Minimal:
-                                        Node.DisplayState = NodeState.Collapsed;
-                                        break;
-                                    default:
-                                        Node.DisplayState = NodeState.Normal;
-                                        break;
-                                }
-                                Invalidate();
-                            }
-                            else
-                            {
-
-                                if (doubleClicked && Node is Compound)
-                                {
-
-                                    Manager.EnterCompound(Node as Compound);
-                                    ChangeFocus(true);
-
-                                    Frame(Manager.CurCompound.Nodes);
-                                }
-                                else
-                                {
-                                    Selection.Modify(Node, ModifierKeys);
-                                }
-
-                                OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
-                                OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
-                                Invalidate();
-
-                            }
-                        }
-                    }
-                break;
-                
-                    case MouseButtons.Middle:
-                        //Branch select
-                List<Node> depend = Manager.GetBranch(Node);
-                
-                Selection.Modify(depend, ModifierKeys);
-
-                OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
-                OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
-                Invalidate();
-
-                break;
-
-                case MouseButtons.Right:  // ContextMenu
-                    bool hitPort = false;
-
-                    if (!Node.Selected)
-                    {
-                        Selection.Modify(Node, ModifierKeys);
-                        Invalidate();
-                    }
-
-                    if (Node.DynamicInputs || Node.DynamicOutputs)
-                    {
-                        Point TransPos = new Point(e.Location.X - (int)(Node.UIx * LayoutSize), e.Location.Y - (int)(Node.UIy * LayoutSize));
-                        int click = GetPortClick(Node, TransPos.X, TransPos.Y);
-
-                        if (click != -1)
-                        {
-                            Port clickedPort = Node.GetPort(click);
-                            foreach (ToolStripItem item in customPortMenuStrip.Items)
-                            {
-                                item.Visible = false;
-                            }
-
-                            if (clickedPort != null && !clickedPort.Default)
-                            {
-                                hitPort = true;
-
-                                deletePortToolStripMenuItem.Visible = true;
-                                deletePortToolStripMenuItem.Tag = clickedPort;
-                                customPortMenuStrip.Show(PointToScreen(e.Location));
-                            }
-                            else
-                            {
-                                foreach (ToolStripItem item in customPortMenuStrip.Items)
-                                {
-                                    if (item != deletePortToolStripMenuItem)
-                                    {
-                                        PortContextTag tag = item.Tag as PortContextTag;
-                                        if (tag != null)
-                                        {
-                                            if (tag.isContextConsistent(clickedPort))
+                                            if (!pad.righty)
                                             {
-                                                item.Visible = true;
-                                                hitPort = true;
-                                                tag.port = clickedPort;
+                                                pad.ExposePort(Node.GetPort(CurConnection));
                                             }
                                         }
                                     }
                                 }
+                            }
 
-                                if (hitPort)
+                            overlay.ConnectArrow = new Point[0];
+                            CurConnection = -1;
+                            Invalidate();
+                        }
+                        else
+                        {
+                            if (!HasMoved) // Select
+                            {
+                                if (HitDisplay(Node, e.Location))
                                 {
-                                    customPortMenuStrip.Show(PointToScreen(e.Location));
+                                    switch (Node.DisplayState)
+                                    {
+                                        case NodeState.Normal:
+                                            Node.DisplayState = NodeState.Minimal;
+                                            break;
+                                        case NodeState.Minimal:
+                                            Node.DisplayState = NodeState.Collapsed;
+                                            break;
+                                        default:
+                                            Node.DisplayState = NodeState.Normal;
+                                            break;
+                                    }
+                                    Invalidate();
+                                }
+                                else
+                                {
+
+                                    if (doubleClicked && Node is Compound)
+                                    {
+
+                                        Manager.EnterCompound(Node as Compound);
+                                        ChangeFocus(true);
+
+                                        Frame(Manager.CurCompound.Nodes);
+                                    }
+                                    else
+                                    {
+                                        Selection.Modify(Node, ModifierKeys);
+                                    }
+
+                                    OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
+                                    OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
+                                    Invalidate();
+
                                 }
                             }
                         }
-                    }
+                        break;
 
-                    if (!hitPort)
-                    {
-                        ShowNodeContextMenu(Node, PointToScreen(e.Location));
-                    }
-                    break;
+                    case MouseButtons.Middle:
+                        //Branch select
+                        List<Node> depend = Manager.GetBranch(Node);
+
+                        Selection.Modify(depend, ModifierKeys);
+
+                        OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
+                        OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
+                        Invalidate();
+
+                        break;
+
+                    case MouseButtons.Right:  // ContextMenu
+                        bool hitPort = false;
+
+                        if (!Node.Selected)
+                        {
+                            Selection.Modify(Node, ModifierKeys);
+                            Invalidate();
+                        }
+
+                        if (Node.DynamicInputs || Node.DynamicOutputs)
+                        {
+                            Point TransPos = new Point(e.Location.X - (int)(Node.UIx * LayoutSize), e.Location.Y - (int)(Node.UIy * LayoutSize));
+                            int click = GetPortClick(Node, TransPos.X, TransPos.Y);
+
+                            if (click != -1)
+                            {
+                                Port clickedPort = Node.GetPort(click);
+                                foreach (ToolStripItem item in customPortMenuStrip.Items)
+                                {
+                                    item.Visible = false;
+                                }
+
+                                if (clickedPort != null && !clickedPort.Default)
+                                {
+                                    hitPort = true;
+
+                                    deletePortToolStripMenuItem.Visible = true;
+                                    deletePortToolStripMenuItem.Tag = clickedPort;
+                                    customPortMenuStrip.Show(PointToScreen(e.Location));
+                                }
+                                else
+                                {
+                                    foreach (ToolStripItem item in customPortMenuStrip.Items)
+                                    {
+                                        if (item != deletePortToolStripMenuItem)
+                                        {
+                                            PortContextTag tag = item.Tag as PortContextTag;
+                                            if (tag != null)
+                                            {
+                                                if (tag.isContextConsistent(clickedPort))
+                                                {
+                                                    item.Visible = true;
+                                                    hitPort = true;
+                                                    tag.port = clickedPort;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (hitPort)
+                                    {
+                                        customPortMenuStrip.Show(PointToScreen(e.Location));
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!hitPort)
+                        {
+                            ShowNodeContextMenu(Node, PointToScreen(e.Location));
+                        }
+                        break;
                 }
 
                 hitNode = null;
@@ -2396,21 +2642,31 @@ namespace TK.NodalEditor.NodesLayout
             strip.Items.Add(toolStripMenuItem);
         }
 
+        //private void createCompoundToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    List<Node> nodes = Selection.GetSelectedNodes();
+        //    if (nodes.Count > 0)
+        //    {
+        //        Compound compound = Manager.AddCompound(nodes);
+
+        //        if (compound != null)
+        //        {
+        //            Manager.EnterCompound(compound);
+        //        }
+
+        //        ChangeFocus(true);
+        //        Frame(Manager.CurCompound.Nodes);
+        //    }
+        //}
+
         private void createCompoundToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<Node> nodes = Selection.GetSelectedNodes();
-            if (nodes.Count > 0)
-            {
-                Compound compound = Manager.AddCompound(nodes);
 
-                if (compound != null)
-                {
-                    Manager.EnterCompound(compound);
-                }
+                NodalDirector.CreateCompound(nodes);
 
                 ChangeFocus(true);
                 Frame(Manager.CurCompound.Nodes);
-            }
         }
 
         private void disconnectAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2503,7 +2759,7 @@ namespace TK.NodalEditor.NodesLayout
         {
             Link link = linkMenuStrip.Tag as Link;
 
-            NodalDirector.DeleteLinks(new List<Link> { link });
+            NodalDirector.Disconnect(link.Target.Owner.FullName, link.Target.FullName, link.Source.Owner.FullName, link.Source.FullName);
             /*
             Manager.CurCompound.UnConnect(link);
 
@@ -2876,6 +3132,45 @@ namespace TK.NodalEditor.NodesLayout
             ChangeFocus(true);
         }*/
 
+        //public void DeleteSelected()
+        //{
+        //    List<Node> selNodes = Selection.GetSelectedNodes();
+        //    if (selNodes.Count > 0)
+        //    {
+        //        List<string> nodesNames = new List<string>();
+        //        foreach (Node node in selNodes)
+        //        {
+        //            nodesNames.Add(node.FullName);
+        //        }
+
+        //        NodalDirector.DeleteNodes(nodesNames);
+        //        /*
+        //        Manager.Companion.LaunchProcess("Delete nodes", selNodes.Count);
+
+        //        foreach (Node node in selNodes)
+        //        {
+        //            Manager.RemoveNode(node);
+        //            node.Deleted = true;
+        //            Manager.Companion.ProgressBarIncrement();
+        //        }
+
+        //        RefreshPorts();
+        //        Selection.Selection.Clear();
+        //        ChangeFocus(true);
+        //        Manager.Companion.EndProcess();
+        //        */
+        //    }
+        //    else
+        //    {
+        //        List<Link> selLinks = Selection.GetSelectedLinks();
+        //        if (selLinks.Count > 0)
+        //        {
+        //            NodalDirector.DeleteLinks(selLinks);
+        //        }
+        //    }
+        //}
+
+        
         public void DeleteSelected()
         {
             List<Node> selNodes = Selection.GetSelectedNodes();
@@ -2886,6 +3181,8 @@ namespace TK.NodalEditor.NodesLayout
                 {
                     nodesNames.Add(node.FullName);
                 }
+
+
 
                 NodalDirector.DeleteNodes(nodesNames);
                 /*
@@ -2909,10 +3206,16 @@ namespace TK.NodalEditor.NodesLayout
                 List<Link> selLinks = Selection.GetSelectedLinks();
                 if (selLinks.Count > 0)
                 {
-                    NodalDirector.DeleteLinks(selLinks);
+                    foreach (Link link in selLinks)
+                    {
+                        NodalDirector.Disconnect(link.Target.Owner.FullName, link.Target.FullName, link.Source.Owner.FullName, link.Source.FullName);
+                    }
+                    
+                        
                 }
             }
         }
+        
 
         public void ParentNode()
         {

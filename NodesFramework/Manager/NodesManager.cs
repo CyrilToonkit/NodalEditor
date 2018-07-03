@@ -42,6 +42,7 @@ namespace TK.NodalEditor
         public NodesManager(ManagerCompanion companion)
         {
             Companion = companion;
+            Companion.Manager = this;
             CreateMode = true;
 
             //Add empty event handlers

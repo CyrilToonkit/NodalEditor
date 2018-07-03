@@ -27,7 +27,9 @@ namespace NodalTester
             InitializeComponent();
             
             NodesSerializer.GetInstance().AddSerializer(NodeElement.Node, "CustomNode", typeof(CustomNode));
-            manager = new NodesManager(new ManagerCompanion());
+            ManagerCompanion comp = new ManagerCompanion();
+            manager = new NodesManager(comp);
+
             NodalDirector.RegisterManager(manager);
             NodalDirector.RegisterLayout(tK_NodalEditorUCtrl1.Layout);
 
