@@ -1893,7 +1893,7 @@ namespace TK.NodalEditor.NodesLayout
 
                 return true;
             }
-            catch (Exception exept) { if (stream != null) { stream.Close(); } }
+            catch (Exception) { if (stream != null) { stream.Close(); } }
 
             return false;
         }
@@ -1917,7 +1917,7 @@ namespace TK.NodalEditor.NodesLayout
 
                 return result;
             }
-            catch (Exception exept) { if (stream != null) { stream.Close(); } }
+            catch (Exception) { if (stream != null) { stream.Close(); } }
 
             return null;
         }
