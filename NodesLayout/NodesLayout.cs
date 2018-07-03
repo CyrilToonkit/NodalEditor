@@ -381,8 +381,21 @@ namespace TK.NodalEditor.NodesLayout
                     switch (e.Button)
                     {
                         case MouseButtons.Left: //Classic case, DragSelect
+                            //EN PLUS
+                            Link HitLink = GetHitLink(e.Location);
 
-                            if (!IsDragging)
+                            if (HitLink != null)
+                            {
+                                Console.WriteLine("ici 2 !");
+
+                                Selection.DeselectAll();
+                                OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(HitLink));
+
+                                Selection.SelectLink(HitLink);
+                                Invalidate();
+
+                            }
+                                if (!IsDragging)
                             {
                                 overlay.SelectRectangle.Size = zeroSize;
                                 IsDragging = true;
@@ -2662,68 +2675,151 @@ namespace TK.NodalEditor.NodesLayout
         private void createCompoundToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<Node> nodes = Selection.GetSelectedNodes();
+            List<string> nodesName = new List<string>();
 
-                NodalDirector.CreateCompound(nodes);
+            if (nodes.Count > 0)
+            {
+                foreach (Node Node in nodes)
+                {
+                    string nodeName = Node.FullName;
+                    nodesName.Add(nodeName);
+                }
 
+                bool test = NodalDirector.CreateCompound(nodesName);
+            }
                 ChangeFocus(true);
                 Frame(Manager.CurCompound.Nodes);
         }
 
+        //private void disconnectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    List<Node> nodes = Selection.GetSelectedNodes();
+        //    if (nodes.Count > 0)
+        //    {
+        //        foreach (Node Node in nodes)
+        //        {
+        //            Manager.CurCompound.UnConnectAll(Node);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        Node Node = nodeMenuStrip.Tag as Node;
+
+        //        Manager.CurCompound.UnConnectAll(Node);
+        //    }
+
+        //    Invalidate();
+        //}
+
         private void disconnectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<Node> nodes = Selection.GetSelectedNodes();
+            List<string> nodesName = new List<string>();
+
             if (nodes.Count > 0)
             {
                 foreach (Node Node in nodes)
                 {
-                    Manager.CurCompound.UnConnectAll(Node);
+                    string nodeName = Node.FullName;
+                    nodesName.Add(nodeName);
                 }
+                bool test = NodalDirector.DisconnectAll(nodesName);
             }
             else
             {
                 Node Node = nodeMenuStrip.Tag as Node;
-
-                Manager.CurCompound.UnConnectAll(Node);
+                string nodeName = Node.FullName;
+                nodesName.Add(nodeName);
+                bool test = NodalDirector.DisconnectAll(nodesName);
             }
-
-            Invalidate();
         }
+
+        //private void disconnectInputsToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    List<Node> nodes = Selection.GetSelectedNodes();
+        //    if (nodes.Count > 0)
+        //    {
+        //        foreach (Node Node in nodes)
+        //        {
+        //            Manager.CurCompound.UnConnectInputs(Node);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        Node Node = nodeMenuStrip.Tag as Node;
+
+        //        Manager.CurCompound.UnConnectInputs(Node);
+        //    }
+
+        //    Invalidate();
+        //}
 
         private void disconnectInputsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<Node> nodes = Selection.GetSelectedNodes();
+            List<string> nodesName = new List<string>();
+
             if (nodes.Count > 0)
             {
                 foreach (Node Node in nodes)
                 {
-                    Manager.CurCompound.UnConnectInputs(Node);
+                    string nodeName = Node.FullName;
+                    nodesName.Add(nodeName);
                 }
+                bool test = NodalDirector.DisconnectInputs(nodesName);
             }
             else
             {
                 Node Node = nodeMenuStrip.Tag as Node;
-
-                Manager.CurCompound.UnConnectInputs(Node);
+                string nodeName = Node.FullName;
+                nodesName.Add(nodeName);
+                bool test = NodalDirector.DisconnectInputs(nodesName);
             }
 
             Invalidate();
         }
 
+        //private void disconnectOutputsToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    List<Node> nodes = Selection.GetSelectedNodes();
+        //    if (nodes.Count > 0)
+        //    {
+        //        foreach (Node Node in nodes)
+        //        {
+        //            Manager.CurCompound.UnConnectOutputs(Node);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        Node Node = nodeMenuStrip.Tag as Node;
+
+        //        Manager.CurCompound.UnConnectOutputs(Node);
+        //    }
+
+        //    Invalidate();
+
+        //}
+
         private void disconnectOutputsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<Node> nodes = Selection.GetSelectedNodes();
+            List<string> nodesName = new List<string>();
+
             if (nodes.Count > 0)
             {
                 foreach (Node Node in nodes)
                 {
-                    Manager.CurCompound.UnConnectOutputs(Node);
+                    string nodeName = Node.FullName;
+                    nodesName.Add(nodeName);
                 }
+                bool test = NodalDirector.DisconnectOutputs(nodesName);
             }
             else
             {
                 Node Node = nodeMenuStrip.Tag as Node;
-
-                Manager.CurCompound.UnConnectOutputs(Node);
+                string nodeName = Node.FullName;
+                nodesName.Add(nodeName);
+                bool test = NodalDirector.DisconnectOutputs(nodesName);
             }
 
             Invalidate();
@@ -2844,58 +2940,95 @@ namespace TK.NodalEditor.NodesLayout
             ChangeFocus(true);
         }
 
+        //private void exposeAllPortsToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    List<Node> selNodes = Selection.GetSelectedNodes();
+        //    if (selNodes.Count > 0)
+        //    {
+        //        foreach (Node node in selNodes)
+        //        {
+        //            foreach (Port port in node.Inputs)
+        //            {
+        //                PortInstance parentPort = node.Parent.GetPortFromNode(port);
+        //                parentPort.Visible = true;
+        //            }
+
+        //            foreach (Port port in node.Outputs)
+        //            {
+        //                PortInstance parentPort = node.Parent.GetPortFromNode(port);
+        //                parentPort.Visible = true;
+        //            }
+        //        }
+
+        //        ChangeFocus(false);
+        //        RefreshPorts();
+        //    }
+        //}
+
         private void exposeAllPortsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<Node> selNodes = Selection.GetSelectedNodes();
+            List<string> nodesName = new List<string>();
+
             if (selNodes.Count > 0)
             {
                 foreach (Node node in selNodes)
                 {
-                    foreach (Port port in node.Inputs)
-                    {
-                        PortInstance parentPort = node.Parent.GetPortFromNode(port);
-                        parentPort.Visible = true;
-                    }
-
-                    foreach (Port port in node.Outputs)
-                    {
-                        PortInstance parentPort = node.Parent.GetPortFromNode(port);
-                        parentPort.Visible = true;
-                    }
+                    string nodeName = node.FullName;
+                    nodesName.Add(nodeName);
                 }
+                bool test = NodalDirector.ExposeAllPorts(nodesName);
 
                 ChangeFocus(false);
                 RefreshPorts();
             }
         }
 
+        //private void hideAllPortsToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    List<Node> selNodes = Selection.GetSelectedNodes();
+        //    if (selNodes.Count > 0)
+        //    {
+        //        foreach (Node node in selNodes)
+        //        {
+        //            foreach (Port port in node.Inputs)
+        //            {
+        //                PortInstance parentPort = node.Parent.GetPortFromNode(port);
+
+        //                if (!parentPort.IsLinked())
+        //                {
+        //                    parentPort.Visible = false;
+        //                }
+        //            }
+
+        //            foreach (Port port in node.Outputs)
+        //            {
+        //                PortInstance parentPort = node.Parent.GetPortFromNode(port);
+
+        //                if (!parentPort.IsLinked())
+        //                {
+        //                    parentPort.Visible = false;
+        //                }
+        //            }
+        //        }
+
+        //        ChangeFocus(false);
+        //        RefreshPorts();
+        //    }
+        //}
+
         private void hideAllPortsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<Node> selNodes = Selection.GetSelectedNodes();
+            List<string> nodesName = new List<string>();
             if (selNodes.Count > 0)
             {
                 foreach (Node node in selNodes)
                 {
-                    foreach (Port port in node.Inputs)
-                    {
-                        PortInstance parentPort = node.Parent.GetPortFromNode(port);
-
-                        if (!parentPort.IsLinked())
-                        {
-                            parentPort.Visible = false;
-                        }
-                    }
-
-                    foreach (Port port in node.Outputs)
-                    {
-                        PortInstance parentPort = node.Parent.GetPortFromNode(port);
-
-                        if (!parentPort.IsLinked())
-                        {
-                            parentPort.Visible = false;
-                        }
-                    }
+                    string nodeName = node.FullName;
+                    nodesName.Add(nodeName);
                 }
+                bool test = NodalDirector.HideAllPorts(nodesName);
 
                 ChangeFocus(false);
                 RefreshPorts();
@@ -3215,12 +3348,46 @@ namespace TK.NodalEditor.NodesLayout
                 }
             }
         }
-        
+
+
+        //public void ParentNode()
+        //{
+        //    List<Node> nodes = Selection.GetSelectedNodes();
+        //    List<Compound> compounds = new List<Compound>();
+
+        //    if (nodes.Count < 2)
+        //    {
+        //        TKMessageBox.ShowError("Please select at least 2 nodes, first any number of nodes to reparent, then at last a Compound to reparent the nodes into !", "Compound parent error");
+        //        return;
+        //    }
+
+        //    Compound newParent = nodes[nodes.Count - 1] as Compound;
+
+        //    if (newParent == null)
+        //    {
+        //        TKMessageBox.ShowError("Last selected node must be a compound to reparent the nodes into !", "Compound parent error");
+        //        return;
+        //    }
+
+        //    nodes.Remove(nodes[nodes.Count - 1]);
+
+        //    foreach (Node node in nodes)
+        //    {
+        //        if (node.Parent != null && node.Parent != newParent)
+        //        {
+        //            Manager.MoveNodes(new List<Node> { node }, newParent);
+        //        }
+        //    }
+
+        //    RefreshPorts();
+        //    Selection.Selection.Clear();
+        //    ChangeFocus(true);
+        //}
 
         public void ParentNode()
         {
             List<Node> nodes = Selection.GetSelectedNodes();
-            List<Compound> compounds = new List<Compound>();
+            List<string> nodesName = new List<string>();
 
             if (nodes.Count < 2)
             {
@@ -3236,31 +3403,48 @@ namespace TK.NodalEditor.NodesLayout
                 return;
             }
 
-            nodes.Remove(nodes[nodes.Count - 1]);
-
             foreach (Node node in nodes)
             {
-                if (node.Parent != null && node.Parent != newParent)
-                {
-                    Manager.MoveNodes(new List<Node> { node }, newParent);
-                }
+                string nodeName = node.FullName;
+                nodesName.Add(nodeName);
             }
+            bool test = NodalDirector.Parent(nodesName);
 
             RefreshPorts();
             Selection.Selection.Clear();
             ChangeFocus(true);
         }
 
+        //public void UnParentNode()
+        //{
+        //    List<Node> nodes = Selection.GetSelectedNodes();
+        //    foreach (Node node in nodes)
+        //    {
+        //        if (node.Parent != null && node.Parent.Parent != null)
+        //        {
+        //            Manager.MoveNodes(new List<Node> { node }, node.Parent.Parent);
+        //        }
+        //    }
+        //    RefreshPorts();
+        //    Selection.Selection.Clear();
+        //    ChangeFocus(true);
+        //}
+
         public void UnParentNode()
         {
             List<Node> nodes = Selection.GetSelectedNodes();
-            foreach (Node node in nodes)
+            List<string> nodesName = new List<string>();            
+
+            if (nodes.Count > 0)
             {
-                if (node.Parent != null && node.Parent.Parent != null)
+                foreach (Node Node in nodes)
                 {
-                    Manager.MoveNodes(new List<Node> { node }, node.Parent.Parent);
+                    string nodeName = Node.FullName;
+                    nodesName.Add(nodeName);
                 }
+                bool test = NodalDirector.UnParent(nodesName);
             }
+
             RefreshPorts();
             Selection.Selection.Clear();
             ChangeFocus(true);

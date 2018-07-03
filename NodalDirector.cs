@@ -62,7 +62,6 @@ namespace TK.NodalEditor
             return true;
         }
 
-        ///This one is not cheating
         public static bool Disconnect(string inputNode, string inputPort, string outputNode, string outputPort)
         {
             if (manager == null)
@@ -283,7 +282,7 @@ namespace TK.NodalEditor
                         {
                             link.Target.Owner.UnConnectObject(link);
                             link.Target.Dependencies.Remove(link);
-                            //link.Target.Owner.RefreshConnections();
+                            link.Target.Owner.RefreshConnections();
                         }
 
                     }
@@ -310,26 +309,49 @@ namespace TK.NodalEditor
             return true;
         }
 
-
-        //EN COURS
-        public static bool DisconnectAll(List<Node> nodes)
+        public static bool DisconnectAll(List<string> inputNodes)
         {
             if (manager == null)
                 return false;
 
-            if (nodes.Count > 0)
+            string nom_fct = string.Format("DisconnectAll(List<string> {0})", inputNodes);
+            List<string> nodesNameError = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (inputNodes.Count > 0)
             {
-                foreach (Node Node in nodes)
+                foreach (string NodeName in inputNodes)
                 {
-                    manager.CurCompound.UnConnectAll(Node);
+                    Node Node = manager.GetNode(NodeName);
+                    
+                    if (Node == null) //Node with NodeName do not exist
+                    {
+                        nodesNameError.Add(NodeName);
+                    }
+                    else //Node with NodeName exist
+                    {
+                        nodes.Add(Node);
+                    }
+                }
+                if(nodesNameError.Count > 0)
+                {
+                    Logger.Log(nom_fct + string.Format("Not all node names in {0} exist", inputNodes), LogSeverities.Error);
+                    return false;
+                }
+                else //All the nodes name exist
+                {
+                    foreach(Node Node in nodes)
+                    {
+                        manager.CurCompound.UnConnectAll(Node);
+                    }
                 }
             }
             else
             {
-                //Node Node = nodeMenuStrip.Tag as Node;
-                //manager.CurCompound.UnConnectAll(Node);
+                Logger.Log(nom_fct + string.Format("{0} is empty", inputNodes), LogSeverities.Error);
+                return false;
             }
-
+            
             if (layout == null)
                 return true;
 
@@ -338,24 +360,47 @@ namespace TK.NodalEditor
             return true;
         }
 
-
-        //EN COURS
-        public static bool DisconnectInputs(List<Node> nodes)
+        public static bool DisconnectInputs(List<string> inputNodes)
         {
             if (manager == null)
                 return false;
 
-            if (nodes.Count > 0)
+            string nom_fct = string.Format("DisconnectInputs(List<string> {0})", inputNodes);
+            List<string> nodesNameError = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (inputNodes.Count > 0)
             {
-                foreach (Node Node in nodes)
+                foreach (string NodeName in inputNodes)
                 {
-                    manager.CurCompound.UnConnectInputs(Node);
+                    Node Node = manager.GetNode(NodeName);
+
+                    if (Node == null) //Node with NodeName do not exist
+                    {
+                        nodesNameError.Add(NodeName);
+                    }
+                    else //Node with NodeName exist
+                    {
+                        nodes.Add(Node);
+                    }
+                }
+                if (nodesNameError.Count > 0)
+                {
+                    Logger.Log(nom_fct + string.Format("Not all node names in {0} exist", inputNodes), LogSeverities.Error);
+                    return false;
+                }
+                else //All the nodes name exist
+                {
+                    foreach (Node Node in nodes)
+                    {
+                        manager.CurCompound.UnConnectInputs(Node);
+                    }
                 }
             }
             else
             {
-                //Node Node = nodeMenuStrip.Tag as Node;
-                //manager.CurCompound.UnConnectInputs(Node);
+                Logger.Log(nom_fct + string.Format("{0} is empty", inputNodes), LogSeverities.Error);
+                return false;
             }
 
             if (layout == null)
@@ -366,23 +411,47 @@ namespace TK.NodalEditor
             return true;
         }
 
-        //EN COURS
-        public static bool DisconnectOutputs(List<string> nodesName)
+        public static bool DisconnectOutputs(List<string> inputNodes)
         {
             if (manager == null)
                 return false;
 
-            if (nodes.Count > 0)
+            string nom_fct = string.Format("DisconnectOutputs(List<string> {0})", inputNodes);
+            List<string> nodesNameError = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (inputNodes.Count > 0)
             {
-                foreach (Node Node in nodes)
+                foreach (string NodeName in inputNodes)
                 {
-                    manager.CurCompound.UnConnectOutputs(Node);
+                    Node Node = manager.GetNode(NodeName);
+
+                    if (Node == null) //Node with NodeName do not exist
+                    {
+                        nodesNameError.Add(NodeName);
+                    }
+                    else //Node with NodeName exist
+                    {
+                        nodes.Add(Node);
+                    }
+                }
+                if (nodesNameError.Count > 0)
+                {
+                    Logger.Log(nom_fct + string.Format("Not all node names in {0} exist", inputNodes), LogSeverities.Error);
+                    return false;
+                }
+                else //All the nodes name exist
+                {
+                    foreach (Node Node in nodes)
+                    {
+                        manager.CurCompound.UnConnectOutputs(Node);
+                    }
                 }
             }
             else
             {
-                //Node Node = nodeMenuStrip.Tag as Node;
-                //manager.CurCompound.UnConnectOutputs(Node);
+                Logger.Log(nom_fct + string.Format("{0} is empty", inputNodes), LogSeverities.Error);
+                return false;
             }
 
             if (layout == null)
@@ -393,20 +462,284 @@ namespace TK.NodalEditor
             return true;
         }
 
-        //EN COURS
-        public static bool CreateCompound(List<Node> nodes)
+
+        public static bool Parent(List<string> inputNodes)
         {
             if (manager == null)
                 return false;
 
-            if (nodes.Count > 0)
-            {
-                Compound compound = manager.AddCompound(nodes);
+            string nom_fct = string.Format("Parent(List<string> {0})", inputNodes);
+            List<string> nodesNameError = new List<string>();
+            List<Node> nodes = new List<Node>();
 
-                if (compound != null)
+            if (inputNodes.Count > 0)
+            {
+                foreach (string NodeName in inputNodes)
                 {
-                    manager.EnterCompound(compound);
+                    Node Node = manager.GetNode(NodeName);
+
+                    if (Node == null) //Node with NodeName do not exist
+                    {
+                        nodesNameError.Add(NodeName);
+                    }
+                    else //Node with NodeName exist
+                    {
+                        nodes.Add(Node);
+                    }
                 }
+                if (nodesNameError.Count > 0)
+                {
+                    Logger.Log(nom_fct + string.Format("Not all node names in {0} exist", inputNodes), LogSeverities.Error);
+                    return false;
+                }
+                else //All the nodes name exist
+                {
+                    if (nodes.Count < 2)
+                    {
+                        Logger.Log("Please select at least 2 nodes, first any number of nodes to reparent, then at last a Compound to reparent the nodes into ! Compound parent error", LogSeverities.Error);
+                        return false;
+                    }
+
+                    Compound newParent = nodes[nodes.Count - 1] as Compound;
+
+                    if (newParent == null)
+                    {
+                        Logger.Log("Last selected node must be a compound to reparent the nodes into ! Compound parent error", LogSeverities.Error);
+                        return false;
+                    }
+
+                    nodes.Remove(nodes[nodes.Count - 1]);
+
+                    foreach (Node node in nodes)
+                    {
+                        if (node.Parent != null && node.Parent != newParent)
+                        {
+                            manager.MoveNodes(new List<Node> { node }, newParent);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Logger.Log(nom_fct + string.Format("{0} is empty", inputNodes), LogSeverities.Error);
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool UnParent(List<string> inputNodes)
+        {
+            if (manager == null)
+                return false;
+
+            string nom_fct = string.Format("UnParent(List<string> {0})", inputNodes);
+            List<string> nodesNameError = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (inputNodes.Count > 0)
+            {
+                foreach (string NodeName in inputNodes)
+                {
+                    Node Node = manager.GetNode(NodeName);
+
+                    if (Node == null) //Node with NodeName do not exist
+                    {
+                        nodesNameError.Add(NodeName);
+                    }
+                    else //Node with NodeName exist
+                    {
+                        nodes.Add(Node);
+                    }
+                }
+                if (nodesNameError.Count > 0)
+                {
+                    Logger.Log(nom_fct + string.Format("Not all node names in {0} exist", inputNodes), LogSeverities.Error);
+                    return false;
+                }
+                else //All the nodes name exist
+                {
+                    foreach (Node node in nodes)
+                    {
+                        if (node.Parent != null && node.Parent.Parent != null)
+                        {
+                            manager.MoveNodes(new List<Node> { node }, node.Parent.Parent);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Logger.Log(nom_fct + string.Format("{0} is empty", inputNodes), LogSeverities.Error);
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool ExposeAllPorts(List<string> inputNodes)
+        {
+            if (manager == null)
+                return false;
+
+            string nom_fct = string.Format("ExposeAllPorts(List<string> {0})", inputNodes);
+            List<string> nodesNameError = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (inputNodes.Count > 0)
+            {
+                foreach (string NodeName in inputNodes)
+                {
+                    Node Node = manager.GetNode(NodeName);
+
+                    if (Node == null) //Node with NodeName do not exist
+                    {
+                        nodesNameError.Add(NodeName);
+                    }
+                    else //Node with NodeName exist
+                    {
+                        nodes.Add(Node);
+                    }
+                }
+                if (nodesNameError.Count > 0)
+                {
+                    Logger.Log(nom_fct + string.Format("Not all node names in {0} exist", inputNodes), LogSeverities.Error);
+                    return false;
+                }
+                else //All the nodes name exist
+                {
+                    foreach (Node Node in nodes)
+                    {
+                        foreach (Port port in Node.Inputs)
+                        {
+                            PortInstance parentPort = Node.Parent.GetPortFromNode(port);
+                            parentPort.Visible = true;
+                        }
+
+                        foreach (Port port in Node.Outputs)
+                        {
+                            PortInstance parentPort = Node.Parent.GetPortFromNode(port);
+                            parentPort.Visible = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Logger.Log(nom_fct + string.Format("{0} is empty", inputNodes), LogSeverities.Error);
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool HideAllPorts(List<string> inputNodes)
+        {
+            if (manager == null)
+                return false;
+
+            string nom_fct = string.Format("HideAllPorts(List<string> {0})", inputNodes);
+            List<string> nodesNameError = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (inputNodes.Count > 0)
+            {
+                foreach (string NodeName in inputNodes)
+                {
+                    Node Node = manager.GetNode(NodeName);
+
+                    if (Node == null) //Node with NodeName do not exist
+                    {
+                        nodesNameError.Add(NodeName);
+                    }
+                    else //Node with NodeName exist
+                    {
+                        nodes.Add(Node);
+                    }
+                }
+                if (nodesNameError.Count > 0)
+                {
+                    Logger.Log(nom_fct + string.Format("Not all node names in {0} exist", inputNodes), LogSeverities.Error);
+                    return false;
+                }
+                else //All the nodes name exist
+                {
+                    foreach (Node Node in nodes)
+                    {
+                        foreach (Port port in Node.Inputs)
+                        {
+                            PortInstance parentPort = Node.Parent.GetPortFromNode(port);
+
+                            if (!parentPort.IsLinked())
+                            {
+                                parentPort.Visible = false;
+                            }
+                        }
+
+                        foreach (Port port in Node.Outputs)
+                        {
+                            PortInstance parentPort = Node.Parent.GetPortFromNode(port);
+
+                            if (!parentPort.IsLinked())
+                            {
+                                parentPort.Visible = false;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Logger.Log(nom_fct + string.Format("{0} is empty", inputNodes), LogSeverities.Error);
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool CreateCompound(List<string> inputNodes)
+        {
+            if (manager == null)
+                return false;
+
+            string nom_fct = string.Format("CreateCompound(List<string> {0})", inputNodes);
+            List<string> nodesNameError = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (inputNodes.Count > 0)
+            {
+                foreach (string NodeName in inputNodes)
+                {
+                    Node Node = manager.GetNode(NodeName);
+
+                    if (Node == null) //Node with NodeName do not exist
+                    {
+                        nodesNameError.Add(NodeName);
+                    }
+                    else //Node with NodeName exist
+                    {
+                        nodes.Add(Node);
+                    }
+                }
+                if (nodesNameError.Count > 0)
+                {
+                    Logger.Log(nom_fct + string.Format("Not all node names in {0} exist", inputNodes), LogSeverities.Error);
+                    return false;
+                }
+                else //All the nodes name exist
+                {
+                    Compound compound = manager.AddCompound(nodes);
+
+                    if (compound != null)
+                    {
+                        manager.EnterCompound(compound);
+                    }
+                }
+            }
+            else
+            {
+                Logger.Log(nom_fct + string.Format("{0} is empty", inputNodes), LogSeverities.Error);
+                return false;
             }
 
             if (layout == null)
@@ -418,7 +751,7 @@ namespace TK.NodalEditor
         }
 
 
-        ///This one is cheating, we should not use Classes here (Link)
+        ///Example to delete
         public static bool DeleteLinks(List<Link> selLinks)
         {
             if (manager == null)
