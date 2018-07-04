@@ -1991,7 +1991,15 @@ namespace TK.NodalEditor
                         type = reader.GetAttribute("Type");
                     }
 
-                    PortObj element = (PortObj)Serializer.PortObjSerializers[type].Deserialize(reader);
+                    PortObj element = null;
+                    XmlSerializer portObjSerializer = null;
+
+                    if(!Serializer.PortObjSerializers.TryGetValue(type, out portObjSerializer))
+                    {
+                        portObjSerializer = Serializer.PortObjSerializers["Default"];
+                    }
+
+                    element = portObjSerializer.Deserialize(reader) as PortObj;
                     Elements.Add(element);
                     element.Owner = this;
                     reader.Read();
