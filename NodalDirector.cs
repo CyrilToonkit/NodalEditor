@@ -1,8 +1,12 @@
 ﻿using MiniLogger;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Forms;
 using TK.BaseLib;
+using TK.BaseLib.CSCodeEval;
+using TK.GraphComponents.Dialogs;
 
 namespace TK.NodalEditor
 {
@@ -21,6 +25,40 @@ namespace TK.NodalEditor
         {
             layout = inLayout;
         }
+
+        #region Logging
+
+        public static void Log(string inMessage)
+        {
+            Logger.Log(inMessage, LogSeverities.Log);
+        }
+
+        public static void Info(string inMessage)
+        {
+            Logger.Log(inMessage, LogSeverities.Info);
+        }
+
+        public static void Warning(string inMessage)
+        {
+            Logger.Log(inMessage, LogSeverities.Warning);
+        }
+
+        public static void Error(string inMessage)
+        {
+            Logger.Log(inMessage, LogSeverities.Error);
+        }
+
+        public static void Fatal(string inMessage)
+        {
+            Logger.Log(inMessage, LogSeverities.Fatal);
+        }
+
+        public static void ShowError(string Message, string Caption)
+        {
+            TKMessageBox.ShowError(Message, Caption);
+        }
+
+        #endregion
 
         public static bool DeleteNodes(List<string> inNodesNames)
         {
@@ -748,6 +786,49 @@ namespace TK.NodalEditor
             layout.Invalidate();
 
             return true;
+        }
+
+        /// <summary>
+        /// Executes arbitrary C# code at runtime
+        /// </summary>
+        /// <param name="inCode">The code to execute</param>
+        public static void Evaluate(string inCode)
+        {
+            Dictionary<string, object> args = new Dictionary<string, object>();
+            /*
+            args.Add("ManagerCompanion Companion", Companion);
+            args.Add("RigCreator Creator", Creator);
+            args.Add("NodesManager nodesManager", nodesManager);
+            args.Add("NodesLayout RigsLayout", RigsLayout);
+            */
+            InterpreterResult rslt = CSInterpreter.Eval(inCode.Replace("cmds.", "NodalDirector."), string.Empty, "TK_BaseLib.dll;TK_GraphComponents.dll;TK_NodalEditor.dll;", "using System.Collections.Generic;using TK.BaseLib;using TK.BaseLib.CGModel;using TK.GraphComponents.Dialogs;using TK.NodalEditor;using TK.NodalEditor.NodesLayout;", args);
+            string msg = "No info !";
+
+            if (!rslt.Success)
+            {
+                if (rslt.Output is CompilerErrorCollection)
+                {
+                    CompilerErrorCollection errors = rslt.Output as CompilerErrorCollection;
+
+                    msg = string.Empty;
+
+                    foreach (CompilerError error in errors)
+                    {
+                        msg += error.ErrorText + "\n";
+                    }
+                }
+                else
+                {
+                    msg = rslt.Output.ToString();
+                }
+
+                ShowError(msg, "Interpreter error");
+            }
+            else
+            {
+                msg = rslt.Output == null ? "null" : rslt.Output.ToString();
+                Log("Returns : " + msg);
+            }
         }
 
 

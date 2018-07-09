@@ -1681,7 +1681,13 @@ namespace TK.NodalEditor.NodesLayout
                     if (link.Target.Owner.IsIn(Manager.CurCompound))
                     {
                         target = GetPortLocation(link.Target.Owner, link.Target.Index);
-                        source = GetPortLocation(Inputs, Inputs.GetPort(link.Target).Index + 1000);
+                        Port sourcePort = Inputs.GetPort(link.Target);
+                        if (sourcePort == null)
+                        {
+                            NodalDirector.Error(string.Format("GetHitLink : Can't find source port '{0}' in Compound 'Pad'", link.Target.FullName));
+                            return null;
+                        }
+                        source = GetPortLocation(Inputs, sourcePort.Index + 1000);
                     }
                     else
                     {
@@ -2058,7 +2064,7 @@ namespace TK.NodalEditor.NodesLayout
                                         }
                                         else
                                         {
-                                            MessageBox.Show("Cannot get source " + Link.Source.Name + " on " + Outputs.node.Name + " !!");
+                                            NodalDirector.Error("Cannot get source " + Link.Source.Name + " on " + Outputs.node.Name + " !!");
                                         }
                                     }
                                 }
@@ -2074,7 +2080,7 @@ namespace TK.NodalEditor.NodesLayout
                                         }
                                         else
                                         {
-                                            MessageBox.Show("Cannot get Target " + Link.Target.Name + " on " + Inputs.node.Name + " !!");
+                                            NodalDirector.Error("Cannot get Target " + Link.Target.Name + " on " + Inputs.node.Name + " !!");
                                         }
                                     }
                                 }

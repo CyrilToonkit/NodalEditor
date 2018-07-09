@@ -86,6 +86,8 @@ namespace NodalTester
                 if (openedComp != null)
                 {
                     Manager.NewLayout(openedComp, false);
+                    NodalLayout.ChangeFocus(true);
+                    NodalLayout.Frame(Manager.CurCompound.Nodes);
                     NodalLayout.Invalidate(); 
                 }
             }
@@ -118,5 +120,9 @@ namespace NodalTester
             }
         }
 
+        private void nodalExecuteBT_Click(object sender, EventArgs e)
+        {
+            NodalDirector.Evaluate(scriptEditorTB.Text);
+        }
     }
 }
