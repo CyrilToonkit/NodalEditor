@@ -1,9 +1,7 @@
-﻿using System;
+﻿using OrderedPropertyGrid;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
 using System.Xml;
-using OrderedPropertyGrid;
 
 namespace TK.NodalEditor
 {
@@ -164,7 +162,7 @@ namespace TK.NodalEditor
         /// <param name="inName">Name of the field</param>
         protected virtual void DeserializeCustomField(XmlReader reader, string inName)
         {
-            reader.Read();
+            reader.Skip();
         }
 
         /// <summary>

@@ -1921,9 +1921,25 @@ namespace TK.NodalEditor.NodesLayout
                 }
                 else
                 {
+
                     item.Key.isHovered = false;
                     hoverChange = true;
-                }
+
+                    if (link.Target.Owner.IsIn(Manager.CurCompound))
+                    {
+                        target = GetPortLocation(link.Target.Owner, link.Target.Index);
+                        Port sourcePort = Inputs.GetPort(link.Target);
+                        if (sourcePort == null)
+                        {
+                            NodalDirector.Error(string.Format("GetHitLink : Can't find source port '{0}' in Compound 'Pad'", link.Target.FullName));
+                            return null;
+                        }
+                        source = GetPortLocation(Inputs, sourcePort.Index + 1000);
+                    }
+                    else
+                    {
+                        return null;
+                    }                }
             }
             if (hoverChange)
                 Invalidate();
@@ -2318,7 +2334,7 @@ namespace TK.NodalEditor.NodesLayout
                                         }
                                         else
                                         {
-                                            MessageBox.Show("Cannot get source " + Link.Source.Name + " on " + Outputs.node.Name + " !!");
+                                            NodalDirector.Error("Cannot get source " + Link.Source.Name + " on " + Outputs.node.Name + " !!");
                                         }
                                     }
                                 }
@@ -2342,7 +2358,7 @@ namespace TK.NodalEditor.NodesLayout
                                         }
                                         else
                                         {
-                                            MessageBox.Show("Cannot get Target " + Link.Target.Name + " on " + Inputs.node.Name + " !!");
+                                            NodalDirector.Error("Cannot get Target " + Link.Target.Name + " on " + Inputs.node.Name + " !!");
                                         }
                                     }
                                 }

@@ -459,7 +459,14 @@ namespace TK.NodalEditor
                         type = reader.GetAttribute("Type");
                     }
 
-                    Link dep = (Link)Serializer.LinkSerializers[type].Deserialize(reader);
+                    XmlSerializer linkSerializer = null;
+
+                    if (!Serializer.LinkSerializers.TryGetValue(type, out linkSerializer))
+                    {
+                        linkSerializer = Serializer.LinkSerializers["Default"];
+                    }
+
+                    Link dep = (Link)linkSerializer.Deserialize(reader);
                     dep.Target = this;
                     Dependencies.Add(dep);
                 }
