@@ -926,7 +926,7 @@ namespace TK.NodalEditor
                     else
                     {
                         parent = GetCommonParent(link.Source.Owner, link.Target.Owner);
-                        if (parent == CurCompound || CurCompound.IsIn(parent) && !links.Contains(link))
+                        if ((parent == CurCompound || CurCompound.IsIn(parent)) && !links.Contains(link))
                         {
                             links.Add(link);
                         }
@@ -941,7 +941,7 @@ namespace TK.NodalEditor
                     if (link.Source.Owner != null)
                     {
                         parent = GetCommonParent(link.Source.Owner, link.Target.Owner);
-                        if (parent == CurCompound || CurCompound.IsIn(parent) && !links.Contains(link))
+                        if ((parent == CurCompound || CurCompound.IsIn(parent)) && !links.Contains(link))
                         {
                             links.Add(link);
                         }

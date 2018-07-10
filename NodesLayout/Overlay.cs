@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace TK.NodalEditor.NodesLayout
 {
@@ -34,6 +35,8 @@ namespace TK.NodalEditor.NodesLayout
         public Pen ConnectPen = Pens.Black;
         public Point[] ConnectArrow = new Point[0];
 
+        private const float penWidth = 1;
+
         public void Draw(Graphics e)
         {
             if(DragSelect)
@@ -45,7 +48,7 @@ namespace TK.NodalEditor.NodesLayout
 
             if (ConnectArrow.Length == 2)
             {
-                DrawArrow(e, ConnectPen, ConnectBrush, ConnectArrow[0], ConnectArrow[1], 0, false, Layout.LinkStates["Default"]);
+                DrawArrow(e, ConnectPen, ConnectBrush, ConnectArrow[0], ConnectArrow[1], 0, false, Layout.LinkStates["Default"], false);
             }
 
             if (Layout.Preferences.ShowMap)
@@ -106,18 +109,17 @@ namespace TK.NodalEditor.NodesLayout
             }
         }
         
-        public void DrawArrow(Graphics graphics, Pen inPen, Brush inBrush, Point point, Point point_2, double Size, bool Selected, LinkState state)
+        public GraphicsPath DrawArrow(Graphics graphics, Pen inPen, Brush inBrush, Point point, Point point_2, double Size, bool Selected, LinkState state, bool Hovered)
         {
-            DrawArrow(graphics, inPen, inBrush, point, point_2, Size, Selected, state, false, 0);
+            return DrawArrow(graphics, inPen, inBrush, point, point_2, Size, Selected, state, false, 0, Hovered);
         }
-        
-        public void DrawArrow(Graphics graphics, Pen inPen, Brush inBrush, Point point, Point point_2, double Size, bool Selected, LinkState state, bool cycling, int YOffset)
+
+        public GraphicsPath DrawArrow(Graphics graphics, Pen inPen, Brush inBrush, Point point, Point point_2, double Size, bool Selected, LinkState state, bool cycling, int YOffset, bool Hovered)
         {
+            GraphicsPath path = null;
             double hyp = Math.Sqrt(Math.Pow(point_2.Y - point.Y, 2) + Math.Pow(point.X - point_2.X, 2));
             if (hyp > 0)
             {
-                //double angle = Math.Acos(Math.Abs(point_2.Y - point.Y) / hyp) + Math.PI / 2;
-
                 Point Handle1 = new Point((int)((4 * point_2.X + point.X) / 5.0), point.Y);
                 Point Handle2 = new Point((int)((4 * point.X + point_2.X) / 5.0), point_2.Y);
 
@@ -141,32 +143,52 @@ namespace TK.NodalEditor.NodesLayout
 
                 if (Selected)
                 {
-                    graphics.DrawBezier(Layout.FatPen, point, Handle1, Handle2, point_2);
+                    path = new GraphicsPath();
+                    path.AddBezier(point, Handle1, Handle2, point_2);
+                    graphics.DrawPath(Layout.FatPen, path);
+                    //graphics.DrawBezier(Layout.FatPen, point, Handle1, Handle2, point_2);
                 }
 
-                //graphics.DrawBezier(inPen, new Point(100, 100), new Point(0, 200), new Point(300, 300), new Point(200, 200));
+                //if (Hovered == true && path != null)
+                //{
+                //    Console.WriteLine("je suis dans Draw 1");
+                //    Pen pe = new Pen(Color.Blue, 2);
+                //    graphics.DrawPath(pe, path);
+                //}
+                //if (Hovered == false && path != null)
+                //{
+                //    Console.WriteLine("je suis dans Draw 2");
+                //    Pen pe = new Pen(Color.Red, 1);
+                //    graphics.DrawPath(pe, path);
+                //}
 
-                graphics.DrawBezier(inPen, point, Handle1, Handle2, point_2);
+                //condition ? true : false
 
-                if (Size > 0)
-                {
-                    int arrowSize = (int)(12 * Size);
+                path = new GraphicsPath();
+                path.AddBezier(point, Handle1, Handle2, point_2);
+                graphics.DrawPath(Hovered ? Layout.FatPen : inPen, path);
 
-                    //Start
-                    if (state.StartArrow != LinksArrows.None)
-                    {
-                        DrawLinkBound(graphics, state.StartArrow, inBrush, point, arrowSize, 1);
-                    }
+                //graphics.DrawBezier(inPen, point, Handle1, Handle2, point_2);
 
-                    //End
-                    if (state.EndArrow != LinksArrows.None)
-                    {
-                        DrawLinkBound(graphics, state.EndArrow, inBrush, point_2, arrowSize, -1);
-                    }
-                }
+                //if (Size > 0)
+                //{
+                //    int arrowSize = (int)(12 * Size);
+
+                //    //Start
+                //    if (state.StartArrow != LinksArrows.None)
+                //    {
+                //        DrawLinkBound(graphics, state.StartArrow, inBrush, point, arrowSize, 1);
+                //    }
+
+                //    //End
+                //    if (state.EndArrow != LinksArrows.None)
+                //    {
+                //        DrawLinkBound(graphics, state.EndArrow, inBrush, point_2, arrowSize, -1);
+                //    }
+                //}
             }
+            return path;
         }
-
         private void DrawLinkBound(Graphics graphics, LinksArrows inArrow, Brush inBrush, Point inPoint, int inArrowSize, int inSign)
         {
             Point ArrowUp = new Point(inPoint.X + (inArrowSize * inSign), inPoint.Y + Math.Max(1, inArrowSize / 2));

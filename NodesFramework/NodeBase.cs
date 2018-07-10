@@ -31,8 +31,13 @@ namespace TK.NodalEditor
         /// </summary>
         bool _selected;
 
+        /// <summary>
+        /// Tells if the element is hovered
+        /// </summary>
+        bool _isHovered;
+
         #endregion
-        
+
         #region PROPERTIES
 
         /// <summary>
@@ -88,6 +93,16 @@ namespace TK.NodalEditor
         {
             get { return _selected; }
             set { _selected = value; }
+        }
+
+        /// <summary>
+        /// Tells if the element is hovered
+        /// </summary>
+        [BrowsableAttribute(false)]
+        public bool isHovered
+        {
+            get { return _isHovered; }
+            set { _isHovered = value; }
         }
 
         /// <summary>

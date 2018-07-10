@@ -1117,7 +1117,12 @@ namespace TK.NodalEditor
         /// <returns>The new Link</returns>
         public Link Connect(int InputIndex, Node OuputRig, int OutputIndex, string Mode, out string Error)
         {
-            return Connect(InputIndex, OuputRig, OutputIndex, Mode, out Error, Companion.Manager.Preferences.CheckCycles);
+            return Connect(InputIndex, OuputRig, OutputIndex, Mode, out Error, Companion.Manager.Preferences.CheckCycles, null);
+        }
+
+        public Link Connect(int InputIndex, Node OuputRig, int OutputIndex, string Mode, out string Error, Link link)
+        {
+            return Connect(InputIndex, OuputRig, OutputIndex, Mode, out Error, Companion.Manager.Preferences.CheckCycles, link);
         }
 
         /// <summary>
@@ -1131,6 +1136,11 @@ namespace TK.NodalEditor
         /// <param name="CheckCycle">Check if the link creates a cycle</param>
         /// <returns>The new Link</returns>
         public Link Connect(int InputIndex, Node OuputRig, int OutputIndex, string Mode, out string Error, bool CheckCycle)
+        {
+            return Connect(InputIndex, OuputRig, OutputIndex, Mode, out Error, CheckCycle, null);
+        }
+
+        public Link Connect(int InputIndex, Node OuputRig, int OutputIndex, string Mode, out string Error, bool CheckCycle, Link link)
         {
             Error = "";
 
@@ -1175,8 +1185,17 @@ namespace TK.NodalEditor
                                 else
                                 {
                                     //Everything is fine, create the link
-                                    newDep = CreateLink(cGport.NodeElementType, cGport, port);
-                                    newDep.Name = port.Owner.FullName + "_To_" + cGport.Owner.FullName;
+                                    if (link == null)
+                                    {
+                                        newDep = CreateLink(cGport.NodeElementType, cGport, port);
+                                    }
+                                    else
+                                    {
+                                        newDep = link;
+                                        newDep.Source = cGport;
+                                        newDep.Target = port;
+                                    }
+                                        newDep.Name = port.Owner.FullName + "_To_" + cGport.Owner.FullName;
                                     if (newDep != null)
                                     {
                                         if (!port.Visible)
@@ -1230,7 +1249,8 @@ namespace TK.NodalEditor
 
             return null;
         }
-        
+
+
         /// <summary>
         /// Tells if the current instance "depend on" another Node
         /// </summary>

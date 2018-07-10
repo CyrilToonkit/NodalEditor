@@ -67,11 +67,9 @@ namespace TK.NodalEditor
             if (manager == null)
                 return false;
 
-            string nom_fct = string.Format("Disconnect(string {0}, string {0}, string {0}, string {0})", inputNode, inputPort, outputNode, outputNode);
-            /*
+            string nom_fct = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\")", inputNode, inputPort, outputNode, outputPort);
             if (verbose)
-                Logger.Log(string.Format("DeleteLinks(new List<string>{{\"{0}\"}})", TypesHelper.Join(outputNode, "\",\"")), LogSeverities.Log);
-            */
+                Logger.Log(nom_fct, LogSeverities.Log);
 
             Node nodeIn = manager.GetNode(inputNode);
             Node nodeOut = manager.GetNode(outputNode);
@@ -88,7 +86,7 @@ namespace TK.NodalEditor
             }
 
             Port portIn = nodeIn.GetPort(inputPort, false);
-            Port portOut = nodeOut.GetPort(outputPort, false);
+            Port portOut = nodeOut.GetPort(outputPort, true);
 
             if (portIn == null)
             {
@@ -107,7 +105,7 @@ namespace TK.NodalEditor
                 foreach (Link link in portIn.Dependencies)
                 {
 
-                    if (link.Source.FullName == portOut.FullName)
+                    if (link.Source == portOut)
                     {
                         linkToDisconnect.Add(link);
                     }
@@ -198,26 +196,28 @@ namespace TK.NodalEditor
         }
 
         //EN COURS
-        public static bool ReConnect(   string inputNode, string inputPort, string outputNode, string outputPort, 
+        public static bool ReConnect(   string inputNodeLocked, string inputPortLocked, string outputNode, string outputPort, 
                                         string newInputNode, string newInputPort, string newOutputNode, string newOutputPort)
         {
             if (manager == null)
                 return false;
 
-            string nom_fct = string.Format("ReConnect(string {0}, string {0}, string {0}, string {0})", inputNode, inputPort, outputNode, outputNode);
+            string nom_fct = string.Format("ReConnect(string {0}, string {0}, string {0}, string {0})", inputNodeLocked, inputPortLocked, outputNode, outputNode);
 
             /*
             if (verbose)
                 Logger.Log(string.Format("DeleteLinks(new List<string>{{\"{0}\"}})", TypesHelper.Join(outputNode, "\",\"")), LogSeverities.Log);
             */
-            Node nodeIn = manager.GetNode(inputNode);
+
+            Console.WriteLine("Dans reconnect ");
+            Node nodeInLocked = manager.GetNode(inputNodeLocked);
             Node nodeOut = manager.GetNode(outputNode);
             Node newNodeIn = manager.GetNode(newInputNode);
             Node newNodeOut = manager.GetNode(newOutputNode);
 
-            if (nodeIn == null)
+            if (nodeInLocked == null)
             {
-                Logger.Log(nom_fct + string.Format("input Node {0} is null", inputNode), LogSeverities.Error);
+                Logger.Log(nom_fct + string.Format("input Node {0} is null", inputNodeLocked), LogSeverities.Error);
                 return false;
             }
             if (nodeOut == null)
@@ -236,14 +236,14 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            Port portOut = nodeOut.GetPort(outputPort, false);
-            Port portIn = nodeIn.GetPort(inputPort, false);
-            Port newPortOut = nodeOut.GetPort(newOutputPort, false);
-            Port newPortIn = nodeIn.GetPort(newInputPort, false);
+            Port portOut = nodeOut.GetPort(outputPort, true);
+            Port portInLocked = nodeInLocked.GetPort(inputPortLocked, false); 
+            Port newPortOut = newNodeOut.GetPort(newOutputPort, true);
+            Port newPortIn = newNodeIn.GetPort(newInputPort, false);
 
-            if (portIn == null)
+            if (portInLocked == null)
             {
-                Logger.Log(nom_fct + string.Format("input Port {0} from {0} is null", inputNode, inputPort), LogSeverities.Error);
+                Logger.Log(nom_fct + string.Format("input Port {0} from {0} is null", inputNodeLocked, inputPortLocked), LogSeverities.Error);
                 return false;
             }
             if (portOut == null)
@@ -262,45 +262,49 @@ namespace TK.NodalEditor
                 return false;
             }
 
-
-            if (portIn.Dependencies.Count != 0)
+            string error = string.Empty;
+            List<Link> linkToDisconnect = new List<Link>();
+            if (portInLocked.Dependencies.Count != 0)
             {
-                List<Link> linkToDisconnect = new List<Link>();
-                foreach (Link link in portIn.Dependencies)
+                
+                foreach (Link link in portInLocked.Dependencies)
                 {
                     if (link.Source.FullName == portOut.FullName)
                     {
                         linkToDisconnect.Add(link);
                     }
                 }
-
+                
                 if (linkToDisconnect.Count != 0)
                 {
                     foreach (Link link in linkToDisconnect)
                     {
-                        if (link.Target.Dependencies.Contains(link))
-                        {
-                            link.Target.Owner.UnConnectObject(link);
-                            link.Target.Dependencies.Remove(link);
-                            link.Target.Owner.RefreshConnections();
-                        }
-
+                        manager.CurCompound.UnConnect(link);
+                        
                     }
                 }
                 else
                 {
-                    Logger.Log(nom_fct + string.Format("No link between port {0} from Node {0} and port {0} from Node {0}", inputPort, inputNode), LogSeverities.Error);
+                    Logger.Log(nom_fct + string.Format("No link between port {0} from Node {0} and port {0} from Node {0}", inputPortLocked, inputNodeLocked), LogSeverities.Error);
                 }
             }
             else
             {
-                Logger.Log(nom_fct + string.Format("Port {0} from Node {0} has no link", inputPort, inputNode), LogSeverities.Error);
+                Logger.Log(nom_fct + string.Format("Port {0} from Node {0} has no link", inputPortLocked, inputNodeLocked), LogSeverities.Error);
             }
 
-            Connect(inputNode, inputPort, newOutputNode, newOutputPort);
+            if (linkToDisconnect.Count != 0)
+            {
+                newNodeIn.Connect(newPortIn.Index, newNodeOut, newPortOut.Index, "", out error, linkToDisconnect[0]);
+            }
 
-            //Port port = node.GetPort();
-            //port.Dependencies[0].Target.Fu
+
+
+
+            if (error.Length != 0)
+            {
+                Logger.Log(nom_fct + "Cannot connect", LogSeverities.Error);
+            }
 
             if (layout == null)
                 return true;
