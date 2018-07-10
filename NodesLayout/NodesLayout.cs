@@ -1900,50 +1900,39 @@ namespace TK.NodalEditor.NodesLayout
 
         private Link GetHitLink(Point point)
         {
+            Link hitLink = null;
+            bool hovered = false;
             bool hoverChange = false;
+
             foreach (KeyValuePair<Link, GraphicsPath> item in paths)
             {
                 //Exclude hidden links
-                //if (!TypeIsShowing(item.Key.NodeElementType) || !item.Key.Selectable)
                 if (!LinkIsShowing(item.Key) || !item.Key.Selectable)
                 {
                     continue;
                 }
 
-                //if (item.Value == null)
-                //    return null;
-
-                
-                if (item.Value.IsOutlineVisible(point, widenPen))
+                if (!hovered && item.Value.IsOutlineVisible(point, widenPen))
                 {
-                    hoverChange = true;
-                    return item.Key;
+                    if(!hoverChange && !item.Key.isHovered)
+                    {
+                        item.Key.isHovered = true;
+                        hoverChange = true;
+                    }
+                    hitLink = item.Key;
+                    hovered = true;
                 }
-                else
+                else if (item.Key.isHovered)
                 {
-
                     item.Key.isHovered = false;
                     hoverChange = true;
-
-                    if (link.Target.Owner.IsIn(Manager.CurCompound))
-                    {
-                        target = GetPortLocation(link.Target.Owner, link.Target.Index);
-                        Port sourcePort = Inputs.GetPort(link.Target);
-                        if (sourcePort == null)
-                        {
-                            NodalDirector.Error(string.Format("GetHitLink : Can't find source port '{0}' in Compound 'Pad'", link.Target.FullName));
-                            return null;
-                        }
-                        source = GetPortLocation(Inputs, sourcePort.Index + 1000);
-                    }
-                    else
-                    {
-                        return null;
-                    }                }
+                }
             }
+
             if (hoverChange)
                 Invalidate();
-            return null;
+
+            return hitLink;
         }
 
 
@@ -2279,13 +2268,7 @@ namespace TK.NodalEditor.NodesLayout
                     paths.Clear();
                     foreach(Link link in links)
                     {
-                        if (!paths.ContainsKey(link))
-                        {
-                            paths.Add(link, null);
-
-                        }
-                        else
-                            Logger.Log(string.Format("{0} link already exists !!", link.FullName), LogSeverities.Warning);
+                        paths.Add(link, null);
                     }
                     Port foundPort = null;
                     
@@ -2395,7 +2378,7 @@ namespace TK.NodalEditor.NodesLayout
         private bool LinkIsShowing(Link inLink)
         {
             string inType = inLink.NodeElementType;
-            if (inLink == detachLink)
+            if (CurConnection2 != -1 && inLink == detachLink)
             {
                 return false;
             }
