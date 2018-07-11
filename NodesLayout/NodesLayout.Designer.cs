@@ -623,6 +623,8 @@ namespace TK.NodalEditor.NodesLayout
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NodesLayout_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.NodesLayout_MouseMove);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.NodesLayout_MouseUp);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.NodesLayout_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.NodesLayout_KeyUp);
             this.nodeMenuStrip.ResumeLayout(false);
             this.linkMenuStrip.ResumeLayout(false);
             this.portsMenuStrip.ResumeLayout(false);

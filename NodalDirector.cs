@@ -68,16 +68,17 @@ namespace TK.NodalEditor
         /// <param name="X">Location X in pixels</param>
         /// <param name="Y">Location Y in pixels</param>
         /// <returns></returns>
-        public static bool AddNode(string inNodeName, string inCompoundName, int X, int Y)
+        public static string AddNode(string inNodeName, string inCompoundName, int X, int Y)
         {
             if (manager == null)
-                return false;
+                return null;
 
             string nom_fct = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", inNodeName, inCompoundName, X, Y);
 
             if (verbose)
                 Log(nom_fct);
 
+            string nodeName = null;
             Compound inCompound = null;
 
             if(string.IsNullOrEmpty(inCompoundName))
@@ -92,7 +93,7 @@ namespace TK.NodalEditor
             if (inCompound == null)
             {
                 Error(nom_fct + "\n" + string.Format("Compound \"{0}\" is null", inCompoundName));
-                return false;
+                return null;
             }
 
             bool isTrue = false; ;
@@ -100,7 +101,8 @@ namespace TK.NodalEditor
             {
                 if(inNodeName == Node.FullName)
                 {
-                    manager.AddNode(inNodeName, inCompound, X, Y);
+                    Node node = manager.AddNode(inNodeName, inCompound, X, Y);
+                    nodeName = node.FullName;
                     isTrue = true;
                     break;
                 }
@@ -114,16 +116,16 @@ namespace TK.NodalEditor
             if(isTrue == false)
             {
                 Error(nom_fct + "\n" + string.Format("Cannot Add Node with name \"{0}\"", inNodeName));
-                return false;
+                return null;
             }
 
 
             if (layout == null)
-                return true;
+                return nodeName;
 
             layout.Invalidate();
 
-            return true;
+            return nodeName;
         }
 
         /// <summary>
@@ -576,13 +578,19 @@ namespace TK.NodalEditor
             if (nodeIn.Parent != null && nodeIn.Parent != newParent)
             {
                 manager.MoveNodes(new List<Node> { nodeIn }, newParent);
-                return true;
             }
             else
             {
                 Error(nom_fct + "\n" + string.Format("input Node \"{0}\" and parent Compound \"{1}\" cannot be parented", inNodeName, parentCompound));
                 return false;
             }
+
+            if (layout == null)
+                return true;
+
+            layout.Invalidate();
+
+            return true;
         }
 
         /// <summary>
@@ -611,14 +619,19 @@ namespace TK.NodalEditor
             if (nodeIn.Parent != null && nodeIn.Parent.Parent != null)
             {
                 manager.MoveNodes(new List<Node> { nodeIn }, nodeIn.Parent.Parent);
-                return true;
             }
             else
             {
                 Error(nom_fct + "\n" + string.Format("input Node \"{0}\" does not have parent", inNodeName));
                 return false;
             }
-                    
+
+            if (layout == null)
+                return true;
+
+            layout.Invalidate();
+
+            return true;
         }
 
         /// <summary>
@@ -655,6 +668,11 @@ namespace TK.NodalEditor
                 PortInstance parentPort = nodeIn.Parent.GetPortFromNode(port);
                 parentPort.Visible = true;
             }
+
+            if (layout == null)
+                return true;
+
+            layout.Invalidate();
 
             return true;
         }
@@ -701,7 +719,12 @@ namespace TK.NodalEditor
                     parentPort.Visible = false;
                 }
             }
-        
+
+            if (layout == null)
+                return true;
+
+            layout.Invalidate();
+
             return true;
         }
 

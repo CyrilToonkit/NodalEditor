@@ -58,7 +58,18 @@ namespace NodalTester
 
             node.CustomText = "Custom Text";
 
+            CustomNode tetNode = new CustomNode();
+            tetNode.Copy(node, true);
+            tetNode.NativeName = tetNode.Name = "tetNode";
+
+            CustomNode otherNode = new CustomNode();
+            otherNode.Copy(node, true);
+            otherNode.NativeName = otherNode.Name = "otherNode";
+
             manager.AvailableNodes.Add(node);
+            manager.AvailableNodes.Add(tetNode);
+            manager.AvailableNodes.Add(otherNode);
+
             manager.NewLayout();
             manager.AddNode(0, manager.Root, 50, 50);
             tK_NodalEditorUCtrl1.Init("C:\\Rigs\\NodesLayout", manager);

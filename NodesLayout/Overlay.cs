@@ -141,7 +141,18 @@ namespace TK.NodalEditor.NodesLayout
                     Handle2 = new Point((int)(point_2.X - 100 * Size), Y_2);
                 }
 
-                if (Selected)
+
+                path = new GraphicsPath();
+                path.AddBezier(point, Handle1, Handle2, point_2);
+                graphics.DrawPath(inPen, path);
+
+                if (Hovered)
+                {
+                    path = new GraphicsPath();
+                    path.AddBezier(point, Handle1, Handle2, point_2);
+                    graphics.DrawPath(Layout.HoverPen, path);
+                }
+                else if (Selected)
                 {
                     path = new GraphicsPath();
                     path.AddBezier(point, Handle1, Handle2, point_2);
@@ -164,9 +175,7 @@ namespace TK.NodalEditor.NodesLayout
 
                 //condition ? true : false
 
-                path = new GraphicsPath();
-                path.AddBezier(point, Handle1, Handle2, point_2);
-                graphics.DrawPath(Hovered ? Layout.HoverPen : inPen, path);
+
 
                 //graphics.DrawBezier(inPen, point, Handle1, Handle2, point_2);
 

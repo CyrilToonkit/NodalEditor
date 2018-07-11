@@ -217,7 +217,7 @@ namespace TK.NodalEditor.NodesLayout
         public Pen FramePen = new Pen(Color.Black);
         public Pen WhitePen = new Pen(Color.White);
         public Pen widenPen = new Pen(Color.Black, 10f);
-        public Pen HoverPen = new Pen(Color.LightSteelBlue, 2f);
+        public Pen HoverPen = new Pen(Color.LightSteelBlue, 3f);
 
         public Pen LinkPen = new Pen(Color.Red);
         public Pen FatPen = new Pen(Color.Black, 3f);
@@ -884,6 +884,18 @@ namespace TK.NodalEditor.NodesLayout
             {
                 Invalidate();
             }
+        }
+
+        private void NodesLayout_KeyDown(object sender, KeyEventArgs e)
+        {
+                if (e.KeyCode == Keys.T)
+                {
+                    Console.WriteLine("coucou j'ai appuyé sur TAB");
+                }
+        }
+        private void NodesLayout_KeyUp(object sender, KeyEventArgs e)
+        {
+
         }
 
         //void Node_MouseUp(object sender, MouseEventArgs e)
