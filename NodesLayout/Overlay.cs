@@ -166,7 +166,7 @@ namespace TK.NodalEditor.NodesLayout
 
                 path = new GraphicsPath();
                 path.AddBezier(point, Handle1, Handle2, point_2);
-                graphics.DrawPath(Hovered ? Layout.FatPen : inPen, path);
+                graphics.DrawPath(Hovered ? Layout.HoverPen : inPen, path);
 
                 //graphics.DrawBezier(inPen, point, Handle1, Handle2, point_2);
 
