@@ -54,6 +54,15 @@ namespace TK.NodalEditor
             set { mCheckCycles = value; }
         }
 
+        Boolean mShowHoveredLinks = true;
+        [CategoryAttribute("Behavior")]
+        [DescriptionAttribute("Tell the Nodal Editor should track hovered links and draw a specific outline")]
+        public Boolean ShowHoveredLinks
+        {
+            get { return mShowHoveredLinks; }
+            set { mShowHoveredLinks = value; }
+        }
+
         // === LayoutPrefs ===========================================================
 
         Boolean mMagnetic = true;
@@ -452,6 +461,7 @@ namespace TK.NodalEditor
         public void ToDefault()
         {
             mCheckCycles = true;
+            mShowHoveredLinks = true;
 
             mMagnetic = true;
             mShowGrid = true;
@@ -497,6 +507,7 @@ namespace TK.NodalEditor
             if (clonePrefs != null)
             {
                 mCheckCycles = clonePrefs.CheckCycles;
+                mShowHoveredLinks = clonePrefs.ShowHoveredLinks;
 
                 mMagnetic = clonePrefs.Magnetic;
                 mShowGrid = clonePrefs.ShowGrid;
