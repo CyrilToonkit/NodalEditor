@@ -141,11 +141,6 @@ namespace TK.NodalEditor.NodesLayout
                     Handle2 = new Point((int)(point_2.X - 100 * Size), Y_2);
                 }
 
-
-                path = new GraphicsPath();
-                path.AddBezier(point, Handle1, Handle2, point_2);
-                graphics.DrawPath(inPen, path);
-
                 if (Hovered)
                 {
                     path = new GraphicsPath();
@@ -157,8 +152,11 @@ namespace TK.NodalEditor.NodesLayout
                     path = new GraphicsPath();
                     path.AddBezier(point, Handle1, Handle2, point_2);
                     graphics.DrawPath(Layout.FatPen, path);
-                    //graphics.DrawBezier(Layout.FatPen, point, Handle1, Handle2, point_2);
                 }
+
+                path = new GraphicsPath();
+                path.AddBezier(point, Handle1, Handle2, point_2);
+                graphics.DrawPath(inPen, path);
 
                 //if (Hovered == true && path != null)
                 //{
@@ -179,22 +177,22 @@ namespace TK.NodalEditor.NodesLayout
 
                 //graphics.DrawBezier(inPen, point, Handle1, Handle2, point_2);
 
-                //if (Size > 0)
-                //{
-                //    int arrowSize = (int)(12 * Size);
+                if (Size > 0)
+                {
+                    int arrowSize = (int)(12 * Size);
 
-                //    //Start
-                //    if (state.StartArrow != LinksArrows.None)
-                //    {
-                //        DrawLinkBound(graphics, state.StartArrow, inBrush, point, arrowSize, 1);
-                //    }
+                    //Start
+                    if (state.StartArrow != LinksArrows.None)
+                    {
+                        DrawLinkBound(graphics, state.StartArrow, inBrush, point, arrowSize, 1);
+                    }
 
-                //    //End
-                //    if (state.EndArrow != LinksArrows.None)
-                //    {
-                //        DrawLinkBound(graphics, state.EndArrow, inBrush, point_2, arrowSize, -1);
-                //    }
-                //}
+                    //End
+                    if (state.EndArrow != LinksArrows.None)
+                    {
+                        DrawLinkBound(graphics, state.EndArrow, inBrush, point_2, arrowSize, -1);
+                    }
+                }
             }
             return path;
         }
