@@ -1901,7 +1901,7 @@ namespace TK.NodalEditor.NodesLayout
             foreach (KeyValuePair<Link, GraphicsPath> item in paths)
             {
                 //Exclude hidden links and link in process of reconnection
-                if (!LinkIsShowing(item.Key) || !item.Key.Selectable)
+                if (item.Value == null || !item.Key.Selectable)
                 {
                     continue;
                 }
