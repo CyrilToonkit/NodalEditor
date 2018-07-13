@@ -805,49 +805,11 @@ namespace TK.NodalEditor.NodesLayout
                                     {
                                         if (detachLink.Target.Owner.IsIn(Manager.CurCompound)) //CASE 1 : Source and Target in Compound
                                         {
-                                            distance1 = e.Location.X - (detachLink.Source.Owner.UIx * LayoutSize + detachLink.Source.Owner.UIWidth * LayoutSize);
-                                            distance2 = detachLink.Target.Owner.UIx * LayoutSize - e.Location.X;
-
-                                            if (distance2 <= distance1) //Detach the link Target
-                                            {
-                                                int PortClick = detachLink.Source.DisplayIndex + 1000;
-                                                detachNode = detachLink.Source.Owner;
-                                                Port port = detachLink.Source;
-
-                                                if (PortClick >= 0)
-                                                {
-                                                    if (port != null)
-                                                    {
-                                                        CurConnection2 = PortClick;
-                                                        reconnecting = Reconnecting.Input;
-                                                    }
-                                                }
-                                            }
-                                            if (distance2 > distance1) //Detach the link Source
-                                            {
-                                                int PortClick = detachLink.Target.DisplayIndex;
-                                                detachNode = detachLink.Target.Owner;
-                                                Port port = detachLink.Target;
-
-                                                if (PortClick >= 0)
-                                                {
-                                                    if (port != null)
-                                                    {
-                                                        CurConnection2 = PortClick;
-                                                        reconnecting = Reconnecting.Output;
-                                                    }
-                                                }
-                                            }
-
-                                        }
-                                        else //CASE 2 : Source in Compound, Target outside
-                                        {
-                                            foundPort = Outputs.GetPort(detachLink.Source);
-
-                                            if (foundPort != null)
+                                            //CASE 11 Source and Target in same compound
+                                            if (SourceNode.Level(Manager.CurCompound) as Compound == detachLink.Target.Owner.Level(Manager.CurCompound) as Compound)
                                             {
                                                 distance1 = e.Location.X - (detachLink.Source.Owner.UIx * LayoutSize + detachLink.Source.Owner.UIWidth * LayoutSize);
-                                                distance2 = GetPortLocation(Manager.CurCompound,foundPort.Index).X - e.Location.X;
+                                                distance2 = detachLink.Target.Owner.UIx * LayoutSize - e.Location.X;
 
                                                 if (distance2 <= distance1) //Detach the link Target
                                                 {
@@ -860,54 +822,6 @@ namespace TK.NodalEditor.NodesLayout
                                                         if (port != null)
                                                         {
                                                             CurConnection2 = PortClick;
-                                                            reconnecting = Reconnecting.Input;
-                                                        }
-                                                    }
-                                                }
-                                                if (distance2 > distance1) //Detach the link Source
-                                                {
-                                                    int PortClick = foundPort.Index + 1000;
-                                                    detachNode = detachLink.Target.Owner;
-                                                    Port port = foundPort;
-                                                    
-                                                    if (PortClick >= 0)
-                                                    {
-                                                        if (port != null)
-                                                        {
-                                                            CurConnection2 = detachLink.Target.DisplayIndex; //PortClick;
-                                                            reconnecting = Reconnecting.Output;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                NodalDirector.Error("Cannot get source " + detachLink.Target.Name + " on " + Outputs.node.Name + " !!");
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (detachLink.Target.Owner.IsIn(Manager.CurCompound)) //CASE 3 : Source outside, Target in Compound
-                                        {
-                                            foundPort = Inputs.GetPort(detachLink.Target);
-
-                                            if (foundPort != null)
-                                            {
-                                                distance1 = e.Location.X - GetPortLocation(Manager.CurCompound, foundPort.Index + 1000).X;
-                                                distance2 = detachLink.Target.Owner.UIx * LayoutSize - e.Location.X;
-
-                                                if (distance2 <= distance1) //Detach the link Target
-                                                {
-                                                    int PortClick = foundPort.Index;
-                                                    detachNode = detachLink.Source.Owner;
-                                                    Port port = foundPort;
-
-                                                    if (PortClick >= 0)
-                                                    {
-                                                        if (port != null)
-                                                        {
-                                                            CurConnection2 = detachLink.Source.DisplayIndex + 1000;//PortClick;
                                                             reconnecting = Reconnecting.Input;
                                                         }
                                                     }
@@ -928,47 +842,331 @@ namespace TK.NodalEditor.NodesLayout
                                                     }
                                                 }
                                             }
+                                            else //CASE 12 Source and Target in different compound
+                                            {
+                                                if ((SourceNode.Level(Manager.CurCompound) as Compound) == null)
+                                                {
+                                                    foundPort = (TargetNode.Level(Manager.CurCompound) as Compound).GetPortFromNode(detachLink.Target);
+
+                                                    if (foundPort != null)
+                                                    {
+                                                        distance1 = e.Location.X - (detachLink.Source.Owner.UIx * LayoutSize + detachLink.Source.Owner.UIWidth * LayoutSize);
+                                                        distance2 = GetPortLocation((TargetNode.Level(Manager.CurCompound) as Compound), foundPort.Index).X - e.Location.X;
+
+                                                        if (distance2 <= distance1) //Detach the link Target
+                                                        {
+                                                            int PortClick = detachLink.Source.DisplayIndex + 1000;
+                                                            detachNode = detachLink.Source.Owner;
+                                                            Port port = detachLink.Source;
+
+                                                            if (PortClick >= 0)
+                                                            {
+                                                                if (port != null)
+                                                                {
+                                                                    CurConnection2 = PortClick;
+                                                                    reconnecting = Reconnecting.Input;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (distance2 > distance1) //Detach the link Source
+                                                        {
+                                                            int PortClick = foundPort.Index + 1000;
+                                                            detachNode = detachLink.Target.Owner;
+                                                            Port port = foundPort;
+
+                                                            if (PortClick >= 0)
+                                                            {
+                                                                if (port != null)
+                                                                {
+                                                                    CurConnection2 = detachLink.Target.DisplayIndex; //PortClick;
+                                                                    reconnecting = Reconnecting.Output;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        NodalDirector.Error("Cannot get source " + detachLink.Target.Name + " on " + Outputs.node.Name + " !!");
+                                                    }
+                                                }
+                                                else //if((TargetNode.Level(Manager.CurCompound) as Compound) == null)
+                                                {
+                                                    foundPort = (SourceNode.Level(Manager.CurCompound) as Compound).GetPortFromNode(detachLink.Source);
+
+                                                    if (foundPort != null)
+                                                    {
+                                                        distance1 = e.Location.X - GetPortLocation((SourceNode.Level(Manager.CurCompound) as Compound), foundPort.Index + 1000).X;
+                                                        distance2 = detachLink.Target.Owner.UIx * LayoutSize - e.Location.X;
+
+                                                        if (distance2 <= distance1) //Detach the link Target
+                                                        {
+                                                            int PortClick = foundPort.Index;
+                                                            detachNode = detachLink.Source.Owner;
+                                                            Port port = foundPort;
+
+                                                            if (PortClick >= 0)
+                                                            {
+                                                                if (port != null)
+                                                                {
+                                                                    CurConnection2 = detachLink.Source.DisplayIndex + 1000;//PortClick;
+                                                                    reconnecting = Reconnecting.Input;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (distance2 > distance1) //Detach the link Source
+                                                        {
+                                                            int PortClick = detachLink.Target.DisplayIndex;
+                                                            detachNode = detachLink.Target.Owner;
+                                                            Port port = detachLink.Target;
+
+                                                            if (PortClick >= 0)
+                                                            {
+                                                                if (port != null)
+                                                                {
+                                                                    CurConnection2 = PortClick;
+                                                                    reconnecting = Reconnecting.Output;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        NodalDirector.Error("Cannot get Target " + detachLink.Target.Name + " on " + Inputs.node.Name + " !!");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else //CASE 2 : Source in Compound, Target outside
+                                        {
+                                            //CASE 21 : Source is not in CurCompound
+                                            if ((SourceNode.Level(Manager.CurCompound) as Compound) != Manager.CurCompound && (SourceNode.Level(Manager.CurCompound) as Compound) != null)
+                                            {
+                                                foundPort = (SourceNode.Level(Manager.CurCompound) as Compound).GetPortFromNode(detachLink.Source);
+
+                                                if (foundPort != null)
+                                                {
+                                                    distance1 = e.Location.X - GetPortLocation((SourceNode.Level(Manager.CurCompound) as Compound), foundPort.Index + 1000).X;
+                                                    distance2 = GetPortLocation(Manager.CurCompound, foundPort.Index).X - e.Location.X;
+
+                                                    if (distance2 <= distance1) //Detach the link Target
+                                                    {
+                                                        int PortClick = detachLink.Source.DisplayIndex + 1000;
+                                                        detachNode = detachLink.Source.Owner;
+                                                        Port port = detachLink.Source;
+
+                                                        if (PortClick >= 0)
+                                                        {
+                                                            if (port != null)
+                                                            {
+                                                                CurConnection2 = PortClick;
+                                                                reconnecting = Reconnecting.Input;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (distance2 > distance1) //Detach the link Source
+                                                    {
+                                                        int PortClick = foundPort.Index + 1000;
+                                                        detachNode = detachLink.Target.Owner;
+                                                        Port port = foundPort;
+
+                                                        if (PortClick >= 0)
+                                                        {
+                                                            if (port != null)
+                                                            {
+                                                                CurConnection2 = detachLink.Target.DisplayIndex; //PortClick;
+                                                                reconnecting = Reconnecting.Output;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    NodalDirector.Error("Cannot get source " + detachLink.Target.Name + " on " + Outputs.node.Name + " !!");
+                                                }
+                                            }
                                             else
                                             {
-                                                NodalDirector.Error("Cannot get Target " + detachLink.Target.Name + " on " + Inputs.node.Name + " !!");
+
+                                                foundPort = Outputs.GetPort(detachLink.Source);
+
+                                                if (foundPort != null)
+                                                {
+                                                    distance1 = e.Location.X - (detachLink.Source.Owner.UIx * LayoutSize + detachLink.Source.Owner.UIWidth * LayoutSize);
+                                                    distance2 = GetPortLocation(Manager.CurCompound, foundPort.Index).X - e.Location.X;
+
+                                                    if (distance2 <= distance1) //Detach the link Target
+                                                    {
+                                                        int PortClick = detachLink.Source.DisplayIndex + 1000;
+                                                        detachNode = detachLink.Source.Owner;
+                                                        Port port = detachLink.Source;
+
+                                                        if (PortClick >= 0)
+                                                        {
+                                                            if (port != null)
+                                                            {
+                                                                CurConnection2 = PortClick;
+                                                                reconnecting = Reconnecting.Input;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (distance2 > distance1) //Detach the link Source
+                                                    {
+                                                        int PortClick = foundPort.Index + 1000;
+                                                        detachNode = detachLink.Target.Owner;
+                                                        Port port = foundPort;
+
+                                                        if (PortClick >= 0)
+                                                        {
+                                                            if (port != null)
+                                                            {
+                                                                CurConnection2 = detachLink.Target.DisplayIndex; //PortClick;
+                                                                reconnecting = Reconnecting.Output;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    NodalDirector.Error("Cannot get source " + detachLink.Target.Name + " on " + Outputs.node.Name + " !!");
+                                                }
+
                                             }
                                         }
-                                        else //CASE 4 : Source and Target outside
+                                    }
+                                    else
+                                    {
+                                        if (detachLink.Target.Owner.IsIn(Manager.CurCompound)) //CASE 3 : Source outside, Target in Compound
                                         {
-                                            distance1 = e.Location.X - (detachLink.Source.Owner.UIx * LayoutSize + detachLink.Source.Owner.UIWidth * LayoutSize);
-                                            distance2 = detachLink.Target.Owner.UIx * LayoutSize - e.Location.X;
-
-                                            if (distance2 <= distance1) //Detach the link Target
+                                            //CASE 31 : Target is not in CurCompound
+                                            if ((TargetNode.Level(Manager.CurCompound) as Compound) != Manager.CurCompound && (TargetNode.Level(Manager.CurCompound) as Compound) != null)
                                             {
-                                                int PortClick = detachLink.Source.DisplayIndex + 1000;
-                                                detachNode = detachLink.Source.Owner;
-                                                Port port = detachLink.Source;
-
-                                                if (PortClick >= 0)
+                                                foundPort = (TargetNode.Level(Manager.CurCompound) as Compound).GetPortFromNode(detachLink.Source);
+                                                if (foundPort != null)
                                                 {
-                                                    if (port != null)
+                                                    distance1 = e.Location.X - -GetPortLocation((TargetNode.Level(Manager.CurCompound) as Compound), foundPort.Index).X;
+                                                    distance2 = detachLink.Target.Owner.UIx * LayoutSize - e.Location.X;
+
+                                                    if (distance2 <= distance1) //Detach the link Target
                                                     {
-                                                        CurConnection2 = PortClick;
-                                                        reconnecting = Reconnecting.Input;
+                                                        int PortClick = foundPort.Index;
+                                                        detachNode = detachLink.Source.Owner;
+                                                        Port port = foundPort;
+
+                                                        if (PortClick >= 0)
+                                                        {
+                                                            if (port != null)
+                                                            {
+                                                                CurConnection2 = detachLink.Source.DisplayIndex + 1000;//PortClick;
+                                                                reconnecting = Reconnecting.Input;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (distance2 > distance1) //Detach the link Source
+                                                    {
+                                                        int PortClick = detachLink.Target.DisplayIndex;
+                                                        detachNode = detachLink.Target.Owner;
+                                                        Port port = detachLink.Target;
+
+                                                        if (PortClick >= 0)
+                                                        {
+                                                            if (port != null)
+                                                            {
+                                                                CurConnection2 = PortClick;
+                                                                reconnecting = Reconnecting.Output;
+                                                            }
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            if (distance2 > distance1) //Detach the link Source
-                                            {
-                                                int PortClick = detachLink.Target.DisplayIndex;
-                                                detachNode = detachLink.Target.Owner;
-                                                Port port = detachLink.Target;
-
-                                                if (PortClick >= 0)
+                                                else
                                                 {
-                                                    if (port != null)
+                                                    NodalDirector.Error("Cannot get Target " + detachLink.Target.Name + " on " + Inputs.node.Name + " !!");
+                                                }
+
+
+                                            }
+                                            else
+                                            {
+                                                foundPort = Inputs.GetPort(detachLink.Target);
+
+                                                if (foundPort != null)
+                                                {
+                                                    distance1 = e.Location.X - GetPortLocation(Manager.CurCompound, foundPort.Index + 1000).X;
+                                                    distance2 = detachLink.Target.Owner.UIx * LayoutSize - e.Location.X;
+
+                                                    if (distance2 <= distance1) //Detach the link Target
                                                     {
-                                                        CurConnection2 = PortClick;
-                                                        reconnecting = Reconnecting.Output;
+                                                        int PortClick = foundPort.Index;
+                                                        detachNode = detachLink.Source.Owner;
+                                                        Port port = foundPort;
+
+                                                        if (PortClick >= 0)
+                                                        {
+                                                            if (port != null)
+                                                            {
+                                                                CurConnection2 = detachLink.Source.DisplayIndex + 1000;//PortClick;
+                                                                reconnecting = Reconnecting.Input;
+                                                            }
+                                                        }
                                                     }
+                                                    if (distance2 > distance1) //Detach the link Source
+                                                    {
+                                                        int PortClick = detachLink.Target.DisplayIndex;
+                                                        detachNode = detachLink.Target.Owner;
+                                                        Port port = detachLink.Target;
+
+                                                        if (PortClick >= 0)
+                                                        {
+                                                            if (port != null)
+                                                            {
+                                                                CurConnection2 = PortClick;
+                                                                reconnecting = Reconnecting.Output;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    NodalDirector.Error("Cannot get Target " + detachLink.Target.Name + " on " + Inputs.node.Name + " !!");
                                                 }
                                             }
                                         }
+                                        //else //CASE 4 : Source and Target outside
+                                        //{
+                                        //    Console.WriteLine("Distance CASE 4");
+                                        //    distance1 = e.Location.X - (detachLink.Source.Owner.UIx * LayoutSize + detachLink.Source.Owner.UIWidth * LayoutSize);
+                                        //    distance2 = detachLink.Target.Owner.UIx * LayoutSize - e.Location.X;
+
+                                        //    if (distance2 <= distance1) //Detach the link Target
+                                        //    {
+                                        //        int PortClick = detachLink.Source.DisplayIndex + 1000;
+                                        //        detachNode = detachLink.Source.Owner;
+                                        //        Port port = detachLink.Source;
+
+                                        //        if (PortClick >= 0)
+                                        //        {
+                                        //            if (port != null)
+                                        //            {
+                                        //                CurConnection2 = PortClick;
+                                        //                reconnecting = Reconnecting.Input;
+                                        //            }
+                                        //        }
+                                        //    }
+                                        //    if (distance2 > distance1) //Detach the link Source
+                                        //    {
+                                        //        int PortClick = detachLink.Target.DisplayIndex;
+                                        //        detachNode = detachLink.Target.Owner;
+                                        //        Port port = detachLink.Target;
+
+                                        //        if (PortClick >= 0)
+                                        //        {
+                                        //            if (port != null)
+                                        //            {
+                                        //                CurConnection2 = PortClick;
+                                        //                reconnecting = Reconnecting.Output;
+                                        //            }
+                                        //        }
+                                        //    }
+                                        //}
                                     }
                                 }
                             }
@@ -1017,12 +1215,12 @@ namespace TK.NodalEditor.NodesLayout
                                                 NodalDirector.Error("Cannot get Target " + detachLink.Target.Name + " on " + Inputs.node.Name + " !!");
                                             }
                                         }
-                                        else
-                                        {
-                                            //CASE 4 : Source and Target outside
-                                            overlay.ConnectPen = GetPen(detachLink.Source.NodeElementType);
-                                            overlay.ConnectArrow = new Point[] { GetPortLocation(detachLink.Source.Owner, detachLink.Source.Index + 1000), e.Location };
-                                        }
+                                        //else
+                                        //{
+                                        //    //CASE 4 : Source and Target outside
+                                        //    overlay.ConnectPen = GetPen(detachLink.Source.NodeElementType);
+                                        //    overlay.ConnectArrow = new Point[] { GetPortLocation(detachLink.Source.Owner, detachLink.Source.Index + 1000), e.Location };
+                                        //}
                                     }
                                 }
 
@@ -1072,12 +1270,12 @@ namespace TK.NodalEditor.NodesLayout
                                                 NodalDirector.Error("Cannot get Target " + detachLink.Target.Name + " on " + Inputs.node.Name + " !!");
                                             }
                                         }
-                                        else
-                                        {
-                                            //CASE 4 : Source and Target outside
-                                            overlay.ConnectPen = GetPen(detachLink.Target.NodeElementType);
-                                            overlay.ConnectArrow = new Point[] { GetPortLocation(detachLink.Target.Owner, detachLink.Target.Index), e.Location };
-                                        }
+                                        //else
+                                        //{
+                                        //    //CASE 4 : Source and Target outside
+                                        //    overlay.ConnectPen = GetPen(detachLink.Target.NodeElementType);
+                                        //    overlay.ConnectArrow = new Point[] { GetPortLocation(detachLink.Target.Owner, detachLink.Target.Index), e.Location };
+                                        //}
                                     }
                                 }
                                 
