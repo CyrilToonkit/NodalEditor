@@ -263,13 +263,14 @@ namespace TK.NodalEditor
         /// <param name="inPortName">Name of the port of input node</param>
         /// <param name="outNodeName">Name of output node</param>
         /// <param name="outPortName">Name of the port of output node</param>
+        /// <param name="inMode">The connection "mode" (basically a modifier Key like "Shift", "Control", "Alt", which can make sense in children classes)</param>
         /// <returns></returns>
-        public static bool Connect(string inNodeName, string inPortName, string outNodeName, string outPortName)
+        public static bool Connect(string inNodeName, string inPortName, string outNodeName, string outPortName, string inMode)
         {
             if (manager == null)
                 return false;
 
-            string nom_fct = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
+            string nom_fct = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\");", inNodeName, inPortName, outNodeName, outPortName, inMode);
 
             if (verbose)
                 Log(nom_fct);
@@ -304,7 +305,7 @@ namespace TK.NodalEditor
 
             string error=string.Empty;
 
-            nodeIn.Connect(portIn.Index, nodeOut, portOut.Index, "", out error);
+            nodeIn.Connect(portIn.Index, nodeOut, portOut.Index, inMode, out error, nodeIn.Companion.Manager.Preferences.CheckCycles);
 
             if (error.Length != 0)
             {
@@ -317,6 +318,19 @@ namespace TK.NodalEditor
             layout.Invalidate();
 
             return true;
+        }
+
+        /// <summary>
+        /// Connect a link with default Mode
+        /// </summary>
+        /// <param name="inNodeName">Name of input node</param>
+        /// <param name="inPortName">Name of the port of input node</param>
+        /// <param name="outNodeName">Name of output node</param>
+        /// <param name="outPortName">Name of the port of output node</param>
+        /// <returns></returns>
+        public static bool Connect(string inNodeName, string inPortName, string outNodeName, string outPortName)
+        {
+            return Connect(inNodeName, inPortName, outNodeName, outPortName, string.Empty);
         }
 
         /// <summary>

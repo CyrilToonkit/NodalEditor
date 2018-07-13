@@ -1436,13 +1436,13 @@ namespace TK.NodalEditor.NodesLayout
 
                                             if (!depositPort.IsOutput && connectPort.IsOutput)
                                             {
-                                                NodalDirector.Connect(HitCtrl.FullName, depositPort.FullName, Node.FullName, connectPort.FullName);
+                                                NodalDirector.Connect(HitCtrl.FullName, depositPort.FullName, Node.FullName, connectPort.FullName, ModifierKeys.ToString());
                                             }
                                             else
                                             {
                                                 if (depositPort.IsOutput && !connectPort.IsOutput)
                                                 {
-                                                    NodalDirector.Connect(Node.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                    NodalDirector.Connect(Node.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName, ModifierKeys.ToString());
                                                 }
                                             }
                                         }
@@ -1460,7 +1460,7 @@ namespace TK.NodalEditor.NodesLayout
                                                         depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, true, newPortForm.CustomParams, newPortForm.TypeMetaData);
                                                         if (depositPort != null)
                                                         {
-                                                            NodalDirector.Connect(HitCtrl.FullName, depositPort.FullName, Node.FullName, connectPort.FullName);
+                                                            NodalDirector.Connect(HitCtrl.FullName, depositPort.FullName, Node.FullName, connectPort.FullName, ModifierKeys.ToString());
                                                         }
                                                     }
                                                 }
@@ -1472,7 +1472,7 @@ namespace TK.NodalEditor.NodesLayout
                                                         depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, false, newPortForm.CustomParams, newPortForm.TypeMetaData);
                                                         if (depositPort != null)
                                                         {
-                                                            NodalDirector.Connect(Node.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                            NodalDirector.Connect(Node.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName, ModifierKeys.ToString());
                                                         }
                                                     }
                                                 }
