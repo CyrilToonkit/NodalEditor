@@ -16,6 +16,7 @@ using TK.GraphComponents.Dialogs;
 using TK.BaseLib;
 using System.Xml.Serialization;
 using System.Drawing.Drawing2D;
+using DevExpress.XtraEditors.Repository;
 
 namespace TK.NodalEditor.NodesLayout
 {
@@ -1145,10 +1146,29 @@ namespace TK.NodalEditor.NodesLayout
 
         private void NodesLayout_KeyDown(object sender, KeyEventArgs e)
         {
-                if (e.KeyCode == Keys.T)
+            if (e.KeyCode == Keys.T)
+            {
+                Console.WriteLine("coucou j'ai appuyé sur TAB");
+                List<string> NodesName = new List<string>();
+                NodesName.Add("node 1");
+                NodesName.Add("foo");
+                NodesName.Add("node 3");
+                NodesName.Add("foot");
+                foreach (Node node in Manager.AvailableNodes)
                 {
-                    Console.WriteLine("coucou j'ai appuyé sur TAB");
+                    NodesName.Add(node.FullName);
                 }
+                nodeLookUpEdit.Properties.DataSource = NodesName;
+                nodeLookUpEdit.Location = PointToClient(Cursor.Position);
+                nodeLookUpEdit.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+                nodeLookUpEdit.Focus();
+                //if(nodeLookUpEdit.KeyDown() == Keys.Enter)
+                //{
+
+                //}
+                Console.WriteLine(nodeLookUpEdit.Focused);
+                nodeLookUpEdit.Visible = true;
+            }
         }
         private void NodesLayout_KeyUp(object sender, KeyEventArgs e)
         {
