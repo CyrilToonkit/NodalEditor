@@ -383,16 +383,6 @@ namespace TK.NodalEditor
 
         #endregion
 
-        /// <summary>
-        /// Return ""
-        /// @todo Why ?!?
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            return "";
-        }
-
         #endregion
 
         public string NiceName

@@ -117,13 +117,7 @@ namespace TK.NodalEditor
         {
             get 
             {
-                if (Owner == null)
-                    return "_" + Name;
-                /*
-                if (mUniqueNameCache == null)
-                    mUniqueNameCache = Owner.FullName + "_" + Name; 
-                 * */
-                return Owner.FullName + "_" + Name; 
+                return string.Format("{0}_{1}", Owner == null ? string.Empty : Owner.FullName, Name);
             }
         }
 
@@ -516,7 +510,7 @@ namespace TK.NodalEditor
         /// <returns>The string version of the object</returns>
         public override string ToString()
         {
-            return Visible ? PortObj.ToString() : "";
+            return PortObj.ToString();
         }
 
         #endregion

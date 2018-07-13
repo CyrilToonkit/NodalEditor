@@ -670,9 +670,9 @@ namespace TK.NodalEditor.NodesLayout
 
         private void NodesLayout_MouseMove(object sender, MouseEventArgs e)
         {
-            Node potentialHover = GetHitNode(e.Location);
             if (Preferences.ShowNodeTips)
             {
+                Node potentialHover = GetHitNode(e.Location);
                 if (hoverNode == null)
                 {
                     if (potentialHover != null)
@@ -743,7 +743,7 @@ namespace TK.NodalEditor.NodesLayout
             if (hitNode == null)
             {
                 Point Moved = PointToScreen(e.Location);
-
+                //We "dragged" something
                 if (Math.Abs(e.X - HitPoint.X) + Math.Abs(e.Y - HitPoint.Y) > 2)
                 {
                     if (IsDragging)
@@ -1126,11 +1126,10 @@ namespace TK.NodalEditor.NodesLayout
                     }
                 }
 
-                Link HitLink = GetHitLink(e.Location);
-                if (HitLink != null)
+                if (Preferences.ShowHoveredLinks)
                 {
-                    HitLink.isHovered = true;
-                    Invalidate();
+                    //Call get hit link just to update hovered link
+                    GetHitLink(e.Location);
                 }
             }
             else
@@ -2184,7 +2183,7 @@ namespace TK.NodalEditor.NodesLayout
                     continue;
                 }
 
-                if (!hovered && item.Value.IsOutlineVisible(point, widenPen))
+                if (!hovered && item.Value.GetBounds().Contains(point) && item.Value.IsOutlineVisible(point, widenPen))
                 {
                     if(!hoverChange && !item.Key.isHovered)
                     {
