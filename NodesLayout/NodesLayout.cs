@@ -3941,55 +3941,7 @@ namespace TK.NodalEditor.NodesLayout
                 Frame(Manager.CurCompound.Nodes);
             }
         }
-        /* DEPRECATE
-        public void DeleteNode(Node inNode)
-        {
-            Manager.RemoveNode(inNode);
-            inNode.Deleted = true;
 
-            RefreshPorts();
-            ChangeFocus(true);
-        }*/
-
-        //public void DeleteSelected()
-        //{
-        //    List<Node> selNodes = Selection.GetSelectedNodes();
-        //    if (selNodes.Count > 0)
-        //    {
-        //        List<string> nodesNames = new List<string>();
-        //        foreach (Node node in selNodes)
-        //        {
-        //            nodesNames.Add(node.FullName);
-        //        }
-
-        //        NodalDirector.DeleteNodes(nodesNames);
-        //        /*
-        //        Manager.Companion.LaunchProcess("Delete nodes", selNodes.Count);
-
-        //        foreach (Node node in selNodes)
-        //        {
-        //            Manager.RemoveNode(node);
-        //            node.Deleted = true;
-        //            Manager.Companion.ProgressBarIncrement();
-        //        }
-
-        //        RefreshPorts();
-        //        Selection.Selection.Clear();
-        //        ChangeFocus(true);
-        //        Manager.Companion.EndProcess();
-        //        */
-        //    }
-        //    else
-        //    {
-        //        List<Link> selLinks = Selection.GetSelectedLinks();
-        //        if (selLinks.Count > 0)
-        //        {
-        //            NodalDirector.DeleteLinks(selLinks);
-        //        }
-        //    }
-        //}
-
-        
         public void DeleteSelected()
         {
             List<Node> selNodes = Selection.GetSelectedNodes();
@@ -4001,24 +3953,7 @@ namespace TK.NodalEditor.NodesLayout
                     nodesNames.Add(node.FullName);
                 }
 
-
-
-                NodalDirector.DeleteNode(nodesNames);
-                /*
-                Manager.Companion.LaunchProcess("Delete nodes", selNodes.Count);
-
-                foreach (Node node in selNodes)
-                {
-                    Manager.RemoveNode(node);
-                    node.Deleted = true;
-                    Manager.Companion.ProgressBarIncrement();
-                }
-
-                RefreshPorts();
-                Selection.Selection.Clear();
-                ChangeFocus(true);
-                Manager.Companion.EndProcess();
-                */
+                NodalDirector.DeleteNodes(nodesNames);
             }
             else
             {
@@ -4029,8 +3964,6 @@ namespace TK.NodalEditor.NodesLayout
                     {
                         NodalDirector.Disconnect(link.Target.Owner.FullName, link.Target.FullName, link.Source.Owner.FullName, link.Source.FullName);
                     }
-                    
-                        
                 }
             }
         }
