@@ -28,31 +28,56 @@ namespace TK.NodalEditor
 
         #region Logging
 
+        /// <summary>
+        /// Logs a verbose message
+        /// </summary>
+        /// <param name="inMessage">Message to log</param>
         public static void Log(string inMessage)
         {
             Logger.Log(inMessage, LogSeverities.Log);
         }
 
+        /// <summary>
+        /// Logs an information message
+        /// </summary>
+        /// <param name="inMessage">Message to log</param>
         public static void Info(string inMessage)
         {
             Logger.Log(inMessage, LogSeverities.Info);
         }
 
+        /// <summary>
+        /// Logs a warning message
+        /// </summary>
+        /// <param name="inMessage">Message to log</param>
         public static void Warning(string inMessage)
         {
             Logger.Log(inMessage, LogSeverities.Warning);
         }
 
+        /// <summary>
+        /// Logs an error message
+        /// </summary>
+        /// <param name="inMessage">Message to log</param>
         public static void Error(string inMessage)
         {
             Logger.Log(inMessage, LogSeverities.Error);
         }
 
+        /// <summary>
+        /// Logs a fatal message
+        /// </summary>
+        /// <param name="inMessage">Message to log</param>
         public static void Fatal(string inMessage)
         {
             Logger.Log(inMessage, LogSeverities.Fatal);
         }
 
+        /// <summary>
+        /// Shows an error dialog
+        /// </summary>
+        /// <param name="Message">Message to log</param>
+        /// <param name="Caption">Title of the dialog</param>
         public static void ShowError(string Message, string Caption)
         {
             TKMessageBox.ShowError(Message, Caption);
@@ -133,7 +158,7 @@ namespace TK.NodalEditor
         /// </summary>
         /// <param name="inNodesNames">List of nodes names</param>
         /// <returns></returns>
-        public static bool DeleteNode(List<string> inNodesNames)
+        public static bool DeleteNodes(List<string> inNodesNames)
         {
             if (manager == null)
                 return false;
@@ -150,8 +175,6 @@ namespace TK.NodalEditor
                 if (node == null)
                 {
                     string message = string.Format("Node '{0}' does not exists !", nodeName);
-                    manager.Companion.Error(message);
-
                     Error(message);
                 }
                 else
@@ -160,6 +183,44 @@ namespace TK.NodalEditor
                     node.Deleted = true;
                     manager.Companion.ProgressBarIncrement();
                 }
+            }
+
+            if (layout == null)
+                return true;
+
+            layout.RefreshPorts();
+            layout.Selection.Selection.Clear();
+            layout.ChangeFocus(true);
+            manager.Companion.EndProcess();
+
+            return true;
+        }
+
+        /// <summary>
+        /// Delete a node
+        /// </summary>
+        /// <param name="inNodeName">nodes name</param>
+        /// <returns></returns>
+        public static bool DeleteNode(string inNodeName)
+        {
+            if (manager == null)
+                return false;
+
+            if (verbose)
+                Log(string.Format("DeleteNode(\"{0}\");", inNodeName));
+
+
+            Node node = manager.GetNode(inNodeName);
+
+            if (node == null)
+            {
+                string message = string.Format("Node '{0}' does not exists !", inNodeName);
+                Error(message);
+            }
+            else
+            {
+                manager.RemoveNode(node);
+                node.Deleted = true;
             }
 
             if (layout == null)
@@ -263,13 +324,14 @@ namespace TK.NodalEditor
         /// <param name="inPortName">Name of the port of input node</param>
         /// <param name="outNodeName">Name of output node</param>
         /// <param name="outPortName">Name of the port of output node</param>
+        /// <param name="inMode">The connection "mode" (basically a modifier Key like "Shift", "Control", "Alt", which can make sense in children classes)</param>
         /// <returns></returns>
-        public static bool Connect(string inNodeName, string inPortName, string outNodeName, string outPortName)
+        public static bool Connect(string inNodeName, string inPortName, string outNodeName, string outPortName, string inMode)
         {
             if (manager == null)
                 return false;
 
-            string nom_fct = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
+            string nom_fct = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\");", inNodeName, inPortName, outNodeName, outPortName, inMode);
 
             if (verbose)
                 Log(nom_fct);
@@ -304,7 +366,7 @@ namespace TK.NodalEditor
 
             string error=string.Empty;
 
-            nodeIn.Connect(portIn.Index, nodeOut, portOut.Index, "", out error);
+            nodeIn.Connect(portIn.Index, nodeOut, portOut.Index, inMode, out error, nodeIn.Companion.Manager.Preferences.CheckCycles);
 
             if (error.Length != 0)
             {
@@ -317,6 +379,19 @@ namespace TK.NodalEditor
             layout.Invalidate();
 
             return true;
+        }
+
+        /// <summary>
+        /// Connect a link with default Mode
+        /// </summary>
+        /// <param name="inNodeName">Name of input node</param>
+        /// <param name="inPortName">Name of the port of input node</param>
+        /// <param name="outNodeName">Name of output node</param>
+        /// <param name="outPortName">Name of the port of output node</param>
+        /// <returns></returns>
+        public static bool Connect(string inNodeName, string inPortName, string outNodeName, string outPortName)
+        {
+            return Connect(inNodeName, inPortName, outNodeName, outPortName, string.Empty);
         }
 
         /// <summary>
@@ -797,12 +872,7 @@ namespace TK.NodalEditor
         public static void Evaluate(string inCode)
         {
             Dictionary<string, object> args = new Dictionary<string, object>();
-            /*
-            args.Add("ManagerCompanion Companion", Companion);
-            args.Add("RigCreator Creator", Creator);
-            args.Add("NodesManager nodesManager", nodesManager);
-            args.Add("NodesLayout RigsLayout", RigsLayout);
-            */
+
             InterpreterResult rslt = CSInterpreter.Eval(inCode.Replace("cmds.", "NodalDirector."), string.Empty, "TK_BaseLib.dll;TK_GraphComponents.dll;TK_NodalEditor.dll;", "using System.Collections.Generic;using TK.BaseLib;using TK.BaseLib.CGModel;using TK.GraphComponents.Dialogs;using TK.NodalEditor;using TK.NodalEditor.NodesLayout;", args);
             string msg = "No info !";
 

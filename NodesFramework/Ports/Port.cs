@@ -117,7 +117,7 @@ namespace TK.NodalEditor
         {
             get 
             {
-                return string.Format("{0}_{1}", Owner == null ? string.Empty : Owner.FullName, Name);
+                return Owner == null ? string.Empty : Owner.FullName + "_" + Name;
             }
         }
 
