@@ -97,7 +97,7 @@ namespace TK.NodalEditor.NodesLayout
             this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pasteRenamedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.customToolTip = new TK.GraphComponents.CustomToolTip();
-            this.nodeLookUpEdit = new DevExpress.XtraEditors.LookUpEdit();
+            this.nodeLookUpEdit = new nodeLookUpEditNoTab();
             this.nodeMenuStrip.SuspendLayout();
             this.linkMenuStrip.SuspendLayout();
             this.portsMenuStrip.SuspendLayout();
@@ -610,15 +610,19 @@ namespace TK.NodalEditor.NodesLayout
             // 
             // nodeLookUpEdit
             // 
+            this.nodeLookUpEdit.EditValue = "";
             this.nodeLookUpEdit.Location = new System.Drawing.Point(90, 155);
             this.nodeLookUpEdit.Name = "nodeLookUpEdit";
             this.nodeLookUpEdit.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.nodeLookUpEdit.Properties.ImmediatePopup = true;
             this.nodeLookUpEdit.Properties.PopupSizeable = false;
-            this.nodeLookUpEdit.Properties.ShowFooter = false;
             this.nodeLookUpEdit.Size = new System.Drawing.Size(100, 20);
             this.nodeLookUpEdit.TabIndex = 5;
+            this.nodeLookUpEdit.TabStop = false;
             this.nodeLookUpEdit.Visible = false;
+            this.nodeLookUpEdit.KeyUp += new System.Windows.Forms.KeyEventHandler(this.nodeLookUpEdit_KeyUp);
+            this.nodeLookUpEdit.Validated += new System.EventHandler(this.NodeLookUpEdit_Validated);
             // 
             // NodesLayout
             // 
@@ -719,6 +723,6 @@ namespace TK.NodalEditor.NodesLayout
         private System.Windows.Forms.ToolStripMenuItem disconnectInputsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem disconnectOutputsToolStripMenuItem;
         public System.Windows.Forms.ContextMenuStrip nodeMenuStrip;
-        private DevExpress.XtraEditors.LookUpEdit nodeLookUpEdit;
+        private nodeLookUpEditNoTab nodeLookUpEdit;
     }
 }

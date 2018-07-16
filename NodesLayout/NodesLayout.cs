@@ -312,8 +312,12 @@ namespace TK.NodalEditor.NodesLayout
         Node hitNode = null;
         Node hoverNode = null;
         Port hoverPort = null;
-
         Node detachNode = null;
+
+        //Lookupedit
+        Point LookupLocation = new Point();
+        bool LookupVisible = false;
+
         //Accessor for the rigs contextMenu
 
         public void SetShortCut(string itemName, string shortCut)
@@ -357,6 +361,16 @@ namespace TK.NodalEditor.NodesLayout
         // Nodes Management ====================================================================
 
         //MOUSE EVENTS =========================================================================
+
+        protected override bool IsInputKey(Keys KeyData)
+        {
+            if( KeyData == Keys.Tab)
+            {
+                return true;
+            }
+
+            return base.IsInputKey(KeyData);
+        }
 
         private void RigNodesLayout_MouseWheel(object sender, MouseEventArgs e)
         {
@@ -1343,9 +1357,20 @@ namespace TK.NodalEditor.NodesLayout
 
         private void NodesLayout_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.T)
+        }
+
+        private void NodeLookUpEdit_Validated(object sender, EventArgs e)
+        {
+
+        }
+
+        private void NodesLayout_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Tab)
             {
-                Console.WriteLine("coucou j'ai appuyé sur TAB");
+                Console.WriteLine("J'ai appuyé sur TAB");
+                LookupVisible = nodeLookUpEdit.Visible = false;
+                //INIT DATA
                 List<string> NodesName = new List<string>();
                 NodesName.Add("node 1");
                 NodesName.Add("foo");
@@ -1355,21 +1380,14 @@ namespace TK.NodalEditor.NodesLayout
                 {
                     NodesName.Add(node.FullName);
                 }
+
                 nodeLookUpEdit.Properties.DataSource = NodesName;
-                nodeLookUpEdit.Location = PointToClient(Cursor.Position);
-                nodeLookUpEdit.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+                nodeLookUpEdit.Location = LookupLocation = PointToClient(Cursor.Position);
+                
+                LookupVisible = nodeLookUpEdit.Visible = true;
                 nodeLookUpEdit.Focus();
-                //if(nodeLookUpEdit.KeyDown() == Keys.Enter)
-                //{
-
-                //}
-                Console.WriteLine(nodeLookUpEdit.Focused);
-                nodeLookUpEdit.Visible = true;
             }
-        }
-        private void NodesLayout_KeyUp(object sender, KeyEventArgs e)
-        {
-
+            Invalidate();
         }
 
         //void Node_MouseUp(object sender, MouseEventArgs e)
@@ -4160,6 +4178,50 @@ namespace TK.NodalEditor.NodesLayout
         private void parentToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ParentNode();
+        }
+
+        private void nodeLookUpEdit_KeyUp(object sender, KeyEventArgs e)
+        {
+            Console.WriteLine("LookUp key : " + e.KeyCode.ToString());
+
+            //object row = nodeLookUpEdit.Properties.GetDataSourceRowByKeyValue(nodeLookUpEdit.EditValue);
+            //if ( row != null)
+            //{
+            //    Console.WriteLine("selection " + (string)nodeLookUpEdit.EditValue);
+            //    string compound = null;
+            //    string inName = (string)nodeLookUpEdit.EditValue;
+            //    NodalDirector.AddNode(inName,compound , Cursor.Position.X, Cursor.Position.Y);
+            //    nodeLookUpEdit.Visible = false;
+            //}
+            //else
+            //{
+            //    MessageBox.Show("This node name does not exist");
+            //}
+
+            Console.WriteLine("selection " + (string)nodeLookUpEdit.EditValue);
+
+            if(e.KeyCode == Keys.Enter)
+            {
+                string compound = null;
+                string inName = (string)nodeLookUpEdit.EditValue;
+                NodalDirector.AddNode(inName, compound, LookupLocation.X, LookupLocation.Y);
+
+                LookupVisible = nodeLookUpEdit.Visible = false;
+                this.Focus();
+            }
+
+            if(e.KeyCode == Keys.Escape)
+            {
+                if (LookupVisible == true)
+                {
+                    Console.WriteLine("ESCAPE lookup");
+                    nodeLookUpEdit.Visible = false;
+                    LookupVisible = nodeLookUpEdit.Visible = false;
+                    this.Focus();
+                }
+            }
+            Invalidate();
+            Console.WriteLine("Fin nodeLookUpEdit_KeyUp");
         }
     }
 }

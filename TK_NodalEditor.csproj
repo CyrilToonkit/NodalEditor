@@ -56,6 +56,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="nodeLookUpEditNoTab.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="nodeLookUpEditNoTab.Designer.cs">
+      <DependentUpon>nodeLookUpEditNoTab.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomMenus\LinkContextTag.cs" />
     <Compile Include="CustomMenus\PortContextTag.cs" />
     <Compile Include="INodalEditorCommands.cs" />

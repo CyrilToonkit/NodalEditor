@@ -132,7 +132,7 @@
     <value>0, 24</value>
   </data>
   <data name="tK_NodalEditorUCtrl1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>719, 426</value>
+    <value>719, 425</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="tK_NodalEditorUCtrl1.TabIndex" type="System.Int32, mscorlib">
@@ -226,7 +226,7 @@
     <value>True</value>
   </data>
   <data name="scriptEditorTB.Size" type="System.Drawing.Size, System.Drawing">
-    <value>713, 60</value>
+    <value>713, 61</value>
   </data>
   <data name="scriptEditorTB.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -302,10 +302,10 @@
     <value>Bottom</value>
   </data>
   <data name="collapsibleGroup1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 450</value>
+    <value>0, 449</value>
   </data>
   <data name="collapsibleGroup1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>719, 104</value>
+    <value>719, 105</value>
   </data>
   <data name="collapsibleGroup1.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
