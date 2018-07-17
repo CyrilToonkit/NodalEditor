@@ -6,3 +6,7 @@
 	path = TK_Logger
 	url = https://github.com/CyrilToonkit/TK_Logger.git
 	branch = master
+[submodule "GenericUndoRedo"]
+	path = GenericUndoRedo
+	url = https://github.com/CyrilToonkit/GenericUndoRedo.git
+	branch = master
