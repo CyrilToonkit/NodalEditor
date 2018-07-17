@@ -308,6 +308,7 @@ namespace TK.NodalEditor.NodesLayout
         //Reconnecing a link
         Link detachLink = null;
         Reconnecting reconnecting = Reconnecting.None;
+        bool ShiftVisibility = false;
 
         Node hitNode = null;
         Node hoverNode = null;
@@ -454,8 +455,7 @@ namespace TK.NodalEditor.NodesLayout
         }
 
         private void NodesLayout_MouseUp(object sender, MouseEventArgs e)
-        {
-            
+        { 
             if (IsInitialised)
             {
                 if (hitNode == null)
@@ -507,14 +507,29 @@ namespace TK.NodalEditor.NodesLayout
                                         {
                                             if (reconnecting == Reconnecting.Input)
                                             {
-                                                NodalDirector.ReConnect(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
-                                                                        HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
+                                                if (ShiftVisibility == true)
+                                                {
+                                                    NodalDirector.ReConnectCopy(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
+                                                                            HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
+                                                }
+                                                else
+                                                {
+                                                    NodalDirector.ReConnect(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
+                                                                            HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
+                                                }
                                             }
                                             else if(reconnecting == Reconnecting.Output)
                                             {
-                                                NodalDirector.ReConnect(detachLink.Source.Owner.FullName, detachLink.Source.FullName, detachNode.FullName, connectPort.FullName, 
-                                                                        HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
-
+                                                if (ShiftVisibility == true)
+                                                {
+                                                    NodalDirector.ReConnectCopy(detachLink.Source.Owner.FullName, detachLink.Source.FullName, detachNode.FullName, connectPort.FullName,
+                                                                            HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
+                                                }
+                                                else
+                                                {
+                                                    NodalDirector.ReConnect(detachLink.Source.Owner.FullName, detachLink.Source.FullName, detachNode.FullName, connectPort.FullName,
+                                                                            HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
+                                                }
                                             }
                                         }
                                         else
@@ -523,13 +538,29 @@ namespace TK.NodalEditor.NodesLayout
                                             {
                                                 if (reconnecting == Reconnecting.Input)
                                                 {
-                                                    NodalDirector.ReConnect(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName, 
+                                                    if (ShiftVisibility == true)
+                                                    {
+                                                        NodalDirector.ReConnectCopy(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
                                                                             detachNode.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                    }
+                                                    else
+                                                    {
+                                                        NodalDirector.ReConnect(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
+                                                                            detachNode.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                    }
                                                 }
                                                 else if (reconnecting == Reconnecting.Output)
                                                 {
-                                                    NodalDirector.ReConnect(detachNode.FullName, connectPort.FullName, detachLink.Source.Owner.FullName, detachLink.Source.FullName,
+                                                    if (ShiftVisibility == true)
+                                                    {
+                                                        NodalDirector.ReConnectCopy(detachNode.FullName, connectPort.FullName, detachLink.Source.Owner.FullName, detachLink.Source.FullName,
                                                                             detachNode.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                    }
+                                                    else
+                                                    {
+                                                        NodalDirector.ReConnect(detachNode.FullName, connectPort.FullName, detachLink.Source.Owner.FullName, detachLink.Source.FullName,
+                                                                            detachNode.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                    }
                                                 }
                                             }
                                         }
@@ -549,13 +580,29 @@ namespace TK.NodalEditor.NodesLayout
                                                     {
                                                         if (reconnecting == Reconnecting.Input)
                                                         {
-                                                            NodalDirector.ReConnect(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
+                                                            if (ShiftVisibility == true)
+                                                            {
+                                                                NodalDirector.ReConnectCopy(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
                                                                                     HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
+                                                            }
+                                                            else
+                                                            {
+                                                                NodalDirector.ReConnect(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
+                                                                                    HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
+                                                            }
                                                         }
                                                         else if (reconnecting == Reconnecting.Output)
                                                         {
-                                                            NodalDirector.ReConnect(detachLink.Source.Owner.FullName, detachLink.Source.FullName, detachNode.FullName, connectPort.FullName, 
+                                                            if (ShiftVisibility == true)
+                                                            {
+                                                                NodalDirector.ReConnectCopy(detachLink.Source.Owner.FullName, detachLink.Source.FullName, detachNode.FullName, connectPort.FullName,
                                                                                     HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
+                                                            }
+                                                            else
+                                                            {
+                                                                NodalDirector.ReConnect(detachLink.Source.Owner.FullName, detachLink.Source.FullName, detachNode.FullName, connectPort.FullName,
+                                                                                    HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName);
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -570,13 +617,29 @@ namespace TK.NodalEditor.NodesLayout
                                                     {
                                                         if (reconnecting == Reconnecting.Input)
                                                         {
-                                                            NodalDirector.ReConnect(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName, 
+                                                            if (ShiftVisibility == true)
+                                                            {
+                                                                NodalDirector.ReConnectCopy(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
                                                                                     detachNode.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                            }
+                                                            else
+                                                            {
+                                                                NodalDirector.ReConnect(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
+                                                                                    detachNode.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                            }
                                                         }
                                                         else if (reconnecting == Reconnecting.Output)
                                                         {
-                                                            NodalDirector.ReConnect(detachLink.Source.Owner.FullName, detachLink.Source.FullName, detachNode.FullName, connectPort.FullName, 
+                                                            if (ShiftVisibility == true)
+                                                            {
+                                                                NodalDirector.ReConnectCopy(detachLink.Source.Owner.FullName, detachLink.Source.FullName, detachNode.FullName, connectPort.FullName,
                                                                                     detachNode.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                            }
+                                                            else
+                                                            {
+                                                                NodalDirector.ReConnect(detachLink.Source.Owner.FullName, detachLink.Source.FullName, detachNode.FullName, connectPort.FullName,
+                                                                                    detachNode.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName);
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -676,7 +739,7 @@ namespace TK.NodalEditor.NodesLayout
                 {
                     Node_MouseUp(hitNode, e);
                 }
-
+                ShiftVisibility = false;
                 detachLink = null;
                 reconnecting = Reconnecting.None;
             }
@@ -803,7 +866,6 @@ namespace TK.NodalEditor.NodesLayout
                         //Reconnection link
                         else if(detachLink != null)
                         {
-
                             if (reconnecting == Reconnecting.None)
                             {
                                 double distance1 = -1;
@@ -1191,6 +1253,11 @@ namespace TK.NodalEditor.NodesLayout
                                 Node TargetNode = detachLink.Target.Owner;
                                 Port foundPort = null;
 
+                                if (Control.ModifierKeys == Keys.Shift)
+                                {
+                                    ShiftVisibility = true;
+                                }
+
                                 if (NodeIsShowing(SourceNode.NodeElementType) && NodeIsShowing(TargetNode.NodeElementType))
                                 {
                                     if (SourceNode.IsIn(Manager.CurCompound)) 
@@ -1244,6 +1311,11 @@ namespace TK.NodalEditor.NodesLayout
                                 Node SourceNode = detachLink.Source.Owner;
                                 Node TargetNode = detachLink.Target.Owner;
                                 Port foundPort = null;
+
+                                if (Control.ModifierKeys == Keys.Shift)
+                                {
+                                    ShiftVisibility = true;
+                                }
 
                                 if (NodeIsShowing(SourceNode.NodeElementType) && NodeIsShowing(TargetNode.NodeElementType))
                                 {
@@ -1353,6 +1425,7 @@ namespace TK.NodalEditor.NodesLayout
             {
                 Invalidate();
             }
+            
         }
 
         private void NodesLayout_KeyDown(object sender, KeyEventArgs e)
@@ -1368,14 +1441,9 @@ namespace TK.NodalEditor.NodesLayout
         {
             if (e.KeyCode == Keys.Tab)
             {
-                Console.WriteLine("J'ai appuyé sur TAB");
                 LookupVisible = nodeLookUpEdit.Visible = false;
                 //INIT DATA
                 List<string> NodesName = new List<string>();
-                NodesName.Add("node 1");
-                NodesName.Add("foo");
-                NodesName.Add("node 3");
-                NodesName.Add("foot");
                 foreach (Node node in Manager.AvailableNodes)
                 {
                     NodesName.Add(node.FullName);
@@ -2753,10 +2821,12 @@ namespace TK.NodalEditor.NodesLayout
 
                     links = Manager.GetLinks();
                     paths.Clear();
-                    foreach(Link link in links)
+
+                    foreach (Link link in links)
                     {
                         paths.Add(link, null);
                     }
+
                     Port foundPort = null;
                     
 
@@ -2865,7 +2935,7 @@ namespace TK.NodalEditor.NodesLayout
         private bool LinkIsShowing(Link inLink)
         {
             string inType = inLink.NodeElementType;
-            if (CurConnection2 != -1 && inLink == detachLink)
+            if (CurConnection2 != -1 && inLink == detachLink && ShiftVisibility == false)
             {
                 return false;
             }
@@ -4115,8 +4185,6 @@ namespace TK.NodalEditor.NodesLayout
 
         private void nodeLookUpEdit_KeyUp(object sender, KeyEventArgs e)
         {
-            Console.WriteLine("LookUp key : " + e.KeyCode.ToString());
-
             //object row = nodeLookUpEdit.Properties.GetDataSourceRowByKeyValue(nodeLookUpEdit.EditValue);
             //if ( row != null)
             //{
@@ -4130,8 +4198,6 @@ namespace TK.NodalEditor.NodesLayout
             //{
             //    MessageBox.Show("This node name does not exist");
             //}
-
-            Console.WriteLine("selection " + (string)nodeLookUpEdit.EditValue);
 
             if(e.KeyCode == Keys.Enter)
             {
@@ -4147,14 +4213,12 @@ namespace TK.NodalEditor.NodesLayout
             {
                 if (LookupVisible == true)
                 {
-                    Console.WriteLine("ESCAPE lookup");
                     nodeLookUpEdit.Visible = false;
                     LookupVisible = nodeLookUpEdit.Visible = false;
                     this.Focus();
                 }
             }
             Invalidate();
-            Console.WriteLine("Fin nodeLookUpEdit_KeyUp");
         }
     }
 }

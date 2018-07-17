@@ -521,6 +521,124 @@ namespace TK.NodalEditor
         }
 
         /// <summary>
+        /// Reconnect a link by keeping the original one
+        /// </summary>
+        /// <param name="inNodeName">Name of input node where the link was connected at first</param>
+        /// <param name="inPortName">Name of input port where the link was connected at first</param>
+        /// <param name="outNodeName">Name of output node where the link was connected at first</param>
+        /// <param name="outPortName">Name of output port where the link was connected at first</param>
+        /// <param name="newinNodeName">Name of input node where we want to reconnect the link</param>
+        /// <param name="newinPortName">Name of input port where we want to reconnect the link</param>
+        /// <param name="newoutNodeName">Name of output node where we want to reconnect the link</param>
+        /// <param name="newoutPortName">Name of output port where we want to reconnect the link</param>
+        /// <returns></returns>
+        public static bool ReConnectCopy(string inNodeName, string inPortName, string outNodeName, string outPortName,
+                                string newinNodeName, string newinPortName, string newoutNodeName, string newoutPortName)
+        {
+            if (manager == null)
+                return false;
+
+            string nom_fct = string.Format("ReConnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\");", inNodeName, inPortName, outNodeName, outPortName, newinNodeName, newinPortName, newoutNodeName, newoutPortName);
+
+            if (verbose)
+                Log(nom_fct);
+
+            Node nodeInLocked = manager.GetNode(inNodeName);
+            Node nodeOut = manager.GetNode(outNodeName);
+            Node newNodeIn = manager.GetNode(newinNodeName);
+            Node newNodeOut = manager.GetNode(newoutNodeName);
+
+            if (nodeInLocked == null)
+            {
+                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
+                return false;
+            }
+            if (nodeOut == null)
+            {
+                Error(nom_fct + "\n" + string.Format("output Node \"{0}\" is null", outNodeName));
+                return false;
+            }
+            if (newNodeIn == null)
+            {
+                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", newinNodeName));
+                return false;
+            }
+            if (newNodeOut == null)
+            {
+                Error(nom_fct + "\n" + string.Format("output Node \"{0}\" is null", newoutNodeName));
+                return false;
+            }
+
+            Port portOut = nodeOut.GetPort(outPortName, true);
+            Port portInLocked = nodeInLocked.GetPort(inPortName, false);
+            Port newPortOut = newNodeOut.GetPort(newoutPortName, true);
+            Port newPortIn = newNodeIn.GetPort(newinPortName, false);
+
+            if (portInLocked == null)
+            {
+                Error(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" is null", inNodeName, inPortName));
+                return false;
+            }
+            if (portOut == null)
+            {
+                Error(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" is null", outNodeName, outPortName));
+                return false;
+            }
+            if (newPortIn == null)
+            {
+                Error(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" is null", newinNodeName, newinPortName));
+                return false;
+            }
+            if (newPortOut == null)
+            {
+                Error(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" is null", newoutNodeName, newoutPortName));
+                return false;
+            }
+
+
+            Link copyLink = new Link();
+
+
+            string error = string.Empty;
+            List<Link> linkToConnect = new List<Link>();
+            if (portInLocked.Dependencies.Count != 0)
+            {
+                foreach (Link link in portInLocked.Dependencies)
+                {
+                    if (link.Source.FullName == portOut.FullName)
+                    {
+                        linkToConnect.Add(link);
+                    }
+                }
+            }
+            else
+            {
+                Error(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+            }
+
+            if (linkToConnect.Count != 0)
+            {
+                copyLink.Copy(linkToConnect[0]);
+                newNodeIn.Connect(newPortIn.Index, newNodeOut, newPortOut.Index, "", out error, copyLink);
+            }
+            else
+            {
+                Error(nom_fct + "\n" + string.Format("No link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\"", inPortName, inNodeName, outPortName, outNodeName));
+            }
+
+            if (error.Length != 0)
+            {
+                Error(nom_fct + "\n" + "Cannot connect");
+            }
+
+            if (layout == null)
+                return true;
+
+            layout.Invalidate();
+            return true;
+        }
+
+        /// <summary>
         /// Disconnect all links of inputNode
         /// </summary>
         /// <param name="inNodeName">Name of node we want to disconnect the links</param>
