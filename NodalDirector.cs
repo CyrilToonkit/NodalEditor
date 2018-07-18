@@ -234,7 +234,7 @@ namespace TK.NodalEditor
             string nodeName = null;
             Compound inCompound = null;
 
-            if(string.IsNullOrEmpty(inCompoundName) || inCompoundName == manager.Root.FullName)
+            if(string.IsNullOrEmpty(inCompoundName) || inCompoundName == _instance.manager.Root.FullName)
             {
                 inCompound = _instance.manager.Root;
             }
