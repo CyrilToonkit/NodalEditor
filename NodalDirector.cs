@@ -234,7 +234,7 @@ namespace TK.NodalEditor
             string nodeName = null;
             Compound inCompound = null;
 
-            if(string.IsNullOrEmpty(inCompoundName))
+            if(string.IsNullOrEmpty(inCompoundName) || inCompoundName == manager.Root.FullName)
             {
                 inCompound = _instance.manager.Root;
             }
@@ -658,7 +658,7 @@ namespace TK.NodalEditor
         }
 
         /// <summary>
-        /// Reconnect a link by keeping the original one
+        /// Create copy of a link
         /// </summary>
         /// <param name="inNodeName">Name of input node where the link was connected at first</param>
         /// <param name="inPortName">Name of input port where the link was connected at first</param>
@@ -669,13 +669,13 @@ namespace TK.NodalEditor
         /// <param name="newoutNodeName">Name of output node where we want to reconnect the link</param>
         /// <param name="newoutPortName">Name of output port where we want to reconnect the link</param>
         /// <returns></returns>
-        public static bool ReConnectCopy(string inNodeName, string inPortName, string outNodeName, string outPortName,
+        public static bool CopyLink(string inNodeName, string inPortName, string outNodeName, string outPortName,
                                 string newinNodeName, string newinPortName, string newoutNodeName, string newoutPortName)
         {
             if (_instance.manager == null)
                 return false;
 
-            string nom_fct = string.Format("ReConnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\");", inNodeName, inPortName, outNodeName, outPortName, newinNodeName, newinPortName, newoutNodeName, newoutPortName);
+            string nom_fct = string.Format("CopyLink(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\");", inNodeName, inPortName, outNodeName, outPortName, newinNodeName, newinPortName, newoutNodeName, newoutPortName);
 
             if (_instance.verbose)
                 Log(nom_fct);
@@ -732,10 +732,6 @@ namespace TK.NodalEditor
                 return false;
             }
 
-
-            Link copyLink = new Link();
-
-
             string error = string.Empty;
             List<Link> linkToConnect = new List<Link>();
             if (portInLocked.Dependencies.Count != 0)
@@ -753,6 +749,7 @@ namespace TK.NodalEditor
                 Error(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
             }
 
+            Link copyLink = (Link)Activator.CreateInstance(linkToConnect[0].GetType(), new object[0]);
             if (linkToConnect.Count != 0)
             {
                 copyLink.Copy(linkToConnect[0]);
@@ -1068,7 +1065,8 @@ namespace TK.NodalEditor
             if (_instance.manager == null)
                 return false;
 
-            string nom_fct = string.Format("CreateCompound(\"{0}\");", inNodeNames);
+            string nom_fct = "CreateCompound(new List {\"TestNode1\"});";
+
 
             if (_instance.verbose)
                 Log(nom_fct);

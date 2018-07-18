@@ -1721,8 +1721,8 @@ namespace TK.NodalEditor
             PortObj portObj = new PortObj();
             portObj.Default = false;
             portObj.NativeName = portObj.Name = GetPortObjUniqueName(inName);
-            portObj.IsInput = !isOutput;
-            portObj.IsOutput = isOutput;
+            portObj.IsInput = true;
+            portObj.IsOutput = true;
 
             return AddPort(portObj)[(isOutput ? 1 : 0)];
         }
