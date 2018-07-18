@@ -1,4 +1,5 @@
-﻿using MiniLogger;
+﻿using GenericUndoRedo;
+using MiniLogger;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -7,24 +8,151 @@ using System.Windows.Forms;
 using TK.BaseLib;
 using TK.BaseLib.CSCodeEval;
 using TK.GraphComponents.Dialogs;
+using TK.NodalEditor.NodesFramework;
 
 namespace TK.NodalEditor
 {
     public class NodalDirector
     {
-        public static NodesManager manager = null;
-        public static NodesLayout.NodesLayout layout = null;
-        public static bool verbose = true;
+        public NodesManager manager = null;
+        public NodesLayout.NodesLayout layout = null;
 
-        public static void RegisterManager(NodesManager inManager)
+        public bool verbose = true;
+
+        public UndoRedoHistory<NodalDirector> history;
+
+        #region Singleton declaration, getters and constructor
+        protected static NodalDirector _instance = null;
+
+        protected NodalDirector()
         {
-            manager = inManager;
+            history = new UndoRedoHistory<NodalDirector>(this);
         }
 
-        public static void RegisterLayout(NodesLayout.NodesLayout inLayout)
+        public static NodalDirector Get()
         {
-            layout = inLayout;
+            if (_instance == null)
+                _instance = new NodalDirector();
+
+            return _instance;
         }
+
+        public static NodalDirector Get(NodesManager inManager, NodesLayout.NodesLayout inLayout)
+        {
+            if (_instance == null)
+                _instance = new NodalDirector();
+
+            _instance.manager = inManager;
+            _instance.layout = inLayout;
+
+            return _instance;
+        }
+
+        #endregion
+
+        #region undoRedo
+        /// <summary>
+        /// Checks if there are any stored state available on the undo stack.
+        /// </summary>
+        /// <returns>true if able to undo, false otherwise</returns>
+        public static bool CanUndo()
+        {
+            return _instance.history.CanUndo;
+        }
+
+        /// <summary>
+        /// Checks if there are any stored state available on the redo stack.
+        /// </summary>
+        /// <returns>true if able to redo, false otherwise</returns>
+        public static bool CanRedo()
+        {
+            return _instance.history.CanRedo;
+        }
+
+        /// <summary>
+        /// Undo last operation
+        /// </summary>
+        /// <returns>true if something was "undoed", false otherwise</returns>
+        public static bool Undo()
+        {
+            if( _instance.history.CanUndo)
+            {
+                _instance.history.Undo();
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Redo last "undoed" operation
+        /// </summary>
+        /// <returns>true if something was "redoed", false otherwise</returns>
+        public static bool Redo()
+        {
+            if (_instance.history.CanRedo)
+            {
+                _instance.history.Redo();
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Clear the entire undo and redo stacks.
+        /// </summary>
+        public static void ClearHistory()
+        {
+            _instance.history.Clear();
+        }
+
+        #endregion
+
+        #region Active commands internals
+
+        /// <summary>
+        /// Adds a node (that was removed) given its instance
+        /// </summary>
+        /// <param name="inNode">Node to (re)add</param>
+        /// <param name="inParent">Compound where we want to add the Node to</param>
+        /// <param name="inConnexions">Connections that needs to be reapplied</param>
+        internal void _AddNode(Node inNode, Compound inParent, NodeConnexions inConnexions)
+        {
+            inNode.Deleted = false;
+
+            Node createdNode = _instance.manager.AddNode(inNode, inParent, (int)(inNode.UIx / layout.LayoutSize), (int)(inNode.UIy / layout.LayoutSize));
+
+            if (inConnexions != null)
+                inConnexions.Reconnect(createdNode);
+
+            _instance.layout.Selection.UpdateSelection();
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
+        }
+
+        /// <summary>
+        /// Deletes a Node given its instance
+        /// </summary>
+        /// <param name="removed">Node to be removed</param>
+        internal void _DeleteNode(Node removed)
+        {
+            _instance.manager.RemoveNode(removed);
+            removed.Deleted = true;
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.RefreshPorts();
+            _instance.layout.Selection.Selection.Clear();
+            _instance.layout.ChangeFocus(true);
+            _instance.manager.Companion.EndProcess();
+        }
+
+        #endregion
 
         #region Logging
 
@@ -95,12 +223,12 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static string AddNode(string inNodeName, string inCompoundName, int X, int Y)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return null;
 
             string nom_fct = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", inNodeName, inCompoundName, X, Y);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
             string nodeName = null;
@@ -108,11 +236,11 @@ namespace TK.NodalEditor
 
             if(string.IsNullOrEmpty(inCompoundName))
             {
-                inCompound = manager.Root;
+                inCompound = _instance.manager.Root;
             }
             else
             {
-                inCompound = manager.GetNode(inCompoundName) as Compound;
+                inCompound = _instance.manager.GetNode(inCompoundName) as Compound;
             }
 
             if (inCompound == null)
@@ -122,11 +250,12 @@ namespace TK.NodalEditor
             }
 
             bool isTrue = false; ;
-            foreach (Node Node in manager.AvailableNodes)
+            foreach (Node Node in _instance.manager.AvailableNodes)
             {
                 if(inNodeName == Node.FullName)
                 {
-                    Node node = manager.AddNode(inNodeName, inCompound, X, Y);
+                    Node node = _instance.manager.AddNode(inNodeName, inCompound, X, Y);
+                    _instance.history.Do(new AddNodeMemento(node.FullName));
                     nodeName = node.FullName;
                     isTrue = true;
                     break;
@@ -145,10 +274,11 @@ namespace TK.NodalEditor
             }
 
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return nodeName;
 
-            layout.Invalidate();
+            _instance.layout.ChangeFocus(false);
+            _instance.layout.Invalidate();
 
             return nodeName;
         }
@@ -160,17 +290,19 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool DeleteNodes(List<string> inNodesNames)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(string.Format("DeleteNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodesNames, "\",\"")));
 
-            manager.Companion.LaunchProcess("Delete nodes", inNodesNames.Count);
+            _instance.manager.Companion.LaunchProcess("Delete nodes", inNodesNames.Count);
+
+            _instance.history.BeginCompoundDo();
 
             foreach (string nodeName in inNodesNames)
             {
-                Node node = manager.GetNode(nodeName);
+                Node node = _instance.manager.GetNode(nodeName);
 
                 if (node == null)
                 {
@@ -179,19 +311,23 @@ namespace TK.NodalEditor
                 }
                 else
                 {
-                    manager.RemoveNode(node);
+                    _instance.history.Do(new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node)));
+                    _instance.manager.RemoveNode(node);
                     node.Deleted = true;
-                    manager.Companion.ProgressBarIncrement();
+
+                    _instance.manager.Companion.ProgressBarIncrement();
                 }
             }
 
-            if (layout == null)
+            _instance.history.EndCompoundDo();
+
+            if (_instance.layout == null)
                 return true;
 
-            layout.RefreshPorts();
-            layout.Selection.Selection.Clear();
-            layout.ChangeFocus(true);
-            manager.Companion.EndProcess();
+            _instance.layout.RefreshPorts();
+            _instance.layout.Selection.Selection.Clear();
+            _instance.layout.ChangeFocus(true);
+            _instance.manager.Companion.EndProcess();
 
             return true;
         }
@@ -203,14 +339,14 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool DeleteNode(string inNodeName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(string.Format("DeleteNode(\"{0}\");", inNodeName));
 
 
-            Node node = manager.GetNode(inNodeName);
+            Node node = _instance.manager.GetNode(inNodeName);
 
             if (node == null)
             {
@@ -219,17 +355,18 @@ namespace TK.NodalEditor
             }
             else
             {
-                manager.RemoveNode(node);
+                _instance.history.Do(new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node)));
+                _instance.manager.RemoveNode(node);
                 node.Deleted = true;
             }
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.RefreshPorts();
-            layout.Selection.Selection.Clear();
-            layout.ChangeFocus(true);
-            manager.Companion.EndProcess();
+            _instance.layout.RefreshPorts();
+            _instance.layout.Selection.Selection.Clear();
+            _instance.layout.ChangeFocus(true);
+            _instance.manager.Companion.EndProcess();
 
             return true;
         }
@@ -244,16 +381,16 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool Disconnect(string inNodeName, string inPortName, string outNodeName, string outPortName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = manager.GetNode(inNodeName);
-            Node nodeOut = manager.GetNode(outNodeName);
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+            Node nodeOut = _instance.manager.GetNode(outNodeName);
 
             if (nodeIn == null)
             {
@@ -296,7 +433,7 @@ namespace TK.NodalEditor
                 {
                     foreach (Link link in linkToDisconnect)
                     {
-                        manager.CurCompound.UnConnect(link);
+                        _instance.manager.CurCompound.UnConnect(link);
                     }
                 }
                 else
@@ -309,10 +446,10 @@ namespace TK.NodalEditor
                 Error(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
             }
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }
@@ -328,16 +465,16 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool Connect(string inNodeName, string inPortName, string outNodeName, string outPortName, string inMode)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\");", inNodeName, inPortName, outNodeName, outPortName, inMode);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = manager.GetNode(inNodeName);
-            Node nodeOut = manager.GetNode(outNodeName);
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+            Node nodeOut = _instance.manager.GetNode(outNodeName);
 
             if (nodeIn == null)
             {
@@ -350,7 +487,7 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            Port portOut = nodeOut.GetPort(outPortName, false);
+            Port portOut = nodeOut.GetPort(outPortName, true);
             Port portIn = nodeIn.GetPort(inPortName, false);
 
             if (portIn == null)
@@ -373,10 +510,10 @@ namespace TK.NodalEditor
                 Error(nom_fct + "\n" + "Cannot connect");
             }
   
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }
@@ -409,18 +546,18 @@ namespace TK.NodalEditor
         public static bool ReConnect(   string inNodeName, string inPortName, string outNodeName, string outPortName, 
                                         string newinNodeName, string newinPortName, string newoutNodeName, string newoutPortName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("ReConnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\");", inNodeName, inPortName, outNodeName, outPortName, newinNodeName, newinPortName, newoutNodeName, newoutPortName);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeInLocked = manager.GetNode(inNodeName);
-            Node nodeOut = manager.GetNode(outNodeName);
-            Node newNodeIn = manager.GetNode(newinNodeName);
-            Node newNodeOut = manager.GetNode(newoutNodeName);
+            Node nodeInLocked = _instance.manager.GetNode(inNodeName);
+            Node nodeOut = _instance.manager.GetNode(outNodeName);
+            Node newNodeIn = _instance.manager.GetNode(newinNodeName);
+            Node newNodeOut = _instance.manager.GetNode(newoutNodeName);
 
             if (nodeInLocked == null)
             {
@@ -486,7 +623,7 @@ namespace TK.NodalEditor
                 {
                     foreach (Link link in linkToDisconnect)
                     {
-                        manager.CurCompound.UnConnect(link);
+                        _instance.manager.CurCompound.UnConnect(link);
                         
                     }
                 }
@@ -513,10 +650,10 @@ namespace TK.NodalEditor
                 Error(nom_fct + "\n" + "Cannot connect");
             }
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
             return true;
         }
 
@@ -535,18 +672,18 @@ namespace TK.NodalEditor
         public static bool ReConnectCopy(string inNodeName, string inPortName, string outNodeName, string outPortName,
                                 string newinNodeName, string newinPortName, string newoutNodeName, string newoutPortName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("ReConnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\");", inNodeName, inPortName, outNodeName, outPortName, newinNodeName, newinPortName, newoutNodeName, newoutPortName);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeInLocked = manager.GetNode(inNodeName);
-            Node nodeOut = manager.GetNode(outNodeName);
-            Node newNodeIn = manager.GetNode(newinNodeName);
-            Node newNodeOut = manager.GetNode(newoutNodeName);
+            Node nodeInLocked = _instance.manager.GetNode(inNodeName);
+            Node nodeOut = _instance.manager.GetNode(outNodeName);
+            Node newNodeIn = _instance.manager.GetNode(newinNodeName);
+            Node newNodeOut = _instance.manager.GetNode(newoutNodeName);
 
             if (nodeInLocked == null)
             {
@@ -631,10 +768,10 @@ namespace TK.NodalEditor
                 Error(nom_fct + "\n" + "Cannot connect");
             }
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
             return true;
         }
 
@@ -645,15 +782,15 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool DisconnectAll(string inNodeName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("DisconnectAll(\"{0}\");", inNodeName);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = manager.GetNode(inNodeName);
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
 
             if (nodeIn == null)
             {
@@ -661,13 +798,13 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            manager.CurCompound.UnConnectAll(nodeIn);
+            _instance.manager.CurCompound.UnConnectAll(nodeIn);
 
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }
@@ -679,15 +816,15 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool DisconnectInputs(string inNodeName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("DisconnectInputs(\"{0}\");", inNodeName);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = manager.GetNode(inNodeName);
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
 
             if (nodeIn == null)
             {
@@ -695,12 +832,12 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            manager.CurCompound.UnConnectInputs(nodeIn);
+            _instance.manager.CurCompound.UnConnectInputs(nodeIn);
         
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }
@@ -712,15 +849,15 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool DisconnectOutputs(string inNodeName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("DisconnectOutputs(\"{0}\");", inNodeName);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = manager.GetNode(inNodeName);
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
 
             if (nodeIn == null)
             {
@@ -728,12 +865,12 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            manager.CurCompound.UnConnectOutputs(nodeIn);
+            _instance.manager.CurCompound.UnConnectOutputs(nodeIn);
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }
@@ -746,16 +883,16 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool Parent(string inNodeName, string parentCompound)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("Parent(\"{0}\", \"{1}\");", inNodeName, parentCompound);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = manager.GetNode(inNodeName);
-            Compound newParent = manager.GetNode(parentCompound) as Compound;
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+            Compound newParent = _instance.manager.GetNode(parentCompound) as Compound;
 
             if (nodeIn == null)
             {
@@ -770,7 +907,7 @@ namespace TK.NodalEditor
 
             if (nodeIn.Parent != null && nodeIn.Parent != newParent)
             {
-                manager.MoveNodes(new List<Node> { nodeIn }, newParent);
+                _instance.manager.MoveNodes(new List<Node> { nodeIn }, newParent);
             }
             else
             {
@@ -778,10 +915,10 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }
@@ -793,15 +930,15 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool UnParent(string inNodeName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("UnParent(\"{0}\");", inNodeName);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = manager.GetNode(inNodeName);
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
 
             if (nodeIn == null)
             {
@@ -811,7 +948,7 @@ namespace TK.NodalEditor
 
             if (nodeIn.Parent != null && nodeIn.Parent.Parent != null)
             {
-                manager.MoveNodes(new List<Node> { nodeIn }, nodeIn.Parent.Parent);
+                _instance.manager.MoveNodes(new List<Node> { nodeIn }, nodeIn.Parent.Parent);
             }
             else
             {
@@ -819,10 +956,10 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }
@@ -834,15 +971,15 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool ExposeAllPorts(string inNodeName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("ExposeAllPorts(\"{0}\");", inNodeName);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = manager.GetNode(inNodeName);
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
 
             if (nodeIn == null)
             {
@@ -862,10 +999,10 @@ namespace TK.NodalEditor
                 parentPort.Visible = true;
             }
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }
@@ -877,15 +1014,15 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool HideAllPorts(string inNodeName)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("HideAllPorts(\"{0}\");", inNodeName);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = manager.GetNode(inNodeName);
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
 
             if (nodeIn == null)
             {
@@ -913,10 +1050,10 @@ namespace TK.NodalEditor
                 }
             }
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }
@@ -928,12 +1065,12 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool CreateCompound(List<string> inNodeNames)
         {
-            if (manager == null)
+            if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("CreateCompound(\"{0}\");", inNodeNames);
 
-            if (verbose)
+            if (_instance.verbose)
                 Log(nom_fct);
 
             List<string> nodesNameError = new List<string>();
@@ -943,7 +1080,7 @@ namespace TK.NodalEditor
             {
                 foreach (string NodeName in inNodeNames)
                 {
-                    Node Node = manager.GetNode(NodeName);
+                    Node Node = _instance.manager.GetNode(NodeName);
 
                     if (Node == null) //Node with NodeName do not exist
                     {
@@ -961,11 +1098,11 @@ namespace TK.NodalEditor
                 }
                 else //All the nodes name exist
                 {
-                    Compound compound = manager.AddCompound(nodes);
+                    Compound compound = _instance.manager.AddCompound(nodes);
 
                     if (compound != null)
                     {
-                        manager.EnterCompound(compound);
+                        _instance.manager.EnterCompound(compound);
                     }
                 }
             }
@@ -975,10 +1112,10 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            if (layout == null)
+            if (_instance.layout == null)
                 return true;
 
-            layout.Invalidate();
+            _instance.layout.Invalidate();
 
             return true;
         }

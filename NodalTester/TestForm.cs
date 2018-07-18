@@ -30,8 +30,7 @@ namespace NodalTester
             ManagerCompanion comp = new ManagerCompanion();
             manager = new NodesManager(comp);
 
-            NodalDirector.RegisterManager(manager);
-            NodalDirector.RegisterLayout(tK_NodalEditorUCtrl1.Layout);
+            NodalDirector.Get(manager, tK_NodalEditorUCtrl1.Layout);
 
             manager.AvailableCompound = new Compound();
 
@@ -134,6 +133,30 @@ namespace NodalTester
         private void nodalExecuteBT_Click(object sender, EventArgs e)
         {
             NodalDirector.Evaluate(scriptEditorTB.Text);
+        }
+
+        private void undoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(NodalDirector.CanUndo())
+            {
+                NodalDirector.Undo();
+            }
+            else
+            {
+                NodalDirector.Error("Nothing to undo !");
+            }
+        }
+
+        private void redoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (NodalDirector.CanRedo())
+            {
+                NodalDirector.Redo();
+            }
+            else
+            {
+                NodalDirector.Error("Nothing to redo !");
+            }
         }
     }
 }
