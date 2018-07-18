@@ -60,6 +60,7 @@ namespace NodalTester
 
             CustomNode tetNode = new CustomNode();
             tetNode.Copy(node, true);
+            tetNode.AllowAddPorts = true;
             tetNode.NativeName = tetNode.Name = "tetNode";
 
             CustomNode otherNode = new CustomNode();
