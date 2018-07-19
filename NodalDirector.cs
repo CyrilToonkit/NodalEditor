@@ -642,9 +642,6 @@ namespace TK.NodalEditor
                 newNodeIn.Connect(newPortIn.Index, newNodeOut, newPortOut.Index, "", out error, linkToDisconnect[0]);
             }
 
-
-
-
             if (error.Length != 0)
             {
                 Error(nom_fct + "\n" + "Cannot connect");

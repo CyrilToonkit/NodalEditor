@@ -28,9 +28,10 @@ namespace TK.NodalEditor.NodesLayout
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NodesLayout));
             this.FakePanel = new System.Windows.Forms.Panel();
-            this.nodeMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+            this.nodeMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.enterCompoundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.explodeCompoundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
@@ -83,21 +84,21 @@ namespace TK.NodalEditor.NodesLayout
             this.outputsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.placeHoldersToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.parametersToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.linkMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+            this.linkMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.disconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.portsMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+            this.portsMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.hideAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.customPortMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+            this.customPortMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.deletePortToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolTip1 = new System.Windows.Forms.ToolTip();
-            this.rootMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.rootMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pasteRenamedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.customToolTip = new TK.GraphComponents.CustomToolTip();
-            this.portLookUpEdit = new TK.NodalEditor.nodeLookUpEditNoTab();
-            this.nodeLookUpEdit = new TK.NodalEditor.nodeLookUpEditNoTab();
+            this.portLookUpEdit = new TK.NodalEditor.nodeLookUpEditNoTab(this.components);
+            this.nodeLookUpEdit = new TK.NodalEditor.nodeLookUpEditNoTab(this.components);
             this.nodeMenuStrip.SuspendLayout();
             this.linkMenuStrip.SuspendLayout();
             this.portsMenuStrip.SuspendLayout();
@@ -612,11 +613,11 @@ namespace TK.NodalEditor.NodesLayout
             // portLookUpEdit
             // 
             this.portLookUpEdit.EditValue = "";
-            this.portLookUpEdit.Location = new System.Drawing.Point(73, 279);
+            this.portLookUpEdit.Location = new System.Drawing.Point(90, 279);
             this.portLookUpEdit.Name = "portLookUpEdit";
             this.portLookUpEdit.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.portLookUpEdit.Size = new System.Drawing.Size(100, 20);
+            this.portLookUpEdit.Size = new System.Drawing.Size(255, 20);
             this.portLookUpEdit.TabIndex = 6;
             this.portLookUpEdit.Visible = false;
             this.portLookUpEdit.KeyUp += new System.Windows.Forms.KeyEventHandler(this.portLookUp_KeyUp);
@@ -630,7 +631,7 @@ namespace TK.NodalEditor.NodesLayout
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.nodeLookUpEdit.Properties.ImmediatePopup = true;
             this.nodeLookUpEdit.Properties.PopupSizeable = false;
-            this.nodeLookUpEdit.Size = new System.Drawing.Size(100, 20);
+            this.nodeLookUpEdit.Size = new System.Drawing.Size(255, 20);
             this.nodeLookUpEdit.TabIndex = 5;
             this.nodeLookUpEdit.TabStop = false;
             this.nodeLookUpEdit.Visible = false;
