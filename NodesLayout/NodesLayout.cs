@@ -1676,7 +1676,27 @@ namespace TK.NodalEditor.NodesLayout
         {
             if (e.KeyCode == Keys.Tab)
             {
-                if (CurConnection == -1)
+                if (CurConnection != -1 || detachLink != null)
+                {
+                    OnLinkLookup = true;
+                    LookupVisible = nodeLookUpEdit.Visible = false;
+                    //INIT DATA
+                    List<Node> Nodes = new List<Node>();
+                    List<string> NodesName = new List<string>();
+                    Nodes = Manager.Root.GetChildren(true);
+
+                    foreach(Node node in Nodes)
+                    {
+                        NodesName.Add(node.FullName);
+                    }
+
+                    nodeLookUpEdit.Properties.DataSource = NodesName;
+                    nodeLookUpEdit.Location = LookupLocation = LookupLinkLocation = PointToClient(Cursor.Position);
+                   
+                    LookupVisible = nodeLookUpEdit.Visible = true;
+                    nodeLookUpEdit.Focus();
+                }
+                else
                 {
                     LookupVisible = nodeLookUpEdit.Visible = false;
                     //INIT DATA
@@ -1689,27 +1709,6 @@ namespace TK.NodalEditor.NodesLayout
                     nodeLookUpEdit.Properties.DataSource = NodesName;
                     nodeLookUpEdit.Location = LookupLocation = PointToClient(Cursor.Position);
 
-                    LookupVisible = nodeLookUpEdit.Visible = true;
-                    nodeLookUpEdit.Focus();
-                }
-
-                if (CurConnection != -1 || detachLink != null)
-                {
-                    OnLinkLookup = true;
-                    LookupVisible = nodeLookUpEdit.Visible = false;
-                    //INIT DATA
-                    List<Node> Nodes = new List<Node>();
-                    List<string> NodesName = new List<string>();
-                    Nodes = Manager.Root.GetChildren(false);
-
-                    foreach(Node node in Nodes)
-                    {
-                        NodesName.Add(node.FullName);
-                    }
-
-                    nodeLookUpEdit.Properties.DataSource = NodesName;
-                    nodeLookUpEdit.Location = LookupLocation = LookupLinkLocation = PointToClient(Cursor.Position);
-                   
                     LookupVisible = nodeLookUpEdit.Visible = true;
                     nodeLookUpEdit.Focus();
                 }
@@ -4012,12 +4011,32 @@ namespace TK.NodalEditor.NodesLayout
             Invalidate();
         }
 
+        //public void SelectNodes(List<Node> list)
+        //{
+        //    Selection.Select(list);
+        //    Invalidate();
+        //    OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
+        //    OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
+        //}
+
         public void SelectNodes(List<Node> list)
         {
-            Selection.Select(list);
-            Invalidate();
-            OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
-            OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
+            //Selection.Select(list);
+            List<string> nodesName = new List<string>();
+
+            if (list.Count > 0)
+            {
+                foreach (Node Node in list)
+                {
+                    string nodeName = Node.FullName;
+                    nodesName.Add(nodeName);
+                }
+
+                NodalDirector.SelectNodes(nodesName);
+                Invalidate();
+                OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
+                OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
+            }
         }
 
         // Ports contextMenu
@@ -4515,7 +4534,6 @@ namespace TK.NodalEditor.NodesLayout
                     NodesLayout_MouseUp(this, new MouseEventArgs(MouseButtons.Left, 1, LookupLocation.X, LookupLocation.Y, 0));
                     this.Focus();
                 }
-                
             }
             Invalidate();
         }

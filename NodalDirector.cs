@@ -109,6 +109,7 @@ namespace TK.NodalEditor
 
         #endregion
 
+        //-----------------------------------------------ACTIVE COMMANDS INTERNALS------------------------------------------------------
         #region Active commands internals
 
         /// <summary>
@@ -152,8 +153,157 @@ namespace TK.NodalEditor
             _instance.manager.Companion.EndProcess();
         }
 
-        #endregion
+        /// <summary>
+        /// Connect a link (that was removed) given its instance
+        /// </summary>
+        /// <param name="Link">Link to (re)connect</param>
+        /// <param name="inMode"></param>
+        internal void _Connect(Link inLink, string inMode)
+        {
+            string error = string.Empty;
+            Link connectedLink = inLink.Target.Owner.Connect(inLink.Target.Index, inLink.Source.Owner, inLink.Source.Index, inMode, out error, inLink);
 
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
+        }
+
+        /// <summary>
+        /// Disconnect a link given its instance
+        /// </summary>
+        /// <param name="disconnected">Link to be disconnected</param>
+        internal void _Disconnect(Link disconnected)
+        {
+            _instance.manager.CurCompound.UnConnect(disconnected);
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
+        }
+
+        internal void _ReConnect(Node inNode, Node outNode, int inPort, int outPort, Link inLink, string inMode)
+        {
+            string error = string.Empty;
+            _instance.manager.CurCompound.UnConnect(inLink);
+            inNode.Connect(inPort, outNode, outPort, inMode, out error, inLink);
+
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
+        }
+
+        internal void _CopyLink(Node inNode, int inPort, Node outNode, int outPort, Link inLink, string inMode)
+        {
+            string error = string.Empty;
+            Link copyLink = (Link)Activator.CreateInstance(inLink.GetType(), new object[0]);
+            copyLink.Copy(inLink);
+            inNode.Connect(inPort, outNode, outPort, inMode, out error, copyLink);
+
+
+            if (_instance.layout == null)
+            return;
+
+            _instance.layout.Invalidate();
+        }
+
+        internal void _DisconnectAll(Node inNode)
+        {
+            //if (inNode is Compound)
+            //{
+            //    //If this is a compound, remove all links towards external rigs
+            //    Compound curComp = inNode as Compound;
+
+            //    List<Link> ToRemove;
+
+            //    if (inputs)
+            //    {
+            //        ToRemove = inNode.InDependencies;
+
+            //        foreach (Link Dep in ToRemove)
+            //        {
+            //            if (!Dep.Source.Owner.IsIn(curComp))
+            //            {
+            //                Dep.Delete();
+            //            }
+            //        }
+            //    }
+
+            //    if (outputs)
+            //    {
+            //        ToRemove = inNode.OutDependencies;
+
+            //        foreach (Link Dep in ToRemove)
+            //        {
+            //            if (!Dep.Target.Owner.IsIn(curComp))
+            //            {
+            //                Dep.Delete();
+            //            }
+            //        }
+            //    }
+            //}
+            //else //If this is a node, simply remove all links
+            //{
+                List<Link> ToRemove = new List<Link>();
+
+                ToRemove.AddRange(inNode.InDependencies);
+                ToRemove.AddRange(inNode.OutDependencies);
+
+                _instance.history.BeginCompoundDo();
+                foreach (Link Dep in ToRemove)
+                    {
+                        _instance.history.Do(new DisconnectMemento(Dep));
+                    }
+                //}
+                _instance.history.EndCompoundDo();
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
+        }
+
+        internal void _Parent(Node inNode, Compound inParent)
+        {
+            if (inNode.Parent != null && inNode.Parent != inParent)
+            {
+                _instance.manager.MoveNodes(new List<Node> { inNode }, inParent);
+            }
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.RefreshPorts();
+            _instance.layout.Selection.Selection.Clear();
+            _instance.layout.ChangeFocus(true);
+
+            _instance.layout.Invalidate();
+        }
+
+        internal void _UnParent(Node inNode)
+        {
+            if (inNode.Parent != null && inNode.Parent.Parent != null)
+            {
+                _instance.manager.MoveNodes(new List<Node> { inNode }, inNode.Parent.Parent);
+            }
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.RefreshPorts();
+            _instance.layout.Selection.Selection.Clear();
+            _instance.layout.ChangeFocus(true);
+
+            _instance.layout.Invalidate();
+        }
+
+
+        #endregion
+        //------------------------------------------------------------------------------------------------------------------------------
         #region Logging
 
         /// <summary>
@@ -434,6 +584,7 @@ namespace TK.NodalEditor
                     foreach (Link link in linkToDisconnect)
                     {
                         _instance.manager.CurCompound.UnConnect(link);
+                        _instance.history.Do(new DisconnectMemento(link));
                     }
                 }
                 else
@@ -503,7 +654,8 @@ namespace TK.NodalEditor
 
             string error=string.Empty;
 
-            nodeIn.Connect(portIn.Index, nodeOut, portOut.Index, inMode, out error, nodeIn.Companion.Manager.Preferences.CheckCycles);
+            Link connected = nodeIn.Connect(portIn.Index, nodeOut, portOut.Index, inMode, out error, nodeIn.Companion.Manager.Preferences.CheckCycles);
+            _instance.history.Do(new ConnectMemento(connected, inMode));
 
             if (error.Length != 0)
             {
@@ -640,6 +792,11 @@ namespace TK.NodalEditor
             if (linkToDisconnect.Count != 0)
             {
                 newNodeIn.Connect(newPortIn.Index, newNodeOut, newPortOut.Index, "", out error, linkToDisconnect[0]);
+              
+                _instance.history.Do(new ReconnectMemento(inNodeName, outNodeName, inPortName, outPortName, linkToDisconnect[0], ""));
+                
+
+                //_instance.history.Do(new Reconnect2Memento(inNodeName, outNodeName, inPortName, outPortName, linkToDisconnect[0], ""));
             }
 
             if (error.Length != 0)
@@ -751,6 +908,7 @@ namespace TK.NodalEditor
             {
                 copyLink.Copy(linkToConnect[0]);
                 newNodeIn.Connect(newPortIn.Index, newNodeOut, newPortOut.Index, "", out error, copyLink);
+                _instance.history.Do(new CopyLinkMemento(inNodeName, outNodeName, inPortName, outPortName, copyLink, ""));
             }
             else
             {
@@ -792,7 +950,54 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            _instance.manager.CurCompound.UnConnectAll(nodeIn);
+            _instance.history.BeginCompoundDo();
+            if (nodeIn is Compound)
+            {
+                //If this is a compound, remove all links towards external rigs
+                Compound curComp = nodeIn as Compound;
+
+                List<Link> ToRemove;
+
+                    ToRemove = nodeIn.InDependencies;
+
+                    foreach (Link Dep in ToRemove)
+                    {
+                        if (!Dep.Source.Owner.IsIn(curComp))
+                        {
+                            _instance.history.Do(new DisconnectMemento(Dep));
+                            _instance.manager.CurCompound.UnConnect(Dep);
+                        }
+                    }
+
+
+                    ToRemove = nodeIn.OutDependencies;
+
+                    foreach (Link Dep in ToRemove)
+                    {
+                        if (!Dep.Target.Owner.IsIn(curComp))
+                        {
+                            _instance.history.Do(new DisconnectMemento(Dep));
+                            _instance.manager.CurCompound.UnConnect(Dep);
+                        }
+                    }
+                
+            }
+            else //If this is a node, simply remove all links
+            {
+                List<Link> ToRemove = new List<Link>();
+
+                ToRemove.AddRange(nodeIn.InDependencies);
+                ToRemove.AddRange(nodeIn.OutDependencies);
+
+               
+                foreach (Link Dep in ToRemove)
+                {
+                    _instance.history.Do(new DisconnectMemento(Dep));
+                    _instance.manager.CurCompound.UnConnect(Dep);
+                }
+            }
+            _instance.history.EndCompoundDo();
+            //_instance.manager.CurCompound.UnConnectAll(nodeIn);
 
 
             if (_instance.layout == null)
@@ -826,8 +1031,41 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            _instance.manager.CurCompound.UnConnectInputs(nodeIn);
-        
+
+            //_instance.manager.CurCompound.UnConnectInputs(nodeIn);
+            _instance.history.BeginCompoundDo();
+            if (nodeIn is Compound)
+            {
+                //If this is a compound, remove all links towards external rigs
+                Compound curComp = nodeIn as Compound;
+
+                List<Link> ToRemove;
+
+                ToRemove = nodeIn.InDependencies;
+
+                foreach (Link Dep in ToRemove)
+                {
+                    if (!Dep.Source.Owner.IsIn(curComp))
+                    {
+                        _instance.history.Do(new DisconnectMemento(Dep));
+                        _instance.manager.CurCompound.UnConnect(Dep);
+                    }
+                }
+            }
+            else //If this is a node, simply remove all links
+            {
+                List<Link> ToRemove = new List<Link>();
+
+                ToRemove.AddRange(nodeIn.InDependencies);
+                
+                foreach (Link Dep in ToRemove)
+                {
+                    _instance.history.Do(new DisconnectMemento(Dep));
+                    _instance.manager.CurCompound.UnConnect(Dep);
+                }
+            }
+            _instance.history.EndCompoundDo();
+
             if (_instance.layout == null)
                 return true;
 
@@ -859,7 +1097,45 @@ namespace TK.NodalEditor
                 return false;
             }
 
-            _instance.manager.CurCompound.UnConnectOutputs(nodeIn);
+            //_instance.manager.CurCompound.UnConnectOutputs(nodeIn);
+
+            _instance.history.BeginCompoundDo();
+            if (nodeIn is Compound)
+            {
+                //If this is a compound, remove all links towards external rigs
+                Compound curComp = nodeIn as Compound;
+
+                List<Link> ToRemove;
+
+
+                    ToRemove = nodeIn.OutDependencies;
+
+                    foreach (Link Dep in ToRemove)
+                    {
+                        if (!Dep.Target.Owner.IsIn(curComp))
+                        {
+                            _instance.history.Do(new DisconnectMemento(Dep));
+                            _instance.manager.CurCompound.UnConnect(Dep);
+                        }
+                    }
+                
+            }
+            else //If this is a node, simply remove all links
+            {
+                List<Link> ToRemove = new List<Link>();
+
+                ToRemove.AddRange(nodeIn.OutDependencies);
+                
+
+                foreach (Link Dep in ToRemove)
+                {
+                    _instance.history.Do(new DisconnectMemento(Dep));
+                    _instance.manager.CurCompound.UnConnect(Dep);
+                }
+            }
+            _instance.history.EndCompoundDo();
+
+
 
             if (_instance.layout == null)
                 return true;
@@ -901,6 +1177,7 @@ namespace TK.NodalEditor
 
             if (nodeIn.Parent != null && nodeIn.Parent != newParent)
             {
+                _instance.history.Do(new ParentMemento(nodeIn.FullName, newParent.FullName));
                 _instance.manager.MoveNodes(new List<Node> { nodeIn }, newParent);
             }
             else
@@ -942,6 +1219,7 @@ namespace TK.NodalEditor
 
             if (nodeIn.Parent != null && nodeIn.Parent.Parent != null)
             {
+                _instance.history.Do(new UnParentMemento(nodeIn.FullName, nodeIn.Parent.FullName));
                 _instance.manager.MoveNodes(new List<Node> { nodeIn }, nodeIn.Parent.Parent);
             }
             else
@@ -1151,6 +1429,98 @@ namespace TK.NodalEditor
                 msg = rslt.Output == null ? "null" : rslt.Output.ToString();
                 Log("Returns : " + msg);
             }
+        }
+
+        public static bool SelectNodes(List<string> inNodeNames)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("SelectNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodeNames, "\",\""));
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            List<string> nodesNameError = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (inNodeNames.Count > 0)
+            {
+                foreach (string NodeName in inNodeNames)
+                {
+                    Node Node = _instance.manager.GetNode(NodeName);
+
+                    if (Node == null) //Node with NodeName do not exist
+                    {
+                        nodesNameError.Add(NodeName);
+                    }
+                    else //Node with NodeName exist
+                    {
+                        nodes.Add(Node);
+                    }
+                }
+                if (nodesNameError.Count > 0)
+                {
+                    Error(nom_fct + "\n" + string.Format("Not all node names exist in List<string>{{\"{0}\"}} ", TypesHelper.Join(inNodeNames, "\",\"")));
+                    return false;
+                }
+                else //All the nodes name exist
+                {
+                    _instance.layout.Selection.Select(nodes);
+                }
+            }
+            else
+            {
+                Error(nom_fct + "\n" + "Cannot Select the Nodes, List<string> is empty");
+                return false;
+            }
+
+            if (_instance.layout == null)
+                return true;
+
+            _instance.layout.Invalidate();
+
+            return true;
+        }
+
+        public static string Duplicate(string inNodeName)
+        {
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("Duplicate(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                Error(nom_fct + "\n" + string.Format("Input Node \"{0}\" is null", inNodeName));
+                return null;
+            }
+
+            Node newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)((nodeIn.UIx) / _instance.layout.LayoutSize), (int)((nodeIn.UIy) / _instance.layout.LayoutSize));
+
+            if(newNode == null)
+            {
+                Error(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
+                return null;
+            }
+
+            if (_instance.layout == null)
+                return null;
+
+            _instance.layout.ChangeFocus(true);
+            _instance.layout.Invalidate();
+
+            return newNode.FullName;
+        }
+
+        public static bool Explode(string inCompoundName)
+        {
+            return true;
         }
     }
 }
