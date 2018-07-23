@@ -28,8 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TestForm));
-            this.tgvImageList = new System.Windows.Forms.ImageList();
+            this.tgvImageList = new System.Windows.Forms.ImageList(this.components);
             this.tK_NodalEditorUCtrl1 = new TK.NodalEditor.NodesLayout.TK_NodalEditorUCtrl();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,6 +47,8 @@
             this.scriptEditorTB = new System.Windows.Forms.TextBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.nodalExecuteBT = new System.Windows.Forms.ToolStripButton();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+            this.sillyMethodToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.collapsibleGroup1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -107,7 +110,9 @@
             // 
             this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.undoToolStripMenuItem,
-            this.redoToolStripMenuItem});
+            this.redoToolStripMenuItem,
+            this.toolStripMenuItem2,
+            this.sillyMethodToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             resources.ApplyResources(this.editToolStripMenuItem, "editToolStripMenuItem");
             // 
@@ -167,6 +172,17 @@
             this.nodalExecuteBT.Name = "nodalExecuteBT";
             this.nodalExecuteBT.Click += new System.EventHandler(this.nodalExecuteBT_Click);
             // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            resources.ApplyResources(this.toolStripMenuItem2, "toolStripMenuItem2");
+            // 
+            // sillyMethodToolStripMenuItem
+            // 
+            this.sillyMethodToolStripMenuItem.Name = "sillyMethodToolStripMenuItem";
+            resources.ApplyResources(this.sillyMethodToolStripMenuItem, "sillyMethodToolStripMenuItem");
+            this.sillyMethodToolStripMenuItem.Click += new System.EventHandler(this.sillyMethodToolStripMenuItem_Click);
+            // 
             // TestForm
             // 
             resources.ApplyResources(this, "$this");
@@ -206,5 +222,7 @@
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem undoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem redoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem sillyMethodToolStripMenuItem;
     }
 }

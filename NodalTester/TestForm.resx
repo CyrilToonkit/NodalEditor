@@ -132,7 +132,7 @@
     <value>0, 24</value>
   </data>
   <data name="tK_NodalEditorUCtrl1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>719, 423</value>
+    <value>719, 422</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="tK_NodalEditorUCtrl1.TabIndex" type="System.Int32, mscorlib">
@@ -154,22 +154,22 @@
     <value>138, 17</value>
   </metadata>
   <data name="newToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>112, 22</value>
   </data>
   <data name="newToolStripMenuItem.Text" xml:space="preserve">
     <value>New</value>
   </data>
   <data name="toolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>177, 6</value>
+    <value>109, 6</value>
   </data>
   <data name="saveToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>112, 22</value>
   </data>
   <data name="saveToolStripMenuItem.Text" xml:space="preserve">
     <value>Save...</value>
   </data>
   <data name="openToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>112, 22</value>
   </data>
   <data name="openToolStripMenuItem.Text" xml:space="preserve">
     <value>Open...</value>
@@ -184,7 +184,7 @@
     <value>Ctrl+Z</value>
   </data>
   <data name="undoToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>144, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="undoToolStripMenuItem.Text" xml:space="preserve">
     <value>Undo</value>
@@ -193,10 +193,19 @@
     <value>Ctrl+Y</value>
   </data>
   <data name="redoToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>144, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="redoToolStripMenuItem.Text" xml:space="preserve">
     <value>Redo</value>
+  </data>
+  <data name="toolStripMenuItem2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>177, 6</value>
+  </data>
+  <data name="sillyMethodToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>180, 22</value>
+  </data>
+  <data name="sillyMethodToolStripMenuItem.Text" xml:space="preserve">
+    <value>SillyMethod</value>
   </data>
   <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>39, 20</value>
@@ -250,7 +259,7 @@
     <value>True</value>
   </data>
   <data name="scriptEditorTB.Size" type="System.Drawing.Size, System.Drawing">
-    <value>713, 63</value>
+    <value>713, 64</value>
   </data>
   <data name="scriptEditorTB.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -326,10 +335,10 @@
     <value>Bottom</value>
   </data>
   <data name="collapsibleGroup1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 447</value>
+    <value>0, 446</value>
   </data>
   <data name="collapsibleGroup1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>719, 107</value>
+    <value>719, 108</value>
   </data>
   <data name="collapsibleGroup1.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -432,6 +441,18 @@
   </data>
   <data name="&gt;&gt;nodalExecuteBT.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripMenuItem2.Name" xml:space="preserve">
+    <value>toolStripMenuItem2</value>
+  </data>
+  <data name="&gt;&gt;toolStripMenuItem2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;sillyMethodToolStripMenuItem.Name" xml:space="preserve">
+    <value>sillyMethodToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;sillyMethodToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>TestForm</value>

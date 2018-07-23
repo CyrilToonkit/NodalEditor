@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using TK.NodalEditor;
-using TK.BaseLib;
-using TK.BaseLib.CustomData;
 using TK.NodalEditor.NodesLayout;
 using System.IO;
+using System.Threading;
 
 namespace NodalTester
 {
@@ -25,7 +18,7 @@ namespace NodalTester
         public TestForm()
         {
             InitializeComponent();
-            
+
             NodesSerializer.GetInstance().AddSerializer(NodeElement.Node, "CustomNode", typeof(CustomNode));
             ManagerCompanion comp = new ManagerCompanion();
             manager = new NodesManager(comp);
@@ -133,7 +126,16 @@ namespace NodalTester
 
         private void nodalExecuteBT_Click(object sender, EventArgs e)
         {
-            NodalDirector.Evaluate(scriptEditorTB.Text);
+            try
+            {
+                NodalDirector.Get().verbose = false;
+                NodalDirector.Evaluate(scriptEditorTB.Text);
+            }
+            catch
+            {
+                NodalDirector.Get().verbose = true;
+                throw;
+            }
         }
 
         private void undoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -158,6 +160,11 @@ namespace NodalTester
             {
                 NodalDirector.Error("Nothing to redo !");
             }
+        }
+
+        private void sillyMethodToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            NodalDirector.AddNode("testNode", "Coco", 10, 10);
         }
     }
 }
