@@ -151,49 +151,63 @@ namespace TK.NodalEditor.NodesLayout
 
         internal void Modify(Node Node, Keys ModifierKeys)
         {
+            List<string> nodesName = new List<string> { Node.FullName };
             switch (ModifierKeys)
             {
                 case Keys.Shift:
-                    AddToSelection(Node);
+                    //AddToSelection(Node);
+                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Add);
                     break;
 
                 case Keys.Control:
-                    ToggleSelection(Node);
+                    //ToggleSelection(Node);
+                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Toggle);
                     break;
                 case Keys.Alt:
-                    RemoveFromSelection(Node);
+                    //RemoveFromSelection(Node);
+                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.RemoveFrom);
                     break;
                 default:
-                    Select(Node);
+                    //Select(Node);
+                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
                     break;
             }
         }
 
         internal void Modify(List<Node> Nodes, Keys ModifierKeys)
         {
+            List<string> nodesName = new List<string>();
+            foreach (Node node in Nodes)
+            {
+                nodesName.Add(node.FullName);
+            }
             switch (ModifierKeys)
             {
                 case Keys.Shift:
-                    foreach (Node Node in Nodes)
-                    {
-                        AddToSelection(Node);
-                    }
+                    //foreach (Node Node in Nodes)
+                    //{
+                    //    AddToSelection(Node);
+                    //}
+                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Add);
                     break;
 
                 case Keys.Control:
-                    foreach (Node Node in Nodes)
-                    {
-                        ToggleSelection(Node);
-                    }
+                    //foreach (Node Node in Nodes)
+                    //{
+                    //    ToggleSelection(Node);
+                    //}
+                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Toggle);
                     break;
                 case Keys.Alt:
-                    foreach (Node Node in Nodes)
-                    {
-                        RemoveFromSelection(Node);
-                    }
+                    //foreach (Node Node in Nodes)
+                    //{
+                    //    RemoveFromSelection(Node);
+                    //}
+                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.RemoveFrom);
                     break;
                 default:
-                    Select(Nodes);
+                    //Select(Nodes);
+                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
                     break;
             }
         }

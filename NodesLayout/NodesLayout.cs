@@ -30,6 +30,11 @@ namespace TK.NodalEditor.NodesLayout
         None, Input, Output
     }
 
+    public enum TypeOfSelection
+    {
+        Default, Add, Toggle, RemoveFrom
+    }
+
     public partial class NodesLayout : UserControl
     {
         float[] DASHPATTERN = new float[] { 4f, 2f };
@@ -1963,13 +1968,7 @@ namespace TK.NodalEditor.NodesLayout
         public void ShowNodeContextMenu(Node inNode, Point point)
         {
             nodeMenuStrip.Tag = inNode;
-            //List<Node> selectedNodes = Selection.GetSelectedNodes();
-            List<string> selectedNodesName = NodalDirector.GetSelectedNodes();
-            List<Node> selectedNodes = new List<Node>();
-            foreach (string Name in selectedNodesName)
-            {
-                selectedNodes.Add(Manager.GetNode(Name));
-            }
+            List<Node> selectedNodes = Selection.GetSelectedNodes();
             
             foreach (ToolStripItem item in nodeMenuStrip.Items)
             {
@@ -2161,17 +2160,22 @@ namespace TK.NodalEditor.NodesLayout
                         HasMoved = true;
                         if (!ConnectedNode.Selected)
                         {
+                            List<string> nodesName = new List<string> { ConnectedNode.FullName };
+
                             switch (ModifierKeys)
                             {
                                 case Keys.Shift:
-                                    Selection.AddToSelection(ConnectedNode);
+                                    //Selection.AddToSelection(ConnectedNode);
+                                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Add);
                                     break;
 
                                 case Keys.Control:
-                                    Selection.ToggleSelection(ConnectedNode);
+                                    //Selection.ToggleSelection(ConnectedNode);
+                                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Toggle);
                                     break;
                                 default:
-                                    Selection.Select(ConnectedNode);
+                                    //Selection.Select(ConnectedNode);
+                                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
                                     break;
                             }
 
@@ -2181,14 +2185,7 @@ namespace TK.NodalEditor.NodesLayout
 
                     if (HasMoved)
                     {
-                        //List<Node> selNodes = Selection.GetSelectedNodes();
-
-                        List<string> selectedNodesName = NodalDirector.GetSelectedNodes();
-                        List<Node> selNodes = new List<Node>();
-                        foreach (string Name in selectedNodesName)
-                        {
-                            selNodes.Add(Manager.GetNode(Name));
-                        }
+                        List<Node> selNodes = Selection.GetSelectedNodes();
 
                         foreach (Node NUctrl in selNodes)
                         {
@@ -3689,16 +3686,14 @@ namespace TK.NodalEditor.NodesLayout
 
         private void disconnectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<Node> nodes = Selection.GetSelectedNodes();
-            List<string> nodesName = new List<string>();
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
 
-            if (nodes.Count > 0)
+            if (nodesName.Count > 0)
             {
-                foreach (Node Node in nodes)
+                foreach (string Name in nodesName)
                 {
-                    bool test = NodalDirector.DisconnectAll(Node.FullName);
+                    bool test = NodalDirector.DisconnectAll(Name);
                 }
-
             }
             else
             {
@@ -3709,45 +3704,39 @@ namespace TK.NodalEditor.NodesLayout
 
         private void disconnectInputsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<Node> nodes = Selection.GetSelectedNodes();
-            List<string> nodesName = new List<string>();
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
 
-            if (nodes.Count > 0)
+            if (nodesName.Count > 0)
             {
-                foreach (Node Node in nodes)
+                foreach (string Name in nodesName)
                 {
-                    NodalDirector.DisconnectInputs(Node.FullName);
+                    NodalDirector.DisconnectInputs(Name);
                 }
-                
             }
             else
             {
                 Node Node = nodeMenuStrip.Tag as Node;
                 NodalDirector.DisconnectInputs(Node.FullName);
             }
-
             Invalidate();
         }
 
         private void disconnectOutputsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<Node> nodes = Selection.GetSelectedNodes();
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
 
-
-            if (nodes.Count > 0)
+            if (nodesName.Count > 0)
             {
-                foreach (Node Node in nodes)
+                foreach (string Name in nodesName)
                 {
-                    NodalDirector.DisconnectOutputs(Node.FullName);
+                    NodalDirector.DisconnectOutputs(Name);
                 }
-                
             }
             else
             {
                 Node Node = nodeMenuStrip.Tag as Node;
                 NodalDirector.DisconnectOutputs(Node.FullName);
             }
-
             Invalidate();
 
         }
@@ -3824,21 +3813,26 @@ namespace TK.NodalEditor.NodesLayout
 
         private void explodeCompoundToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<Node> selNodes = Selection.GetSelectedNodes();
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
             List<Node> affectedNodes = new List<Node>();
-            foreach (Node selNode in selNodes)
+            List<string> affectedNodesName = new List<string>();
+
+            foreach (string Name in nodesName)
             {
-                Compound Node = selNode as Compound;
+                Compound Node = Manager.GetNode(Name) as Compound;
                 if (Node != null)
                 {
                     affectedNodes.AddRange(Node.Nodes);
-                    //Manager.ExplodeCompound(Node);
+                    foreach(Node node in Node.Nodes)
+                    {
+                        affectedNodesName.Add(node.FullName);
+                    }
                     NodalDirector.Explode(Node.FullName);
 
                 }
             }
-
-            Selection.Select(affectedNodes);
+            //Selection.Select(affectedNodes);
+            NodalDirector.SelectNodes(affectedNodesName, TypeOfSelection.Default);
             ChangeFocus(false);
         }
 
@@ -3914,13 +3908,12 @@ namespace TK.NodalEditor.NodesLayout
 
         private void exposeAllPortsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<Node> selNodes = Selection.GetSelectedNodes();
-
-            if (selNodes.Count > 0)
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
+            if (nodesName.Count > 0)
             {
-                foreach (Node node in selNodes)
+                foreach (string Name in nodesName)
                 {
-                    NodalDirector.ExposeAllPorts(node.FullName);
+                    NodalDirector.ExposeAllPorts(Name);
                 }
 
                 ChangeFocus(false);
@@ -3963,13 +3956,12 @@ namespace TK.NodalEditor.NodesLayout
 
         private void hideAllPortsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<Node> selNodes = Selection.GetSelectedNodes();
-
-            if (selNodes.Count > 0)
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
+            if (nodesName.Count > 0)
             {
-                foreach (Node node in selNodes)
+                foreach (string Name in nodesName)
                 {
-                    NodalDirector.HideAllPorts(node.FullName);
+                    NodalDirector.HideAllPorts(Name);
                 }
 
                 ChangeFocus(false);
@@ -4084,7 +4076,7 @@ namespace TK.NodalEditor.NodesLayout
                     nodesName.Add(nodeName);
                 }
 
-                NodalDirector.SelectNodes(nodesName);
+                NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
                 Invalidate();
                 OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
                 OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
@@ -4220,16 +4212,10 @@ namespace TK.NodalEditor.NodesLayout
 
         public void DeleteSelected()
         {
-            List<Node> selNodes = Selection.GetSelectedNodes();
-            if (selNodes.Count > 0)
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
+            if (nodesName.Count > 0)
             {
-                List<string> nodesNames = new List<string>();
-                foreach (Node node in selNodes)
-                {
-                    nodesNames.Add(node.FullName);
-                }
-
-                NodalDirector.DeleteNodes(nodesNames);
+                NodalDirector.DeleteNodes(nodesName);
             }
             else
             {
@@ -4337,25 +4323,11 @@ namespace TK.NodalEditor.NodesLayout
 
         public void UnParentNode()
         {
-            List<Node> nodes = Selection.GetSelectedNodes();
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
 
-            //if (nodes.Count > 0)
-            //{
-            //    foreach (Node Node in nodes)
-            //    {
-            //        NodalDirector.UnParentNode(Node.FullName);
-            //    }
-            //}
-
-            
-            if (nodes.Count > 0)
+            if (nodesName.Count > 0)
             {
-                List<string> NodeNames = new List<string>();
-                foreach (Node Node in nodes)
-                {
-                    NodeNames.Add(Node.FullName);
-                }
-                NodalDirector.UnParentNodes(NodeNames);
+                NodalDirector.UnParentNodes(nodesName);
             }
 
             RefreshPorts();

@@ -110,7 +110,6 @@ namespace TK.NodalEditor
 
         #endregion
 
-        //-----------------------------------------------ACTIVE COMMANDS INTERNALS------------------------------------------------------
         #region Active commands internals
 
         /// <summary>
@@ -397,6 +396,8 @@ namespace TK.NodalEditor
 
         #endregion
 
+        #region Action Commands
+ 
         /// <summary>
         /// Add Node with inNodeName (and a compound inCompoundName) and location X, Y
         /// </summary>
@@ -553,6 +554,48 @@ namespace TK.NodalEditor
             _instance.manager.Companion.EndProcess();
 
             return true;
+        }
+
+        /// <summary>
+        /// Duplicate a node
+        /// </summary>
+        /// <param name="inNodeName">Name of node we want to duplicate</param>
+        /// <returns></returns>
+        public static string Duplicate(string inNodeName)
+        {
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("Duplicate(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                Error(nom_fct + "\n" + string.Format("Input Node \"{0}\" is null", inNodeName));
+                return null;
+            }
+
+            Node newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)((nodeIn.UIx) + (30 * _instance.layout.LayoutSize) / _instance.layout.LayoutSize), (int)((nodeIn.UIy) - (10 * _instance.layout.LayoutSize) / _instance.layout.LayoutSize));
+
+            if (newNode == null)
+            {
+                Error(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
+                return null;
+            }
+
+            if (_instance.layout == null)
+                return null;
+
+
+            _instance.layout.ChangeFocus(true);
+            _instance.layout.Frame(_instance.manager.CurCompound.Nodes);
+            _instance.layout.Invalidate();
+
+            return newNode.FullName;
         }
 
         /// <summary>
@@ -1595,7 +1638,39 @@ namespace TK.NodalEditor
             return true;
         }
 
-        public static bool SelectNodes(List<string> inNodeNames)
+        #endregion
+
+        #region Getters Commands
+
+        /// <summary>
+        /// Getting selected nodes
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GetSelectedNodes()
+        {
+            List<string> NodeNames = new List<string>();
+
+            foreach (NodeBase elem in _instance.layout.Selection.Selection)
+            {
+                if (elem is Node)
+                {
+                    NodeNames.Add((elem as Node).FullName);
+                }
+            }
+
+            return NodeNames;
+        }
+
+        #endregion
+
+        #region UI Commands
+
+        /// <summary>
+        /// Select a List of nodes
+        /// </summary>
+        /// <param name="inNodeNames">List of the node Names</param>
+        /// <returns></returns>
+        public static bool SelectNodes(List<string> inNodeNames, NodesLayout.TypeOfSelection inType)
         {
             if (_instance.manager == null)
                 return false;
@@ -1630,7 +1705,30 @@ namespace TK.NodalEditor
                 }
                 else //All the nodes name exist
                 {
-                    _instance.layout.Selection.Select(nodes);
+                    switch (inType)
+                    {
+                        case NodesLayout.TypeOfSelection.Default:
+                            _instance.layout.Selection.Select(nodes);
+                            break;
+                        case NodesLayout.TypeOfSelection.Add:
+                            foreach(Node node in nodes)
+                            {
+                                _instance.layout.Selection.AddToSelection(node);
+                            }
+                            break;
+                        case NodesLayout.TypeOfSelection.Toggle:
+                            foreach (Node node in nodes)
+                            {
+                                _instance.layout.Selection.ToggleSelection(node);
+                            }
+                            break;
+                        case NodesLayout.TypeOfSelection.RemoveFrom:
+                            foreach (Node node in nodes)
+                            {
+                                _instance.layout.Selection.RemoveFromSelection(node);
+                            }
+                            break;
+                    }   
                 }
             }
             else
@@ -1647,57 +1745,62 @@ namespace TK.NodalEditor
             return true;
         }
 
-        public static List<string> GetSelectedNodes()
-        {
-            List<string> NodeNames = new List<string>();
-
-            foreach (NodeBase elem in _instance.layout.Selection.Selection)
-            {
-                if (elem is Node)
-                {
-                    NodeNames.Add((elem as Node).FullName);
-                }
-            }
-
-            return NodeNames;
-        }
-
-        public static string Duplicate(string inNodeName)
+        /// <summary>
+        /// Open a file
+        /// </summary>
+        /// <param name="inPath">Path where the file is. Be carefull to double the "\" in "\\"</param>
+        /// <param name="inForce"></param>
+        /// <returns></returns>
+        public static bool Open(string inPath, bool inForce)
         {
             if (_instance.manager == null)
-                return null;
+                return false;
 
-            string nom_fct = string.Format("Duplicate(\"{0}\");", inNodeName);
+            string nom_fct = string.Format("Open(\"{0}\", {1});", inPath, inForce);
 
             if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = _instance.manager.GetNode(inNodeName);
+            Compound openedComp = null;
 
-            if (nodeIn == null)
+            using (FileStream fileStream = new FileStream(inPath, FileMode.Open))
             {
-                Error(nom_fct + "\n" + string.Format("Input Node \"{0}\" is null", inNodeName));
-                return null;
+                openedComp = NodesSerializer.GetInstance().CompoundSerializers["Default"].Deserialize(fileStream) as Compound;
             }
 
-            Node newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)((nodeIn.UIx) + (30 * _instance.layout.LayoutSize) / _instance.layout.LayoutSize), (int)((nodeIn.UIy) - (10 * _instance.layout.LayoutSize) / _instance.layout.LayoutSize));
-
-            if (newNode == null)
+            if (openedComp != null)
             {
-                Error(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
-                return null;
+                _instance.manager.NewLayout(openedComp, false);
+                _instance.layout.ChangeFocus(true);
+                _instance.layout.Frame(_instance.manager.CurCompound.Nodes);
+                _instance.layout.Invalidate();
             }
 
-            if (_instance.layout == null)
-                return null;
+            return true;
+        }
 
-            
-            _instance.layout.ChangeFocus(true);
-            _instance.layout.Frame(_instance.manager.CurCompound.Nodes);
+        /// <summary>
+        /// New layout
+        /// </summary>
+        /// <param name="inForce"></param>
+        /// <returns></returns>
+        public static bool New(bool inForce)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("New({0});", inForce);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            _instance.manager.NewLayout();
             _instance.layout.Invalidate();
 
-            return newNode.FullName;
+            return true;
         }
+
+        #endregion
 
         /// <summary>
         /// Executes arbitrary C# code at runtime
@@ -1736,61 +1839,5 @@ namespace TK.NodalEditor
                 Log("Returns : " + msg);
             }
         }
-
-        /// <summary>
-        /// Open a file
-        /// </summary>
-        /// <param name="inPath">Path where the file is. Be carefull to double the "\" in "\\"</param>
-        /// <param name="inForce"></param>
-        /// <returns></returns>
-        public static bool Open(string inPath, bool inForce)
-        {
-                if (_instance.manager == null)
-                    return false;
-
-                string nom_fct = string.Format("Open(\"{0}\", {1});", inPath, inForce);
-
-                if (_instance.verbose)
-                    Log(nom_fct);
-
-                Compound openedComp = null;
-
-                using (FileStream fileStream = new FileStream(inPath, FileMode.Open))
-                {
-                    openedComp = NodesSerializer.GetInstance().CompoundSerializers["Default"].Deserialize(fileStream) as Compound;
-                }
-
-                if (openedComp != null)
-                {
-                    _instance.manager.NewLayout(openedComp, false);
-                    _instance.layout.ChangeFocus(true);
-                    _instance.layout.Frame(_instance.manager.CurCompound.Nodes);
-                    _instance.layout.Invalidate();
-                }
-
-            return true;
-        }
-
-        /// <summary>
-        /// New layout
-        /// </summary>
-        /// <param name="inForce"></param>
-        /// <returns></returns>
-        public static bool New(bool inForce)
-        {
-            if (_instance.manager == null)
-                return false;
-
-            string nom_fct = string.Format("New({0});", inForce);
-
-            if (_instance.verbose)
-                Log(nom_fct);
-
-            _instance.manager.NewLayout();
-            _instance.layout.Invalidate();
-
-            return true;
-        }
-
     }
 }
