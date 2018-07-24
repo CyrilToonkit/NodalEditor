@@ -77,30 +77,40 @@ namespace NodalTester
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Manager.NewLayout();
-            NodalLayout.Invalidate();
+            NodalDirector.New(true);
         }
+
+        //private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    DialogResult rslt = openFileDialog1.ShowDialog();
+
+        //    if (rslt == DialogResult.OK)
+        //    {
+        //        Compound openedComp = null;
+
+        //        using (FileStream fileStream = new FileStream(openFileDialog1.FileName, FileMode.Open))
+        //        {
+        //            openedComp = NodesSerializer.GetInstance().CompoundSerializers["Default"].Deserialize(fileStream) as Compound;
+        //        }
+
+        //        if (openedComp != null)
+        //        {
+        //            Manager.NewLayout(openedComp, false);
+        //            NodalLayout.ChangeFocus(true);
+        //            NodalLayout.Frame(Manager.CurCompound.Nodes);
+        //            NodalLayout.Invalidate();
+        //        }
+        //    }
+        //}
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DialogResult rslt = openFileDialog1.ShowDialog();
 
-            if(rslt == DialogResult.OK)
+            if (rslt == DialogResult.OK)
             {
-                Compound openedComp = null;
-
-                using (FileStream fileStream = new FileStream(openFileDialog1.FileName, FileMode.Open))
-                {
-                    openedComp = NodesSerializer.GetInstance().CompoundSerializers["Default"].Deserialize(fileStream) as Compound;
-                }
-
-                if (openedComp != null)
-                {
-                    Manager.NewLayout(openedComp, false);
-                    NodalLayout.ChangeFocus(true);
-                    NodalLayout.Frame(Manager.CurCompound.Nodes);
-                    NodalLayout.Invalidate(); 
-                }
+                string inPath = openFileDialog1.FileName;
+                NodalDirector.Open(inPath, true);
             }
         }
 

@@ -208,7 +208,7 @@ namespace TK.NodalEditor
         {
             Node Node = target.manager.GetNode(NodeName);
             Compound Compound = target.manager.GetNode(CompoundName) as Compound;
-            IMemento<NodalDirector> inverse = new ParentMemento(NodeName, CompoundName);
+            IMemento<NodalDirector> inverse = new UnParentMemento(NodeName, CompoundName);
             target._UnParent(Node);
             return inverse;
         }
@@ -226,8 +226,46 @@ namespace TK.NodalEditor
         {
             Node Node = target.manager.GetNode(NodeName);
             Compound Compound = target.manager.GetNode(CompoundName) as Compound;
-            IMemento<NodalDirector> inverse = new UnParentMemento(NodeName, CompoundName);
+            IMemento<NodalDirector> inverse = new ParentMemento(NodeName, CompoundName);
             target._Parent(Node, Compound);
+            return inverse;
+        }
+    }
+
+    class CreateCompoundMemento : NodalEditorMemento
+    {
+        private List<Node> Nodes;
+        private Compound Compound;
+        public CreateCompoundMemento(List<Node> inNodes, Compound inCompound)
+        {
+            Nodes = inNodes;
+            Compound = inCompound;
+        }
+
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            //Compound Compound = target.manager.GetNode(Nodes[0].Parent.FullName) as Compound;
+
+            IMemento<NodalDirector> inverse = new ExplodeMemento(Compound, Nodes);
+            target._Explode(Compound);
+            return inverse;
+        }
+    }
+
+    class ExplodeMemento : NodalEditorMemento
+    {
+        private Compound Compound;
+        private List<Node> Nodes;
+        public ExplodeMemento(Compound inCompound, List<Node> inNodes)
+        {
+            this.Compound = inCompound;
+            this.Nodes = inNodes;
+        }
+
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            IMemento<NodalDirector> inverse = new CreateCompoundMemento(Nodes, Compound);
+            target._CreateCompound(Nodes, Compound);
             return inverse;
         }
     }
