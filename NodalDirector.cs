@@ -3,8 +3,6 @@ using MiniLogger;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
 using TK.BaseLib;
 using TK.BaseLib.CSCodeEval;
 using TK.GraphComponents.Dialogs;
@@ -430,11 +428,10 @@ namespace TK.NodalEditor
 
             if (inCompound == null)
             {
-                Error(nom_fct + "\n" + string.Format("Compound \"{0}\" is null", inCompoundName));
-                return null;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Compound \"{0}\" does not exists!", inCompoundName));
             }
 
-            bool isTrue = false; ;
+            bool isTrue = false;
             foreach (Node Node in _instance.manager.AvailableNodes)
             {
                 if(inNodeName == Node.FullName)
@@ -454,8 +451,7 @@ namespace TK.NodalEditor
 
             if(isTrue == false)
             {
-                Error(nom_fct + "\n" + string.Format("Cannot Add Node with name \"{0}\"", inNodeName));
-                return null;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("No Node named \"{0}\"!", inNodeName));
             }
 
 
@@ -1810,7 +1806,7 @@ namespace TK.NodalEditor
         {
             Dictionary<string, object> args = new Dictionary<string, object>();
 
-            InterpreterResult rslt = CSInterpreter.Eval(inCode.Replace("cmds.", "NodalDirector."), string.Empty, "TK_BaseLib.dll;TK_GraphComponents.dll;TK_NodalEditor.dll;", "using System.Collections.Generic;using TK.BaseLib;using TK.BaseLib.CGModel;using TK.GraphComponents.Dialogs;using TK.NodalEditor;using TK.NodalEditor.NodesLayout;", args);
+            InterpreterResult rslt = CSInterpreter.Eval(inCode.Replace("cmds.", "NodalDirector."), string.Empty, "TK_BaseLib.dll;TK_GraphComponents.dll;TK_NodalEditor.dll;", "using System.Collections.Generic;using TK.BaseLib;using TK.BaseLib.CGModel;using TK.GraphComponents.Dialogs;using TK.NodalEditor;using TK.NodalEditor.NodesLayout;", args, false);
             string msg = "No info !";
 
             if (!rslt.Success)
@@ -1823,7 +1819,7 @@ namespace TK.NodalEditor
 
                     foreach (CompilerError error in errors)
                     {
-                        msg += error.ErrorText + "\n";
+                        msg += string.Format("Error in \"Interpreter\" line {0} > {1}\n{2}\n", error.Line - 9, inCode.Split("\n".ToCharArray())[error.Line - 10], error.ErrorText);
                     }
                 }
                 else
