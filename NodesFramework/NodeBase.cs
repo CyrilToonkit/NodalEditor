@@ -54,7 +54,7 @@ namespace TK.NodalEditor
                 //UpdateName(GetFullName(value));
                 UpdateName(value);
                 */
-
+                
                 UpdateName(GetFullName(value));
                 _name = value;
             }

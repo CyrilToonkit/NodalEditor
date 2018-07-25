@@ -255,4 +255,24 @@ namespace TK.NodalEditor
             return inverse;
         }
     }
+
+    class RenameMemento : NodalEditorMemento
+    {
+        private string newName;
+        private Node Node;
+        private string nodeName;
+
+        public RenameMemento(Node inNode, string inNewName)
+        {
+            this.newName = inNewName;
+            this.Node = inNode;
+            this.nodeName = inNode.FullName;
+        }
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            IMemento<NodalDirector> inverse = new RenameMemento(Node, nodeName);
+            target._Rename(Node, nodeName);
+            return inverse;
+        }
+    }
 }

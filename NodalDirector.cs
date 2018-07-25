@@ -204,6 +204,15 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
+        /// <summary>
+        /// Copy a link given its instance
+        /// </summary>
+        /// <param name="inNode"></param>
+        /// <param name="inPort"></param>
+        /// <param name="outNode"></param>
+        /// <param name="outPort"></param>
+        /// <param name="inLink"></param>
+        /// <param name="inMode"></param>
         internal void _CopyLink(Node inNode, int inPort, Node outNode, int outPort, Link inLink, string inMode)
         {
             string error = string.Empty;
@@ -252,6 +261,11 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
+        /// <summary>
+        /// Create a compound
+        /// </summary>
+        /// <param name="inNodes">List of nodes</param>
+        /// <param name="inCompound">Compound</param>
         internal void _CreateCompound(List<Node> inNodes, Compound inCompound)
         {
             Compound compound = _instance.manager.AddCompound(inNodes, inCompound);
@@ -269,6 +283,10 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
+        /// <summary>
+        /// Explode a compound given its instance
+        /// </summary>
+        /// <param name="inCompound">Compound we want to explode</param>
         internal void _Explode(Compound inCompound)
         {
             if(inCompound == _instance.manager.CurCompound)
@@ -285,9 +303,23 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
+        /// <summary>
+        /// Rename a node given its instance
+        /// </summary>
+        /// <param name="inNode">Node we want to rename</param>
+        /// <param name="inNewName">New name for inNode</param>
+        internal void _Rename(Node inNode, string inNewName)
+        {
+            inNode.FullName = _instance.manager.SetNodeUniqueName(inNewName, inNode);
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
+        }
 
         #endregion
-        //------------------------------------------------------------------------------------------------------------------------------
+        
         #region Logging
 
         /// <summary>
@@ -827,8 +859,8 @@ namespace TK.NodalEditor
         /// <param name="newoutNodeName">Name of output node where we want to reconnect the link</param>
         /// <param name="newoutPortName">Name of output port where we want to reconnect the link</param>
         /// <returns></returns>
-        public static bool CopyLink(string inNodeName, string inPortName, string outNodeName, string outPortName,
-                                string newinNodeName, string newinPortName, string newoutNodeName, string newoutPortName)
+        public static bool CopyLink(    string inNodeName, string inPortName, string outNodeName, string outPortName,
+                                        string newinNodeName, string newinPortName, string newoutNodeName, string newoutPortName)
         {
             if (_instance.manager == null)
                 return false;
@@ -1534,6 +1566,49 @@ namespace TK.NodalEditor
             return true;
         }
 
+        /// <summary>
+        /// Rename a node or compound
+        /// </summary>
+        /// <param name="inName">Node or Compound Name</param>
+        /// <param name="inNewName">New name</param>
+        /// <returns></returns>
+        public static string Rename(string inName, string inNewName)
+        {
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("Rename(\"{0}\", \"{1}\");", inNewName, inNewName);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inName);
+            
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inName));
+            }
+
+            string UniqueName = _instance.manager.SetNodeUniqueName(inNewName, nodeIn);
+            _instance.history.Do(new RenameMemento(nodeIn, inNewName));
+
+            if (UniqueName == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Rename Input Node \"{0}\" with \"{1}\"", inName, inNewName));
+            }
+            else
+            {
+                nodeIn.FullName = UniqueName;
+            }
+
+            if (_instance.layout == null)
+                return null;
+
+            _instance.layout.Invalidate();
+
+            return nodeIn.FullName;
+        }
+
         #endregion
 
         #region Getters Commands
@@ -1564,7 +1639,40 @@ namespace TK.NodalEditor
         /// <summary>
         /// Select a List of nodes
         /// </summary>
-        /// <param name="inNodeNames">List of the node Names</param>
+        /// <param name="inNodeNames">List of node Names</param>
+        /// <returns></returns>
+        public static bool SelectNodes(List<string> inNodeNames)
+        {
+            return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Default);
+        }
+
+        /// <summary>
+        /// Select a List of nodes with selection Types
+        /// </summary>
+        /// <param name="inNodeNames">List of node Names</param>
+        /// <param name="inType">Type of Selection : "Default", "Add", "Toggle", "RemoveFrom"</param>
+        /// <returns></returns>
+        public static bool SelectNodes(List<string> inNodeNames, string inType)
+        {
+            if(inType == "Default")
+                return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Default);
+            else if (inType == "Add")
+                return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Add);
+            else if (inType == "Toggle")
+                return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Toggle);
+            else if (inType == "RemoveFrom")
+                return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.RemoveFrom);
+            else
+            {
+                throw new NodalDirectorException("Cannot Select the Nodes, Wrong inType");
+            }
+        }
+
+        /// <summary>
+        /// Select a List of nodes with selection Types
+        /// </summary>
+        /// <param name="inNodeNames">List of node Names</param>
+        /// <param name="inType">Type of Selection : Default, Add, Toggle, RemoveFrom</param>
         /// <returns></returns>
         public static bool SelectNodes(List<string> inNodeNames, NodesLayout.TypeOfSelection inType)
         {
@@ -1606,7 +1714,7 @@ namespace TK.NodalEditor
                             _instance.layout.Selection.Select(nodes);
                             break;
                         case NodesLayout.TypeOfSelection.Add:
-                            foreach(Node node in nodes)
+                            foreach (Node node in nodes)
                             {
                                 _instance.layout.Selection.AddToSelection(node);
                             }
@@ -1623,12 +1731,12 @@ namespace TK.NodalEditor
                                 _instance.layout.Selection.RemoveFromSelection(node);
                             }
                             break;
-                    }   
+                    }
                 }
             }
             else
             {
-                throw new NodalDirectorException(nom_fct + "\n" + "Cannot Select the Nodes, List<string> has no element!");
+                _instance.layout.Selection.DeselectAll();
             }
 
             if (_instance.layout == null)
@@ -1637,6 +1745,16 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             return true;
+        }
+
+        /// <summary>
+        /// Open a file
+        /// </summary>
+        /// <param name="inPath">Path where the file is. Be carefull to double the "\" in "\\"</param>
+        /// <returns></returns>
+        public static bool Open(string inPath)
+        {
+            return Open(inPath, true);
         }
 
         /// <summary>
@@ -1671,6 +1789,15 @@ namespace TK.NodalEditor
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// New layout
+        /// </summary>
+        /// <returns></returns>
+        public static bool New()
+        {
+            return New(true);
         }
 
         /// <summary>
