@@ -180,20 +180,6 @@ namespace TK.NodalEditor
         }
     }
 
-    class DisconnectAllMemento : NodalEditorMemento
-    {
-        private Node Node;
-        public DisconnectAllMemento(Node inNode)
-        {
-            this.Node = inNode;
-        }
-        public override IMemento<NodalDirector> Restore(NodalDirector target)
-        {
-            IMemento<NodalDirector> inverse = new DisconnectAllMemento(Node);
-            target._DisconnectAll(Node);
-            return inverse;
-        }
-    }
     class ParentMemento : NodalEditorMemento
     {
         private string NodeName;

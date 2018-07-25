@@ -182,6 +182,15 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
+        /// <summary>
+        /// ReConnect a link (that was disconnected) given its instance
+        /// </summary>
+        /// <param name="inNode"></param>
+        /// <param name="outNode"></param>
+        /// <param name="inPort"></param>
+        /// <param name="outPort"></param>
+        /// <param name="inLink"></param>
+        /// <param name="inMode"></param>
         internal void _ReConnect(Node inNode, Node outNode, int inPort, int outPort, Link inLink, string inMode)
         {
             string error = string.Empty;
@@ -205,62 +214,6 @@ namespace TK.NodalEditor
 
             if (_instance.layout == null)
             return;
-
-            _instance.layout.Invalidate();
-        }
-
-        internal void _DisconnectAll(Node inNode)
-        {
-            //if (inNode is Compound)
-            //{
-            //    //If this is a compound, remove all links towards external rigs
-            //    Compound curComp = inNode as Compound;
-
-            //    List<Link> ToRemove;
-
-            //    if (inputs)
-            //    {
-            //        ToRemove = inNode.InDependencies;
-
-            //        foreach (Link Dep in ToRemove)
-            //        {
-            //            if (!Dep.Source.Owner.IsIn(curComp))
-            //            {
-            //                Dep.Delete();
-            //            }
-            //        }
-            //    }
-
-            //    if (outputs)
-            //    {
-            //        ToRemove = inNode.OutDependencies;
-
-            //        foreach (Link Dep in ToRemove)
-            //        {
-            //            if (!Dep.Target.Owner.IsIn(curComp))
-            //            {
-            //                Dep.Delete();
-            //            }
-            //        }
-            //    }
-            //}
-            //else //If this is a node, simply remove all links
-            //{
-                List<Link> ToRemove = new List<Link>();
-
-                ToRemove.AddRange(inNode.InDependencies);
-                ToRemove.AddRange(inNode.OutDependencies);
-
-                _instance.history.BeginCompoundDo();
-                foreach (Link Dep in ToRemove)
-                    {
-                        _instance.history.Do(new DisconnectMemento(Dep));
-                    }
-                //}
-                _instance.history.EndCompoundDo();
-
-            if (_instance.layout == null)
-                return;
 
             _instance.layout.Invalidate();
         }
@@ -488,7 +441,7 @@ namespace TK.NodalEditor
                 if (node == null)
                 {
                     string message = string.Format("Node '{0}' does not exists !", nodeName);
-                    Error(message);
+                    throw new NodalDirectorException(message);
                 }
                 else
                 {
@@ -532,7 +485,7 @@ namespace TK.NodalEditor
             if (node == null)
             {
                 string message = string.Format("Node '{0}' does not exists !", inNodeName);
-                Error(message);
+                throw new NodalDirectorException(message);
             }
             else
             {
@@ -571,16 +524,14 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("Input Node \"{0}\" is null", inNodeName));
-                return null;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Input Node \"{0}\" does not exists!", inNodeName));
             }
 
             Node newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)((nodeIn.UIx) + (30 * _instance.layout.LayoutSize) / _instance.layout.LayoutSize), (int)((nodeIn.UIy) - (10 * _instance.layout.LayoutSize) / _instance.layout.LayoutSize));
 
             if (newNode == null)
             {
-                Error(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
-                return null;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
             }
 
             if (_instance.layout == null)
@@ -617,13 +568,11 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
             if (nodeOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Node \"{0}\" is null", outNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
             }
 
             Port portIn = nodeIn.GetPort(inPortName, false);
@@ -631,13 +580,11 @@ namespace TK.NodalEditor
 
             if (portIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{0}\" is null", inNodeName, inPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{0}\" does not exist!", inNodeName, inPortName));
             }
             if (portOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{0}\" is null", outNodeName, outPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{0}\" does not exist!", outNodeName, outPortName));
             }
 
             if (portIn.Dependencies.Count != 0)
@@ -662,12 +609,12 @@ namespace TK.NodalEditor
                 }
                 else
                 {
-                    Error(nom_fct + "\n" + string.Format("No link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\"", inPortName, inNodeName, outPortName, outNodeName));
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\" does not exist!", inPortName, inNodeName, outPortName, outNodeName));
                 }
             }
             else
             {
-                Error(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
             }
 
             if (_instance.layout == null)
@@ -702,13 +649,11 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
             if (nodeOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Node \"{0}\" is null", outNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
             }
 
             Port portOut = nodeOut.GetPort(outPortName, true);
@@ -716,13 +661,11 @@ namespace TK.NodalEditor
 
             if (portIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" is null", inNodeName, inPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
             }
             if (portOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" is null", outNodeName, outPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
             }
 
             string error=string.Empty;
@@ -732,7 +675,7 @@ namespace TK.NodalEditor
 
             if (error.Length != 0)
             {
-                Error(nom_fct + "\n" + "Cannot connect");
+                throw new NodalDirectorException(nom_fct + "\n" + "Cannot connect");
             }
   
             if (_instance.layout == null)
@@ -786,23 +729,19 @@ namespace TK.NodalEditor
 
             if (nodeInLocked == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
             if (nodeOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Node \"{0}\" is null", outNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
             }
             if (newNodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", newinNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", newinNodeName));
             }
             if (newNodeOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Node \"{0}\" is null", newoutNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", newoutNodeName));
             }
 
             Port portOut = nodeOut.GetPort(outPortName, true);
@@ -812,23 +751,19 @@ namespace TK.NodalEditor
 
             if (portInLocked == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" is null", inNodeName, inPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
             }
             if (portOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" is null", outNodeName, outPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
             }
             if (newPortIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" is null", newinNodeName, newinPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", newinNodeName, newinPortName));
             }
             if (newPortOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" is null", newoutNodeName, newoutPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", newoutNodeName, newoutPortName));
             }
 
             string error = string.Empty;
@@ -854,27 +789,23 @@ namespace TK.NodalEditor
                 }
                 else
                 {
-                    Error(nom_fct + "\n" + string.Format("No link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\"", inPortName, inNodeName, outPortName, outNodeName));
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\" does not exist!", inPortName, inNodeName, outPortName, outNodeName));
                 }
             }
             else
             {
-                Error(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
             }
 
             if (linkToDisconnect.Count != 0)
             {
                 newNodeIn.Connect(newPortIn.Index, newNodeOut, newPortOut.Index, "", out error, linkToDisconnect[0]);
-              
                 _instance.history.Do(new ReconnectMemento(inNodeName, outNodeName, inPortName, outPortName, linkToDisconnect[0], ""));
-                
-
-                //_instance.history.Do(new Reconnect2Memento(inNodeName, outNodeName, inPortName, outPortName, linkToDisconnect[0], ""));
             }
 
             if (error.Length != 0)
             {
-                Error(nom_fct + "\n" + "Cannot connect");
+                throw new NodalDirectorException(nom_fct + "\n" + "Cannot ReConnect");
             }
 
             if (_instance.layout == null)
@@ -914,23 +845,19 @@ namespace TK.NodalEditor
 
             if (nodeInLocked == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
             if (nodeOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Node \"{0}\" is null", outNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
             }
             if (newNodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", newinNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", newinNodeName));
             }
             if (newNodeOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Node \"{0}\" is null", newoutNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", newoutNodeName));
             }
 
             Port portOut = nodeOut.GetPort(outPortName, true);
@@ -940,23 +867,19 @@ namespace TK.NodalEditor
 
             if (portInLocked == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" is null", inNodeName, inPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
             }
             if (portOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" is null", outNodeName, outPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
             }
             if (newPortIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" is null", newinNodeName, newinPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", newinNodeName, newinPortName));
             }
             if (newPortOut == null)
             {
-                Error(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" is null", newoutNodeName, newoutPortName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", newoutNodeName, newoutPortName));
             }
 
             string error = string.Empty;
@@ -973,7 +896,7 @@ namespace TK.NodalEditor
             }
             else
             {
-                Error(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
             }
 
             Link copyLink = (Link)Activator.CreateInstance(linkToConnect[0].GetType(), new object[0]);
@@ -985,12 +908,12 @@ namespace TK.NodalEditor
             }
             else
             {
-                Error(nom_fct + "\n" + string.Format("No link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\"", inPortName, inNodeName, outPortName, outNodeName));
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\" does not exist!", inPortName, inNodeName, outPortName, outNodeName));
             }
 
             if (error.Length != 0)
             {
-                Error(nom_fct + "\n" + "Cannot connect");
+                throw new NodalDirectorException(nom_fct + "\n" + "Cannot Copy the link");
             }
 
             if (_instance.layout == null)
@@ -1019,8 +942,7 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
             _instance.history.BeginCompoundDo();
@@ -1053,8 +975,6 @@ namespace TK.NodalEditor
                             _instance.manager.CurCompound.UnConnect(Dep);
                         }
                     }
-                    
-                
             }
             else //If this is a node, simply remove all links
             {
@@ -1101,8 +1021,7 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
 
@@ -1167,8 +1086,7 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
             //_instance.manager.CurCompound.UnConnectOutputs(nodeIn);
@@ -1209,8 +1127,6 @@ namespace TK.NodalEditor
             }
             _instance.history.EndCompoundDo();
 
-
-
             if (_instance.layout == null)
                 return true;
 
@@ -1230,7 +1146,7 @@ namespace TK.NodalEditor
             if (_instance.manager == null)
                 return false;
 
-            string nom_fct = string.Format("Parent(\"{0}\", \"{1}\");", inNodeName, parentCompound);
+            string nom_fct = string.Format("ParentNode(\"{0}\", \"{1}\");", inNodeName, parentCompound);
 
             if (_instance.verbose)
                 Log(nom_fct);
@@ -1240,13 +1156,11 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
             if (newParent == null)
             {
-                Error(nom_fct + "\n" + string.Format("parent Compound \"{0}\" is null", parentCompound));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("parent Compound \"{0}\" does not exist!", parentCompound));
             }
 
 
@@ -1257,8 +1171,7 @@ namespace TK.NodalEditor
             }
             else
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" and parent Compound \"{1}\" cannot be parented", inNodeName, parentCompound));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" and parent Compound \"{1}\" cannot be parented", inNodeName, parentCompound));
             }
 
             if (_instance.layout == null)
@@ -1281,7 +1194,7 @@ namespace TK.NodalEditor
                 return false;
 
 
-            string nom_fct = string.Format("Parent(\"{0}\", \"{1}\");", TypesHelper.Join(inNodeNames, "\",\""), parentCompound);
+            string nom_fct = string.Format("ParentNodes(\"{0}\", \"{1}\");", TypesHelper.Join(inNodeNames, "\",\""), parentCompound);
 
             if (_instance.verbose)
                 Log(nom_fct);
@@ -1292,8 +1205,7 @@ namespace TK.NodalEditor
 
             if (newParent == null)
             {
-                Error(nom_fct + "\n" + string.Format("parent Compound \"{0}\" is null", parentCompound));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("parent Compound \"{0}\" does not exist!", parentCompound));
             }
 
             foreach (string NodeName in inNodeNames)
@@ -1301,8 +1213,7 @@ namespace TK.NodalEditor
                 Node nodeIn = _instance.manager.GetNode(NodeName);
                 if (nodeIn == null)
                 {
-                    Error(nom_fct + "\n" + string.Format("Input Node \"{0}\" is null", NodeName));
-                    return false;
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Input Node \"{0}\" does not exist!", NodeName));
                 }
                 else
                 {
@@ -1312,8 +1223,7 @@ namespace TK.NodalEditor
                     }
                     else
                     {
-                        Error(nom_fct + "\n" + string.Format("Input Node \"{0}\" and parent Compound \"{1}\" cannot be parented", nodeIn.FullName, parentCompound));
-                        return false;
+                        throw new NodalDirectorException(nom_fct + "\n" + string.Format("Input Node \"{0}\" and parent Compound \"{1}\" cannot be parented", nodeIn.FullName, parentCompound));
                     }
                     
                 }
@@ -1345,7 +1255,7 @@ namespace TK.NodalEditor
             if (_instance.manager == null)
                 return false;
 
-            string nom_fct = string.Format("UnParent(\"{0}\");", inNodeName);
+            string nom_fct = string.Format("UnParentNode(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
                 Log(nom_fct);
@@ -1354,8 +1264,7 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
             _instance.history.BeginCompoundDo();
             if (nodeIn.Parent != null && nodeIn.Parent.Parent != null)
@@ -1365,8 +1274,7 @@ namespace TK.NodalEditor
             }
             else
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" does not have parent", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not have parent", inNodeName));
             }
             _instance.history.EndCompoundDo();
             if (_instance.layout == null)
@@ -1387,7 +1295,7 @@ namespace TK.NodalEditor
             if (_instance.manager == null)
                 return false;
 
-            string nom_fct = string.Format("Parent(\"{0}\");", TypesHelper.Join(inNodeNames, "\",\""));
+            string nom_fct = string.Format("UnParentNodes(\"{0}\");", TypesHelper.Join(inNodeNames, "\",\""));
 
             if (_instance.verbose)
                 Log(nom_fct);
@@ -1400,8 +1308,7 @@ namespace TK.NodalEditor
 
                 if (nodeIn == null)
                 {
-                    Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", NodeName));
-                    return false;
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", NodeName));
                 }
                 else
                 {
@@ -1411,8 +1318,7 @@ namespace TK.NodalEditor
                     }
                     else
                     {
-                        Error(nom_fct + "\n" + string.Format("Input Node \"{0}\" does not have parent", NodeName));
-                        return false;
+                        throw new NodalDirectorException(nom_fct + "\n" + string.Format("Input Node \"{0}\" does not have parent", NodeName));
                     }
                 }
             }
@@ -1452,8 +1358,7 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
             foreach (Port port in nodeIn.Inputs)
@@ -1495,8 +1400,7 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                Error(nom_fct + "\n" + string.Format("input Node \"{0}\" is null", inNodeName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
             foreach (Port port in nodeIn.Inputs)
@@ -1563,8 +1467,7 @@ namespace TK.NodalEditor
                 }
                 if (nodesNameError.Count > 0)
                 {
-                    Error(nom_fct + string.Format("Not all node names in \"{0}\" exist", inNodeNames));
-                    return false;
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Not all node names in \"{0}\" exist", inNodeNames));
                 }
                 else //All the nodes name exist
                 {
@@ -1579,8 +1482,7 @@ namespace TK.NodalEditor
             }
             else
             {
-                Error(nom_fct + string.Format("\"{0}\" is empty", inNodeNames));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + "Cannot Create Compound, List<string> has no element!");
             }
 
             if (_instance.layout == null)
@@ -1621,10 +1523,8 @@ namespace TK.NodalEditor
             }
             else
             {
-                Error(nom_fct + "\n" + string.Format("Compound \"{0}\" is null", inCompoundName));
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Compound \"{0}\" does not exist!", inCompoundName));
             }
-
 
             if (_instance.layout == null)
                 return false;
@@ -1696,8 +1596,7 @@ namespace TK.NodalEditor
                 }
                 if (nodesNameError.Count > 0)
                 {
-                    Error(nom_fct + "\n" + string.Format("Not all node names exist in List<string>{{\"{0}\"}} ", TypesHelper.Join(inNodeNames, "\",\"")));
-                    return false;
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Not all node names exist in List<string>{{\"{0}\"}} ", TypesHelper.Join(inNodeNames, "\",\"")));
                 }
                 else //All the nodes name exist
                 {
@@ -1729,8 +1628,7 @@ namespace TK.NodalEditor
             }
             else
             {
-                Error(nom_fct + "\n" + "Cannot Select the Nodes, List<string> is empty");
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + "Cannot Select the Nodes, List<string> has no element!");
             }
 
             if (_instance.layout == null)
