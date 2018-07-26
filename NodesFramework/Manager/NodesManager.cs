@@ -1,4 +1,6 @@
-﻿using System;
+﻿using IronPython.Hosting;
+using Microsoft.Scripting.Hosting;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -35,6 +37,9 @@ namespace TK.NodalEditor
 
         }*/
 
+        ScriptEngine engine;
+        ScriptScope scope;
+
         /// <summary>
         /// Base constructor
         /// </summary>
@@ -47,6 +52,10 @@ namespace TK.NodalEditor
 
             //Add empty event handlers
             NodesChangedEvent += NodesManager_NodesChangedEvent;
+
+            //Start python interpreter
+            engine = Python.CreateEngine();
+            scope = engine.CreateScope();
         }
 
         private void NodesManager_NodesChangedEvent(object sender, NodesChangedEventArgs e)
@@ -1202,6 +1211,11 @@ namespace TK.NodalEditor
             branch.Add(Node);
 
             return branch;
+        }
+
+        internal void Execute(string inCode)
+        {
+            engine.Execute(inCode, scope);
         }
 
         /// <summary>

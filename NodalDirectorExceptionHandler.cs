@@ -34,7 +34,7 @@ namespace TK.NodalEditor
             {
                 string[] stacks = e.Exception.StackTrace.Split("\n".ToCharArray());
 
-                int line = 0;
+                int line = 10;
 
                 foreach (string stack in stacks)
                 {
@@ -46,7 +46,18 @@ namespace TK.NodalEditor
                     }
                 }
 
-                NodalDirector.Error(string.Format("in \"Interpreter\" line {0} > {1}\n{2}", line - 9, e.Exception.HelpLink.Split("\n".ToCharArray())[line - 10], e.Exception.Message));
+                string codeline = string.Empty;
+
+                if(e.Exception.HelpLink != null)
+                {
+                    string[] lines = e.Exception.HelpLink.Split("\n".ToCharArray());
+                    if (lines.Length > line - 10)
+                    {
+                        codeline = lines[line - 10];
+                    }
+                }
+
+                NodalDirector.Error(string.Format("in \"Interpreter\" line {0} > {1}\n{2}", line - 9, codeline, e.Exception.Message));
                 return;
             }
 
