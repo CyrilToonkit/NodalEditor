@@ -201,7 +201,7 @@ namespace TK.NodalEditor.NodesLayout
         CompoundPortPad Outputs;
         ToolStrip BreadCrumbs;
 
-        Size zeroSize = new Size(0,0);
+        Size zeroSize = new Size(0, 0);
 
         public SelectionManager Selection;
 
@@ -218,7 +218,7 @@ namespace TK.NodalEditor.NodesLayout
         // === Graphical Elements ==========================================================================
 
         Graphics graphics;
-        
+
         public Pen GridPen = new Pen(Color.LightGray);
         public Pen FramePen = new Pen(Color.Black);
         public Pen WhitePen = new Pen(Color.White);
@@ -284,7 +284,7 @@ namespace TK.NodalEditor.NodesLayout
 
         public int YLoc
         {
-            get 
+            get
             {
                 if (Parent == null)
                     return 0;
@@ -323,7 +323,7 @@ namespace TK.NodalEditor.NodesLayout
         Node hitNode = null;
         Node hoverNode = null;
         Port hoverPort = null;
-  
+
 
         //Lookupedit
         Point LookupLocation = new Point();
@@ -331,13 +331,18 @@ namespace TK.NodalEditor.NodesLayout
         bool LookupVisible = false;
         bool OnLinkLookup = false;
 
+        //Cutter Line
+        public GraphicsPath cutterPath = null;
+        public bool isCutted = false;
+        public bool isRectDrag = false;
+
         //Accessor for the rigs contextMenu
 
         public void SetShortCut(string itemName, string shortCut)
         {
             foreach (ToolStripItem item in nodeMenuStrip.Items)
             {
-                if (item is ToolStripMenuItem &&  item.Name == itemName)
+                if (item is ToolStripMenuItem && item.Name == itemName)
                 {
                     (item as ToolStripMenuItem).ShortcutKeyDisplayString = shortCut;
                 }
@@ -353,10 +358,10 @@ namespace TK.NodalEditor.NodesLayout
             set
             {
                 mLayoutSize = value;
-                PerformMyLayout(new Point(1,1));
+                PerformMyLayout(new Point(1, 1));
             }
         }
-        
+
         void contextMenuStrip1_Closed(object sender, ToolStripDropDownClosedEventArgs e)
         {
             Invalidate();
@@ -377,7 +382,7 @@ namespace TK.NodalEditor.NodesLayout
 
         protected override bool IsInputKey(Keys KeyData)
         {
-            if( KeyData == Keys.Tab)
+            if (KeyData == Keys.Tab)
             {
                 return true;
             }
@@ -388,7 +393,7 @@ namespace TK.NodalEditor.NodesLayout
         private void RigNodesLayout_MouseWheel(object sender, MouseEventArgs e)
         {
             if (OnLinkLookup == false)
-            { 
+            {
                 if (new Rectangle(new Point(-Location.X, -Location.Y), Size).Contains(e.Location))
                 {
                     double delta = (e.Delta / 1000.0);
@@ -417,7 +422,7 @@ namespace TK.NodalEditor.NodesLayout
         private void NodesLayout_MouseDown(object sender, MouseEventArgs e)
         {
             if (OnLinkLookup == false)
-            { 
+            {
                 if (IsInitialised)
                 {
                     hitNode = GetHitNode(e.Location);
@@ -435,13 +440,11 @@ namespace TK.NodalEditor.NodesLayout
 
                                 if (detachLink == null)
                                 {
-                                    //Rectangle selection with mouse left click
                                     if (!IsDragging)
                                     {
                                         overlay.SelectRectangle.Size = zeroSize;
                                         IsDragging = true;
                                     }
-
                                 }
                                 break;
 
@@ -666,8 +669,8 @@ namespace TK.NodalEditor.NodesLayout
 
         private void NodesLayout_MouseUp(object sender, MouseEventArgs e)
         {
-            if(OnLinkLookup == false)
-            { 
+            if (OnLinkLookup == false)
+            {
                 if (IsInitialised)
                 {
                     if (hitNode == null)
@@ -676,11 +679,30 @@ namespace TK.NodalEditor.NodesLayout
 
                         if (overlay.DragSelect)
                         {
-                            Selection.Select(overlay.SelectRectangle, LayoutSize, ModifierKeys);
+                            if (isCutted)
+                            {
+                                List<Link> linkToCut = new List<Link>();
+                                linkToCut = GetHitLink2(overlay.ConnectCutter[0], overlay.ConnectCutter[1]);
+                                overlay.ConnectCutter = null;
+                                if (linkToCut.Count != 0)
+                                {
+                                    foreach (Link link in linkToCut)
+                                    {
+                                        NodalDirector.Disconnect(link.Target.Owner.FullName, link.Target.FullName, link.Source.Owner.FullName, link.Source.FullName);
+                                        
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Selection.Select(overlay.SelectRectangle, LayoutSize, ModifierKeys);
+                                OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
+                                OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
+                            }
                             Invalidate();
-                            OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
-                            OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
                             overlay.DragSelect = false;
+                            isCutted = false;
+                            isRectDrag = false;
                         }
                         else
                         {
@@ -703,12 +725,6 @@ namespace TK.NodalEditor.NodesLayout
                                     //    ReconnectingLink(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, connectPort.FullName,
                                     //                    HitCtrl.FullName, depositPort.FullName, detachNode.FullName, connectPort.FullName, e.Location);
                                     //}
-
-
-
-
-
-
 
                                     Point TransPos = new Point(e.Location.X - (int)(HitCtrl.UIx * LayoutSize), e.Location.Y - (int)(HitCtrl.UIy * LayoutSize));
                                     int portIndex = GetPortClick(HitCtrl, TransPos.X, TransPos.Y);
@@ -974,8 +990,8 @@ namespace TK.NodalEditor.NodesLayout
                     ShiftVisibility = false;
                     //if (OnLinkLookup == false)
                     //{
-                        detachLink = null;
-                        reconnecting = Reconnecting.None;
+                    detachLink = null;
+                    reconnecting = Reconnecting.None;
                     //}
                 }
             }
@@ -983,8 +999,8 @@ namespace TK.NodalEditor.NodesLayout
 
         private void NodesLayout_MouseMove(object sender, MouseEventArgs e)
         {
-            if(OnLinkLookup == false)
-            { 
+            if (OnLinkLookup == false)
+            {
                 if (Preferences.ShowNodeTips)
                 {
                     Node potentialHover = GetHitNode(e.Location);
@@ -1066,13 +1082,24 @@ namespace TK.NodalEditor.NodesLayout
                             SuspendLayout();
 
                             overlay.DragSelect = true;
-
-                            overlay.SelectRectangle.Location = new Point(Math.Min(HitPoint.X, e.X), Math.Min(HitPoint.Y, e.Y));
-                            overlay.SelectRectangle.Width = e.X > HitPoint.X ? e.X - HitPoint.X : HitPoint.X - e.X;
-                            overlay.SelectRectangle.Height = e.Y > HitPoint.Y ? e.Y - HitPoint.Y : HitPoint.Y - e.Y;
-
+                            if ((Control.ModifierKeys == (Keys.Shift | Keys.Alt)) && isRectDrag == false)
+                            {
+                                isCutted = true;
+                                overlay.ConnectCutter = new Point[] { HitPoint, e.Location };
+                            }
+                            else
+                            {
+                                if (isCutted == false)
+                                {
+                                    isRectDrag = true;
+                                    overlay.SelectRectangle.Location = new Point(Math.Min(HitPoint.X, e.X), Math.Min(HitPoint.Y, e.Y));
+                                    overlay.SelectRectangle.Width = e.X > HitPoint.X ? e.X - HitPoint.X : HitPoint.X - e.X;
+                                    overlay.SelectRectangle.Height = e.Y > HitPoint.Y ? e.Y - HitPoint.Y : HitPoint.Y - e.Y;
+                                }
+                            }
                             Invalidate();
                             ResumeLayout();
+
                         }
                         else
                         {
@@ -1357,7 +1384,7 @@ namespace TK.NodalEditor.NodesLayout
                                                     foundPort = (TargetNode.Level(Manager.CurCompound) as Compound).GetPortFromNode(detachLink.Target);
                                                     if (foundPort != null)
                                                     {
-                                                        distance1 = e.Location.X - GetPortLocation(Manager.CurCompound, foundPort.Index + 1000).X; 
+                                                        distance1 = e.Location.X - GetPortLocation(Manager.CurCompound, foundPort.Index + 1000).X;
                                                         distance2 = GetPortLocation((TargetNode.Level(Manager.CurCompound) as Compound), foundPort.Index).X - e.Location.X;
 
                                                         if (distance2 <= distance1) //Detach the link Target
@@ -1503,7 +1530,7 @@ namespace TK.NodalEditor.NodesLayout
                                             if (detachLink.Target.Owner.IsIn(Manager.CurCompound)) //CASE 1 : Source and Target in Compound
                                             {
                                                 overlay.ConnectPen = GetPen(detachLink.Source.NodeElementType);
-                                                overlay.ConnectArrow = new Point[] { GetPortLocation(detachLink.Source.Owner, detachLink.Source.Index + 1000), e.Location };  
+                                                overlay.ConnectArrow = new Point[] { GetPortLocation(detachLink.Source.Owner, detachLink.Source.Index + 1000), e.Location };
                                             }
                                             else //CASE 2 : Source in Compound, Target outside
                                             {
@@ -1512,7 +1539,7 @@ namespace TK.NodalEditor.NodesLayout
                                                 {
                                                     overlay.ConnectPen = GetPen(detachLink.Source.NodeElementType);
                                                     overlay.ConnectArrow = new Point[] { GetPortLocation(detachLink.Source.Owner, detachLink.Source.Index + 1000), e.Location };
-                                                    
+
                                                 }
                                                 else
                                                 {
@@ -1665,7 +1692,7 @@ namespace TK.NodalEditor.NodesLayout
                 }
 
             }
-            
+
         }
 
         private void NodesLayout_KeyDown(object sender, KeyEventArgs e)
@@ -1690,14 +1717,14 @@ namespace TK.NodalEditor.NodesLayout
                     List<string> NodesName = new List<string>();
                     Nodes = Manager.Root.GetChildren(true);
 
-                    foreach(Node node in Nodes)
+                    foreach (Node node in Nodes)
                     {
                         NodesName.Add(node.FullName);
                     }
 
                     nodeLookUpEdit.Properties.DataSource = NodesName;
                     nodeLookUpEdit.Location = LookupLocation = LookupLinkLocation = PointToClient(Cursor.Position);
-                   
+
                     LookupVisible = nodeLookUpEdit.Visible = true;
                     nodeLookUpEdit.Focus();
                 }
@@ -1969,7 +1996,7 @@ namespace TK.NodalEditor.NodesLayout
         {
             nodeMenuStrip.Tag = inNode;
             List<Node> selectedNodes = Selection.GetSelectedNodes();
-            
+
             foreach (ToolStripItem item in nodeMenuStrip.Items)
             {
                 NodeContextTag tag = item.Tag as NodeContextTag;
@@ -2366,7 +2393,7 @@ namespace TK.NodalEditor.NodesLayout
         private Node GetHitNode(Point point)
         {
             List<Node> curNodes = Manager.CurCompound.Nodes;
-            for (int i = curNodes.Count-1; i >= 0; i--)
+            for (int i = curNodes.Count - 1; i >= 0; i--)
             {
                 Node curNode = curNodes[i];
                 if (new Rectangle(new Point((int)(curNode.UIx * LayoutSize), (int)(curNode.UIy * LayoutSize)), new Size((int)(curNode.UIWidth * LayoutSize), (int)(curNode.UIHeight * LayoutSize))).Contains(point))
@@ -2460,10 +2487,10 @@ namespace TK.NodalEditor.NodesLayout
                 Inputs.Visible = false;
                 Outputs.Visible = false;
             }
-            
+
             RefreshNodeSizes();
             IsInitialised = true;
-            PerformMyLayout(new Point(1,1));
+            PerformMyLayout(new Point(1, 1));
             OnFocusChanged(new FocusChangedEventArgs(Manager.BreadCrumbs));
         }
 
@@ -2596,7 +2623,7 @@ namespace TK.NodalEditor.NodesLayout
 
                 if (!hovered && item.Value.GetBounds().Contains(point) && item.Value.IsOutlineVisible(point, widenPen))
                 {
-                    if(!hoverChange && !item.Key.isHovered)
+                    if (!hoverChange && !item.Key.isHovered)
                     {
                         item.Key.isHovered = true;
                         hoverChange = true;
@@ -2617,6 +2644,50 @@ namespace TK.NodalEditor.NodesLayout
             return hitLink;
         }
 
+        private List<Link> GetHitLink2(Point inPoint1, Point inPoint2)
+        {
+            List<Link> hitLinks = new List<Link>();
+
+            //PointF[] pathPoint = inPath.PathPoints;
+            //Point pt1 = new Point((int)pathPoint[0].X, (int)pathPoint[0].Y);
+            //Point pt2 = new Point((int)pathPoint[1].X, (int)pathPoint[1].Y);
+
+            foreach (KeyValuePair<Link, GraphicsPath> item in paths)
+            {
+                List<PointF> pts = new List<PointF>();
+                List<Point> line = new List<Point>();
+
+                //Exclude hidden links and link in process of reconnection
+                if (item.Value == null || !item.Key.Selectable)
+                {
+                    continue;
+                }
+
+                pts = liang_barsky_clipper(item.Value.GetBounds().Left, item.Value.GetBounds().Top, item.Value.GetBounds().Right, item.Value.GetBounds().Bottom,
+                          inPoint1.X, inPoint1.Y, inPoint2.X, inPoint2.Y);
+
+                if (pts != null && pts.Count == 2) //If cutter is in link box
+                {
+                    line = bresenham(new Point((int)pts[0].X, (int)pts[0].Y), new Point((int)pts[1].X, (int)pts[1].Y));
+
+                    if(line.Count != 0)
+                    {
+                        for(int i = 0; i< line.Count; i++)
+                        {
+                            if (item.Value.IsOutlineVisible(line[i], widenPen))
+                            {
+                                hitLinks.Add(item.Key);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            Invalidate();
+
+            return hitLinks;
+        }
+
 
         // SIZING =======================================================================
 
@@ -2629,7 +2700,7 @@ namespace TK.NodalEditor.NodesLayout
 
         public void SetSize(double NewSize)
         {
-            SetSize(NewSize,new Point(1,1));
+            SetSize(NewSize, new Point(1, 1));
         }
 
         public void SetSize(double NewSize, Point NewLoc)
@@ -2755,7 +2826,7 @@ namespace TK.NodalEditor.NodesLayout
                 PointF MinLoc = new PointF(nodes[0].UIx, nodes[0].UIy);
                 PointF MaxLoc = new PointF(nodes[0].UIx + nodes[0].UIWidth, nodes[0].UIy + nodes[0].UIHeight);
 
-                for(int nodeCounter = 1; nodeCounter < nodes.Count; nodeCounter++)
+                for (int nodeCounter = 1; nodeCounter < nodes.Count; nodeCounter++)
                 {
                     Node curNode = nodes[nodeCounter];
 
@@ -2763,8 +2834,8 @@ namespace TK.NodalEditor.NodesLayout
                     {
                         MinLoc.X = curNode.UIx;
                     }
-                    
-                    if(curNode.UIx + curNode.UIWidth > MaxLoc.X)
+
+                    if (curNode.UIx + curNode.UIWidth > MaxLoc.X)
                     {
                         MaxLoc.X = curNode.UIx + curNode.UIWidth;
                     }
@@ -2812,7 +2883,7 @@ namespace TK.NodalEditor.NodesLayout
             SavedLayout layout = GetLayout();
 
             XmlSerializer ser = new XmlSerializer(typeof(SavedLayout));
-            
+
             FileStream stream = null;
             FileInfo infosFile = new FileInfo(inPath);
 
@@ -2864,14 +2935,14 @@ namespace TK.NodalEditor.NodesLayout
                     Location = new Point(layout.LayoutPosition[0], layout.LayoutPosition[1]);
                     LayoutSize = layout.Size;
                 }
-                else if(Manager.CurCompound.FullName == layout.ExploredCompound)
+                else if (Manager.CurCompound.FullName == layout.ExploredCompound)
                 {
                     Location = new Point(layout.LayoutPosition[0], layout.LayoutPosition[1]);
                     LayoutSize = layout.Size;
                 }
             }
 
-            if(nodesPositions)
+            if (nodesPositions)
             {
                 ApplyNodesPositions(layout);
             }
@@ -2897,7 +2968,7 @@ namespace TK.NodalEditor.NodesLayout
 
         public SavedLayout GetLayout()
         {
-            return new SavedLayout(Manager.CurCompound.FullName, Location.X, Location.Y, LayoutSize, Manager.Root); 
+            return new SavedLayout(Manager.CurCompound.FullName, Location.X, Location.Y, LayoutSize, Manager.Root);
         }
 
         // PAINT ==========================================================================
@@ -2955,7 +3026,7 @@ namespace TK.NodalEditor.NodesLayout
                     }
 
                     Port foundPort = null;
-                    
+
 
                     foreach (Link Link in links)
                     {
@@ -3225,7 +3296,7 @@ namespace TK.NodalEditor.NodesLayout
             }
         }
 
-        public void DrawSmoothRectangle(Graphics graphics,Pen pen, Brush brush, int inX, int inY, int inWidth, int inHeight, int Smoothness)
+        public void DrawSmoothRectangle(Graphics graphics, Pen pen, Brush brush, int inX, int inY, int inWidth, int inHeight, int Smoothness)
         {
             if (brush != null)
             {
@@ -3247,7 +3318,7 @@ namespace TK.NodalEditor.NodesLayout
             graphics.DrawLine(pen, inX, inY + Smoothness, inX, inY + inHeight - Smoothness - 1);
             graphics.DrawLine(pen, inX + inWidth - 1, inY + Smoothness, inX + inWidth - 1, inY + inHeight - Smoothness - 1);
             graphics.DrawLine(pen, inX + Smoothness, inY, inX + inWidth - Smoothness - 1, inY);
-            graphics.DrawLine(pen, inX + Smoothness, inY + inHeight - 1, inX + inWidth - Smoothness - 1, inY + inHeight - 1); 
+            graphics.DrawLine(pen, inX + Smoothness, inY + inHeight - 1, inX + inWidth - Smoothness - 1, inY + inHeight - 1);
         }
 
         public void DrawPortPlug(Graphics graphics, Brush brush, int inX, int inY, int Size)
@@ -3313,7 +3384,7 @@ namespace TK.NodalEditor.NodesLayout
                     LinkCategoryPens.Add(categ.Name, penFromBrush);
                 }
 
-                if(!TypesVisible.ContainsKey(categ.Name))
+                if (!TypesVisible.ContainsKey(categ.Name))
                 {
                     TypesVisible.Add(categ.Name, categ.Visible);
                 }
@@ -3371,7 +3442,7 @@ namespace TK.NodalEditor.NodesLayout
                 int nodeHeight = 0;
 
                 foreach (Node node in Manager.CurCompound.Nodes)
-                {                    
+                {
                     nodeWidth = 0;
 
                     labelSize = graphics.MeasureString(node.FullName, Preferences.NodeLabelFont);
@@ -3473,15 +3544,15 @@ namespace TK.NodalEditor.NodesLayout
         {
             Node toImport = null;
 
-            if(e.Data.GetDataPresent(typeof(int)))
+            if (e.Data.GetDataPresent(typeof(int)))
             {
                 int Dropped = (int)e.Data.GetData(typeof(int));
-                if(Manager.AvailableNodes.Count > Dropped)
+                if (Manager.AvailableNodes.Count > Dropped)
                 {
                     toImport = Manager.AvailableNodes[Dropped];
                 }
             }
-            else if(e.Data.GetDataPresent(typeof(string)))
+            else if (e.Data.GetDataPresent(typeof(string)))
             {
                 string name = (string)e.Data.GetData(typeof(string));
             }
@@ -3498,14 +3569,14 @@ namespace TK.NodalEditor.NodesLayout
                 }
             }
 
-            if(toImport != null)
+            if (toImport != null)
             {
                 //Where
                 Point toClient = PointToClient(new Point(e.X, e.Y));
-                if(toImport is Compound && ModifierKeys == Keys.Shift)
+                if (toImport is Compound && ModifierKeys == Keys.Shift)
                 {
                     //Open compound
-                    if((Manager.CurCompound == Manager.Root && Manager.CurCompound.Nodes.Count == 0) || MessageBox.Show("You asked for an \"Open Compound\" and your current layout is not empty.\nAre you sure you want to overwrite ?", "Open Compound", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    if ((Manager.CurCompound == Manager.Root && Manager.CurCompound.Nodes.Count == 0) || MessageBox.Show("You asked for an \"Open Compound\" and your current layout is not empty.\nAre you sure you want to overwrite ?", "Open Compound", MessageBoxButtons.OKCancel) == DialogResult.OK)
                     {
                         Manager.NewLayout(toImport as Compound, true);
                         ChangeFocus(false);
@@ -3823,7 +3894,7 @@ namespace TK.NodalEditor.NodesLayout
                 if (Node != null)
                 {
                     affectedNodes.AddRange(Node.Nodes);
-                    foreach(Node node in Node.Nodes)
+                    foreach (Node node in Node.Nodes)
                     {
                         affectedNodesName.Add(node.FullName);
                     }
@@ -3848,7 +3919,7 @@ namespace TK.NodalEditor.NodesLayout
 
             foreach (Node node in Manager.ClipBoard)
             {
-                Manager.Copy(node, Manager.CurCompound, (int)((node.UIx + Offset.X -30) / LayoutSize), (int)((node.UIy + Offset.Y - 10) / LayoutSize));
+                Manager.Copy(node, Manager.CurCompound, (int)((node.UIx + Offset.X - 30) / LayoutSize), (int)((node.UIy + Offset.Y - 10) / LayoutSize));
             }
 
             ChangeFocus(true);
@@ -4022,7 +4093,7 @@ namespace TK.NodalEditor.NodesLayout
                 case "All":
                     CreateGraphicalElements();
                     break;
-                default :
+                default:
                     if (!e.PropertyName.Contains("Font") && e.PropertyName.Contains("Color"))
                     {
                         CreateLayoutTools();
@@ -4368,7 +4439,7 @@ namespace TK.NodalEditor.NodesLayout
         string NodeNameLookUp = null;
         private void nodeLookUpEdit_KeyUp(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Enter) 
+            if (e.KeyCode == Keys.Enter)
             {
                 if (OnLinkLookup) //Quick Connect Link
                 {
@@ -4377,7 +4448,7 @@ namespace TK.NodalEditor.NodesLayout
                     Node Node = Manager.GetNode(NodeNameLookUp);
                     List<string> portName = new List<string>();
 
-                    
+
 
                     if (CurConnection != -1) //CASE 1 : Connection
                     {
@@ -4386,7 +4457,7 @@ namespace TK.NodalEditor.NodesLayout
                         {
                             foreach (Port port in Node.Inputs)
                             {
-                                if(port.NodeElementType == type)
+                                if (port.NodeElementType == type)
                                     portName.Add(port.FullName);
                             }
                         }
@@ -4430,7 +4501,7 @@ namespace TK.NodalEditor.NodesLayout
                 else //Quick Add Node
                 {
                     string inName = (string)nodeLookUpEdit.EditValue;
-                    NodalDirector.AddNode(inName, Manager.CurCompound.FullName, LookupLocation.X*(int)(1/LayoutSize), LookupLocation.Y*(int)(1/LayoutSize));
+                    NodalDirector.AddNode(inName, Manager.CurCompound.FullName, (int)(LookupLocation.X * (1 / LayoutSize)), (int)(LookupLocation.Y * (1 / LayoutSize)));
                     LookupVisible = nodeLookUpEdit.Visible = false;
                     this.Focus();
                 }
@@ -4477,7 +4548,7 @@ namespace TK.NodalEditor.NodesLayout
             {
                 string PortNameLookUp = (string)portLookUpEdit.EditValue;
                 Node Node = Manager.GetNode(NodeNameLookUp);
-                
+
 
                 if (CurConnection != -1) //CASE 1 : Connection
                 {
@@ -4510,7 +4581,7 @@ namespace TK.NodalEditor.NodesLayout
                             NodalDirector.ReConnect(detachLink.Target.Owner.FullName, detachLink.Target.FullName, detachNode.FullName, detachNode.GetPort(CurConnection2).FullName,
                                                     NodeNameLookUp, PortNameLookUp, detachNode.FullName, detachNode.GetPort(CurConnection2).FullName);
                         }
-                        
+
                         //Refresh display ports
                         if (Node.IsIn(Manager.CurCompound))
                         {
@@ -4550,9 +4621,9 @@ namespace TK.NodalEditor.NodesLayout
                             Outputs.GetPort(portl).Visible = true;
                             RefreshPorts();
                         }
-                        if(detachNode.IsIn(Manager.CurCompound))
+                        if (detachNode.IsIn(Manager.CurCompound))
                         {
-                            if(detachNode.GetPort(CurConnection2).IsOutput)
+                            if (detachNode.GetPort(CurConnection2).IsOutput)
                             {
                                 Outputs.GetPort(detachNode.GetPort(CurConnection2)).Visible = true;
                             }
@@ -4564,11 +4635,11 @@ namespace TK.NodalEditor.NodesLayout
                         }
                     }
                 }
-                
+
                 LookupVisible = portLookUpEdit.Visible = false;
                 OnLinkLookup = false;
                 NodesLayout_MouseUp(this, new MouseEventArgs(MouseButtons.Left, 1, LookupLocation.X, LookupLocation.Y, 0));
-                this.Focus(); 
+                this.Focus();
             }
 
             if (e.KeyCode == Keys.Escape)
@@ -4583,5 +4654,285 @@ namespace TK.NodalEditor.NodesLayout
             }
             Invalidate();
         }
+
+        //this function gives the maximum
+        float maxi(float[] arr, int n)
+        {
+            float m = 0;
+            for (int i = 0; i < n; ++i)
+                if (m < arr[i])
+                    m = arr[i];
+            return m;
+        }
+
+        // this function gives the minimum
+        float mini(float[] arr, int n)
+        {
+            float m = 1;
+            for (int i = 0; i < n; ++i)
+                if (m > arr[i])
+                    m = arr[i];
+            return m;
+        }
+
+        private List<PointF> liang_barsky_clipper(float xmin, float ymin, float xmax, float ymax,
+                                  float x1, float y1, float x2, float y2)
+        {
+            // defining variables
+            float p1 = -(x2 - x1);
+            float p2 = -p1;
+            float p3 = -(y2 - y1);
+            float p4 = -p3;
+
+            float q1 = x1 - xmin;
+            float q2 = xmax - x1;
+            float q3 = y1 - ymin;
+            float q4 = ymax - y1;
+
+            float[] posarr = new float[5];
+            float[] negarr = new float[5];
+            int posind = 1, negind = 1;
+            posarr[0] = 1;
+            negarr[0] = 0;
+
+            List<PointF> intersection = new List<PointF>();
+            bool isInterect = true;
+
+            if ((p1 == 0 && q1 < 0) || (p3 == 0 && q3 < 0))
+            {
+                isInterect = false;
+            }
+            if (p1 != 0)
+            {
+                float r1 = q1 / p1;
+                float r2 = q2 / p2;
+                if (p1 < 0)
+                {
+                    negarr[negind++] = r1; // for negative p1, add it to negative array
+                    posarr[posind++] = r2; // and add p2 to positive array
+                }
+                else
+                {
+                    negarr[negind++] = r2;
+                    posarr[posind++] = r1;
+                }
+            }
+            if (p3 != 0)
+            {
+                float r3 = q3 / p3;
+                float r4 = q4 / p4;
+                if (p3 < 0)
+                {
+                    negarr[negind++] = r3;
+                    posarr[posind++] = r4;
+                }
+                else
+                {
+                    negarr[negind++] = r4;
+                    posarr[posind++] = r3;
+                }
+            }
+
+            float xn1, yn1, xn2, yn2;
+            float rn1, rn2;
+            rn1 = maxi(negarr, negind); // maximum of negative array
+            rn2 = mini(posarr, posind); // minimum of positive array
+
+            if (rn1 > rn2)
+            {
+                isInterect = false;
+            }
+
+            if (isInterect)
+            {
+                xn1 = x1 + p2 * rn1;
+                yn1 = y1 + p4 * rn1; // computing new points
+
+                xn2 = x1 + p2 * rn2;
+                yn2 = y1 + p4 * rn2;
+
+                PointF newLineA = new PointF(xn1, yn1);
+                PointF newLineB = new PointF(xn2, yn2);
+                intersection.Add(newLineA);
+                intersection.Add(newLineB);
+            }
+            else
+            {
+                intersection = null;
+            }
+
+            return intersection;
+        }
+
+        int octant_number(Point p0,Point p1)
+        {
+            int x0 = p0.X;
+            int y0 = p0.Y;
+
+            int x1 = p1.X;
+            int y1 = p1.Y;
+
+            int dx = x1 - x0;
+            int dy = y1 - y0;
+
+            if (dy >= 0)
+            {
+                if (dx >= 0)
+                {
+                    if (dx >= dy) return 0;
+                    else return 1;
+                }
+                else
+                {
+                    if (-dx >= dy) return 3;
+                    else return 2;
+                }
+            }
+            else
+            {
+                if (dx >= 0)
+                {
+                    if (dx >= -dy) return 7;
+                    else return 6;
+                }
+                else
+                {
+                    if (-dx >= -dy) return 4;
+                    else return 5;
+                }
+            }
+
+        }
+
+        Point symmetry_octant(Point p, int octant)
+        {
+            Point newp = new Point();
+            if (octant >= 0 && octant < 8)
+            {
+                int x = p.X;
+                int y = p.Y;
+                
+                switch (octant)
+                {
+                    case 0: return p;
+                    case 1:
+                        newp.X = y;
+                        newp.Y = x;
+                        break;
+                    case 2:
+                        newp.X = y;
+                        newp.Y = -x;
+                        break;
+                    case 3:
+                        newp.X = -x;
+                        newp.Y = y;
+                        break;
+                    case 4:
+                        newp.X = -x;
+                        newp.Y = -y;
+                        break;
+                    case 5:
+                        newp.X = -y;
+                        newp.Y = -x;
+                        break;
+                    case 6:
+                        newp.X = -y;
+                        newp.Y = x;
+                        break;
+                    case 7:
+                        newp.X = x;
+                        newp.Y = -y;
+                        break;
+                }
+            }
+
+            return newp;
+        }
+
+        Point symmetry_octant_inverse(Point p, int octant)
+        {
+            Point newp = new Point();
+            if (octant >= 0 && octant < 8)
+            {
+                int x = p.X;
+                int y = p.Y;
+                switch (octant)
+                {
+                    case 0: return p;
+                    case 1:
+                        newp.X = y;
+                        newp.Y = x;
+                        break;
+                case 2:
+                        newp.X = -y;
+                        newp.Y = x;
+                        break;
+                case 3:
+                        newp.X = -x;
+                        newp.Y = y;
+                        break;
+                case 4:
+                        newp.X = -x;
+                        newp.Y = -y;
+                        break;
+                case 5:
+                        newp.X = -y;
+                        newp.Y = -x;
+                        break;
+                case 6:
+                        newp.X = y;
+                        newp.Y = -x;
+                        break;
+                    case 7:
+                        newp.X = x;
+                        newp.Y = -y;
+                        break;
+                }
+            }
+
+            return newp;
+        }
+
+        void bresenham_first_octant(Point p0, Point p1, List<Point> line, int octant)
+        {
+            int dx = p1.X - p0.X;
+            int dy = p1.Y - p0.Y;
+
+            int m = 2 * dy;
+            int e = -dx;
+
+            int y = p0.Y;
+
+            for(int x = p0.X; x<=p1.X; ++x)
+            {
+                Point p = new Point(x, y);
+                line.Add(symmetry_octant_inverse(p,octant));
+                e += m;
+
+                if (e >= 0)
+                {
+                    y = y + 1;
+                    e = e - 2 * dx;
+                }
+            }
+        }
+
+        List<Point> bresenham(Point p0,Point p1)
+        {
+            List<Point> line = new List<Point>();
+            int octant = octant_number(p0, p1);
+
+            Point p0_octant = symmetry_octant(p0, octant);
+            Point p1_octant = symmetry_octant(p1, octant);
+
+            bresenham_first_octant(p0_octant, p1_octant, line, octant);
+
+            return line;
+        }
+
+
+
+
+
     }
 }

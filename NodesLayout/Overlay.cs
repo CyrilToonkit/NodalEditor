@@ -34,6 +34,7 @@ namespace TK.NodalEditor.NodesLayout
         public Brush ConnectBrush = Brushes.Black;
         public Pen ConnectPen = Pens.Black;
         public Point[] ConnectArrow = new Point[0];
+        public Point[] ConnectCutter = null;
 
         private const float penWidth = 1;
 
@@ -44,6 +45,16 @@ namespace TK.NodalEditor.NodesLayout
                 e.DrawRectangle(Hash, SelectRectangle);
             }
 
+            if(ConnectCutter != null)
+            {
+                //ConnectCutter[0].X = (int)(ConnectCutter[0].X * Layout.LayoutSize);
+                //ConnectCutter[0].Y = (int)(ConnectCutter[0].Y * Layout.LayoutSize);
+                e.DrawLine(Hash, ConnectCutter[0], ConnectCutter[1]);
+                //Layout.cutterPath = new GraphicsPath();
+                //Layout.cutterPath.AddLine(ConnectCutter[0], ConnectCutter[1]);
+                //e.DrawPath(Hash, Layout.cutterPath);
+            }
+            
             // LINKS *********************************************************
 
             if (ConnectArrow.Length == 2)
@@ -157,7 +168,7 @@ namespace TK.NodalEditor.NodesLayout
                 path = new GraphicsPath();
                 path.AddBezier(point, Handle1, Handle2, point_2);
                 graphics.DrawPath(inPen, path);
-
+                
                 //if (Hovered == true && path != null)
                 //{
                 //    Console.WriteLine("je suis dans Draw 1");

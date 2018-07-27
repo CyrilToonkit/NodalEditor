@@ -16,12 +16,12 @@ namespace NodalTester
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-
+            /*
             NodalDirectorExceptionHandler handler = new NodalDirectorExceptionHandler();
             Application.ThreadException +=
                 new ThreadExceptionEventHandler(
                     handler.Application_ThreadException);
-
+                    */
             //Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
 
             TestForm form = new TestForm();
