@@ -336,6 +336,9 @@ namespace TK.NodalEditor.NodesLayout
         public bool isCutted = false;
         public bool isRectDrag = false;
 
+
+        Point NodeOrigin = new Point();
+
         //Accessor for the rigs contextMenu
 
         public void SetShortCut(string itemName, string shortCut)
@@ -1086,6 +1089,8 @@ namespace TK.NodalEditor.NodesLayout
                             {
                                 isCutted = true;
                                 overlay.ConnectCutter = new Point[] { HitPoint, e.Location };
+                                //overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X * (LayoutSize)), (int)(HitPoint.Y * (LayoutSize))), e.Location };
+                                //overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / (LayoutSize)), (int)(HitPoint.Y / (LayoutSize))), e.Location };
                             }
                             else
                             {
@@ -1906,6 +1911,16 @@ namespace TK.NodalEditor.NodesLayout
 
                                 }
                             }
+                            else
+                            {
+                                float uix = hitNode.UIx;
+                                float uiy = hitNode.UIy;
+                                hitNode.UIx = NodeOrigin.X;
+                                hitNode.UIy = NodeOrigin.Y;
+                                NodalDirector.MoveNode(hitNode.FullName, e.Location.X, e.Location.Y);
+                                hitNode.UIx = uix;
+                                hitNode.UIy = uiy;
+                            }
                         }
                         break;
 
@@ -2132,6 +2147,7 @@ namespace TK.NodalEditor.NodesLayout
         {
             if (hitNode != null)
             {
+                Console.WriteLine("Je suis là");
                 ConnectedNode = sender as Node;
                 Point Position = PointToScreen(e.Location);
                 Point parentPos = Parent.PointToClient(Position);
@@ -2181,6 +2197,7 @@ namespace TK.NodalEditor.NodesLayout
 
                 if (IsDragging)
                 {
+                    Console.WriteLine("Je suis là 2");
                     Point Translation = new Point(Position.X - HitPoint.X, Position.Y - HitPoint.Y);
                     if (!HasMoved && (Math.Abs(Translation.X) + Math.Abs(Translation.Y) > 3))
                     {
@@ -2212,6 +2229,7 @@ namespace TK.NodalEditor.NodesLayout
 
                     if (HasMoved)
                     {
+                        Console.WriteLine("Je suis là 3");
                         List<Node> selNodes = Selection.GetSelectedNodes();
 
                         foreach (Node NUctrl in selNodes)
@@ -2241,6 +2259,8 @@ namespace TK.NodalEditor.NodesLayout
 
             if (e.Button == MouseButtons.Left)
             {
+                NodeOrigin.X = (int)Node.UIx;
+                NodeOrigin.Y = (int)Node.UIy;
                 if (!IsDragging)
                 {
                     Point TransPos = new Point(e.Location.X - (int)(Node.UIx * LayoutSize), e.Location.Y - (int)(Node.UIy * LayoutSize));
@@ -3909,7 +3929,9 @@ namespace TK.NodalEditor.NodesLayout
 
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Manager.ClipBoard = Selection.GetSelectedNodes();
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
+            NodalDirector.Copy(nodesName);
+            //Manager.ClipBoard = Selection.GetSelectedNodes();
         }
 
         private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3924,6 +3946,9 @@ namespace TK.NodalEditor.NodesLayout
 
             ChangeFocus(true);
         }
+
+
+
 
         private void pasteRenamedToolStripMenuItem_Click(object sender, EventArgs e)
         {

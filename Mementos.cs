@@ -17,16 +17,19 @@ namespace TK.NodalEditor
         Node node;
         Compound parent;
         NodeConnexions connections;
-        public ReAddNodeMemento(Node inNode, Compound inParent, NodeConnexions inConnections)
+        int XOffset, YOffset;
+        public ReAddNodeMemento(Node inNode, Compound inParent, NodeConnexions inConnections, int inXOffset, int inYOffset)
         {
             node = inNode;
             parent = inParent;
             connections = inConnections;
+            XOffset = inXOffset;
+            YOffset = inYOffset;
         }
 
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
-            IMemento<NodalDirector> inverse = new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node));
+            IMemento<NodalDirector> inverse = new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node), XOffset, YOffset);
             target._DeleteNode(node);
             return inverse;
         }
@@ -37,17 +40,20 @@ namespace TK.NodalEditor
         Node removed;
         Compound parent;
         NodeConnexions connections;
-        public DeleteNodeMemento(Node inRemoved, Compound inParent, NodeConnexions inConnections)
+        int XOffset, YOffset;
+        public DeleteNodeMemento(Node inRemoved, Compound inParent, NodeConnexions inConnections, int inXOffset, int inYOffset)
         {
             removed = inRemoved;
             parent = inParent;
             connections = inConnections;
+            XOffset = inXOffset;
+            YOffset = inYOffset;
         }
 
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
-            IMemento<NodalDirector> inverse = new ReAddNodeMemento(removed, parent, connections);
-            target._AddNode(removed, parent, connections);
+            IMemento<NodalDirector> inverse = new ReAddNodeMemento(removed, parent, connections, XOffset, YOffset);
+            target._AddNode(removed, parent, connections, XOffset, YOffset);
             return inverse;
         }
     }
@@ -63,7 +69,7 @@ namespace TK.NodalEditor
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
             Node removed = target.manager.GetNode(nodeName);
-            IMemento<NodalDirector> inverse = new DeleteNodeMemento(removed, removed.Parent, null);
+            IMemento<NodalDirector> inverse = new DeleteNodeMemento(removed, removed.Parent, null, 0, 0);
             target._DeleteNode(removed);
             return inverse;
         }
@@ -275,4 +281,45 @@ namespace TK.NodalEditor
             return inverse;
         }
     }
+
+    class MoveNodeMemento : NodalEditorMemento
+    {
+        private Node Node;
+        private int x, y;
+
+        public MoveNodeMemento(Node inNode, int inX, int inY)
+        {
+            this.Node = inNode;
+            this.x = (int)inNode.UIx;
+            this.y = (int)inNode.UIy;
+        }
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            IMemento<NodalDirector> inverse = new MoveNodeMemento(Node, (int)(x *  target.layout.LayoutSize), (int)(y * target.layout.LayoutSize));
+            target._MoveNode(Node, (int)(x * target.layout.LayoutSize), (int)(y * target.layout.LayoutSize));
+            return inverse;
+        }
+    }
+
+    //class PasteMemento : NodalEditorMemento
+    //{
+    //    private Node Node;
+    //    private int XOffset, YOffset;
+    //    private string search, replace;
+
+    //    public PasteMemento(Node inNode, int inXOffset, int inYOffset, string inSearch, string inReplace)
+    //    {
+    //        this.Node = inNode;
+    //        this.XOffset = inXOffset;
+    //        this.YOffset = inYOffset;
+    //        this.search = inSearch;
+    //        this.replace = inReplace;
+    //    }
+    //    public override IMemento<NodalDirector> Restore(NodalDirector target)
+    //    {
+    //        IMemento<NodalDirector> inverse = new DeleteNodeMemento();
+    //        target._DeleteNode();
+    //        return inverse;
+    //    }
+    //}
 }

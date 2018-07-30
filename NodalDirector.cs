@@ -116,11 +116,12 @@ namespace TK.NodalEditor
         /// <param name="inNode">Node to (re)add</param>
         /// <param name="inParent">Compound where we want to add the Node to</param>
         /// <param name="inConnexions">Connections that needs to be reapplied</param>
-        internal void _AddNode(Node inNode, Compound inParent, NodeConnexions inConnexions)
+        internal void _AddNode(Node inNode, Compound inParent, NodeConnexions inConnexions, int inXOffset, int inYOffset)
         {
             inNode.Deleted = false;
 
-            Node createdNode = _instance.manager.AddNode(inNode, inParent, (int)(inNode.UIx / layout.LayoutSize), (int)(inNode.UIy / layout.LayoutSize));
+            Node createdNode = _instance.manager.AddNode(inNode, inParent, (int)(inNode.UIx - (inXOffset / layout.LayoutSize)), (int)(inNode.UIy - (inYOffset / layout.LayoutSize)));
+          
 
             if (inConnexions != null)
                 inConnexions.Reconnect(createdNode);
@@ -318,6 +319,46 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
+        internal void _MoveNode(Node inNode, int inX, int inY)
+        {
+            inNode.UIx = (int)(inX * (1 / _instance.layout.LayoutSize));
+            inNode.UIy = (int)(inY * (1 / _instance.layout.LayoutSize));
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
+        }
+
+        internal void _Paste(Node inNode, int inXOffset, int inYOffset, string inSearch, string inReplace)
+        {
+            int XOffset = inXOffset - (int)_instance.manager.ClipBoard[0].UIx;
+            int YOffset = inYOffset - (int)_instance.manager.ClipBoard[0].UIy;
+
+            if (string.IsNullOrEmpty(inSearch))
+            {
+                foreach (Node node in _instance.manager.ClipBoard)
+                {
+                    _instance.manager.Copy(node, _instance.manager.CurCompound, (int)((node.UIx + XOffset - 30) / _instance.layout.LayoutSize), (int)((node.UIy + YOffset - 10) / _instance.layout.LayoutSize));
+                }
+            }
+            else
+            {
+                foreach (Node node in _instance.manager.ClipBoard)
+                {
+                     _instance.manager.Copy(node, _instance.manager.CurCompound, (int)((node.UIx + XOffset - 30) / _instance.layout.LayoutSize), (int)((node.UIy + YOffset - 10) / _instance.layout.LayoutSize), inSearch, inReplace);
+                }
+            }
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.ChangeFocus(true);
+            _instance.layout.Frame(_instance.manager.CurCompound.Nodes);
+            _instance.layout.Invalidate();
+
+        }
+
         #endregion
         
         #region Logging
@@ -477,7 +518,7 @@ namespace TK.NodalEditor
                 }
                 else
                 {
-                    _instance.history.Do(new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node)));
+                    _instance.history.Do(new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node), 0, 0));
                     _instance.manager.RemoveNode(node);
                     node.Deleted = true;
 
@@ -521,7 +562,7 @@ namespace TK.NodalEditor
             }
             else
             {
-                _instance.history.Do(new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node)));
+                _instance.history.Do(new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node), 0, 0));
                 _instance.manager.RemoveNode(node);
                 node.Deleted = true;
             }
@@ -544,10 +585,16 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static string Duplicate(string inNodeName)
         {
+            return Duplicate(inNodeName, null, null);
+        }
+
+        public static string Duplicate(string inNodeName, string inSearch, string inReplace)
+        {
+
             if (_instance.manager == null)
                 return null;
 
-            string nom_fct = string.Format("Duplicate(\"{0}\");", inNodeName);
+            string nom_fct = string.Format("Duplicate(\"{0}\", \"{1}\", \"{2}\");", inNodeName, inSearch, inReplace);
 
             if (_instance.verbose)
                 Log(nom_fct);
@@ -559,11 +606,23 @@ namespace TK.NodalEditor
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("Input Node \"{0}\" does not exists!", inNodeName));
             }
 
-            Node newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)((nodeIn.UIx) + (30 * _instance.layout.LayoutSize) / _instance.layout.LayoutSize), (int)((nodeIn.UIy) - (10 * _instance.layout.LayoutSize) / _instance.layout.LayoutSize));
+            Node newNode = new Node();
 
-            if (newNode == null)
+            if (string.IsNullOrEmpty(inSearch))
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
+                newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)(nodeIn.UIx + (30 / _instance.layout.LayoutSize)), (int)(nodeIn.UIy - (10 / _instance.layout.LayoutSize)));
+                if (newNode == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
+                }
+            }
+            else
+            {
+                newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)(nodeIn.UIx + (30 / _instance.layout.LayoutSize)), (int)(nodeIn.UIy - (10 / _instance.layout.LayoutSize)), inSearch, inReplace);
+                if (newNode == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
+                }
             }
 
             if (_instance.layout == null)
@@ -1609,6 +1668,105 @@ namespace TK.NodalEditor
             return nodeIn.FullName;
         }
 
+        public static bool Copy(List<string> inNodeNames)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("Copy(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodeNames, "\",\""));
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            List<Node> Nodes = new List<Node>();
+
+            foreach (string NodeName in inNodeNames)
+            {
+                Node nodeIn = _instance.manager.GetNode(NodeName);
+                if (nodeIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Input Node \"{0}\" does not exist!", NodeName));
+                }
+                else
+                {
+                        Nodes.Add(nodeIn);
+                }
+            }
+
+            _instance.manager.ClipBoard = Nodes;
+
+            return true;
+        }
+
+        public static List<string> Paste(int inXOffset, int inYOffset)
+        {
+            return Paste(inXOffset, inYOffset, null, null);
+        }
+
+        public static List<string> Paste(int inXOffset, int inYOffset, string inSearch, string inReplace)
+        {
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("Paste({0}, {1}, \"{2}\", \"{3}\");", inXOffset, inYOffset, inSearch, inReplace);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            List<string> pasteNodeName = new List<string>();
+
+            //int XOffset = inXOffset - (int)_instance.manager.ClipBoard[0].UIx;
+            //int YOffset = inYOffset - (int)_instance.manager.ClipBoard[0].UIy;
+
+            if (_instance.manager.ClipBoard != null)
+            {
+                _instance.history.BeginCompoundDo();
+                if (string.IsNullOrEmpty(inSearch))
+                {
+                    foreach (Node node in _instance.manager.ClipBoard)
+                    {
+                        Node copyNode = new Node();
+                        copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)(node.UIx + ((inXOffset) / _instance.layout.LayoutSize)), (int)(node.UIy + ((inYOffset) / _instance.layout.LayoutSize)));
+                        if(copyNode == null)
+                        {
+                            throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste");
+                        }
+                        _instance.history.Do(new ReAddNodeMemento(copyNode, copyNode.Parent, new NodeConnexions(copyNode), inXOffset, inYOffset));
+                        pasteNodeName.Add(copyNode.FullName);
+                    }
+                }
+                else
+                {
+                    foreach (Node node in _instance.manager.ClipBoard)
+                    {
+                        Node copyNode = new Node();
+                        copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)(node.UIx + ((inXOffset) / _instance.layout.LayoutSize)), (int)(node.UIy + ((inYOffset) / _instance.layout.LayoutSize)), inSearch, inReplace);
+                        if (copyNode == null)
+                        {
+                            throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste");
+                        }
+                        _instance.history.Do(new ReAddNodeMemento(copyNode, copyNode.Parent, new NodeConnexions(copyNode), inXOffset, inYOffset));
+                        pasteNodeName.Add(copyNode.FullName);
+                    }
+                }
+                _instance.history.EndCompoundDo();
+            }
+            else
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste");
+            }
+            
+            if (_instance.layout == null)
+                return null;
+
+            _instance.layout.ChangeFocus(true);
+            _instance.layout.Frame(_instance.manager.CurCompound.Nodes);
+            _instance.layout.Invalidate();
+            return pasteNodeName;
+        }
+
+
+
         #endregion
 
         #region Getters Commands
@@ -1741,6 +1899,35 @@ namespace TK.NodalEditor
 
             if (_instance.layout == null)
                 return true;
+
+            _instance.layout.Invalidate();
+
+            return true;
+        }
+
+        public static bool MoveNode(string inNodeName, int inX, int inY)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("MoveNode(\"{0}\", {1}, {2});", inNodeName, inX, inY);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            _instance.history.Do(new MoveNodeMemento(nodeIn, inX, inY));
+            nodeIn.UIx = (int)(inX * (1 / _instance.layout.LayoutSize));
+            nodeIn.UIy = (int)(inY * (1 / _instance.layout.LayoutSize));
+
+            if (_instance.layout == null)
+                return false;
 
             _instance.layout.Invalidate();
 
