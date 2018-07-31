@@ -1667,6 +1667,11 @@ namespace TK.NodalEditor
             return nodeIn.FullName;
         }
 
+        /// <summary>
+        /// Copy a list of nodes
+        /// </summary>
+        /// <param name="inNodeNames">List of node names</param>
+        /// <returns></returns>
         public static bool Copy(List<string> inNodeNames)
         {
             if (_instance.manager == null)
@@ -1745,7 +1750,8 @@ namespace TK.NodalEditor
                     foreach (Node node in _instance.manager.ClipBoard)
                     {
                         Node copyNode = new Node();
-                        copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)((node.UIx + (inXOffset)) / _instance.layout.LayoutSize), (int)((node.UIy + (inYOffset)) / _instance.layout.LayoutSize), inSearch, inReplace);
+                        //copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)((node.UIx + (inXOffset)) / _instance.layout.LayoutSize), (int)((node.UIy + (inYOffset)) / _instance.layout.LayoutSize), inSearch, inReplace);
+                        copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)(node.UIx + (inXOffset)), (int)(node.UIy + (inYOffset)), inSearch, inReplace);
                         if (copyNode == null)
                         {
                             throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste");
@@ -1765,7 +1771,6 @@ namespace TK.NodalEditor
                 return null;
 
             _instance.layout.ChangeFocus(true);
-            //_instance.layout.Frame(_instance.manager.CurCompound.Nodes);
             _instance.layout.Invalidate();
             return pasteNodeName;
         }
@@ -1910,6 +1915,13 @@ namespace TK.NodalEditor
             return true;
         }
 
+        /// <summary>
+        /// Move node in X and Y
+        /// </summary>
+        /// <param name="inNodeName"></param>
+        /// <param name="inX">Position X in pixel</param>
+        /// <param name="inY">Position Y in pixel</param>
+        /// <returns></returns>
         public static bool MoveNode(string inNodeName, int inX, int inY)
         {
             if (_instance.manager == null)

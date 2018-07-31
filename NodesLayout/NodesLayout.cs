@@ -332,7 +332,6 @@ namespace TK.NodalEditor.NodesLayout
         bool OnLinkLookup = false;
 
         //Cutter Line
-        public GraphicsPath cutterPath = null;
         public bool isCutted = false;
         public bool isRectDrag = false;
 
@@ -685,6 +684,7 @@ namespace TK.NodalEditor.NodesLayout
                             if (isCutted) //Link cutter
                             {
                                 List<Link> linkToCut = new List<Link>();
+                                //Recover the list of links to cut 
                                 linkToCut = GetHitLink2(new Point ((int)(overlay.ConnectCutter[0].X*LayoutSize), (int)(overlay.ConnectCutter[0].Y * LayoutSize)), new Point((int)(overlay.ConnectCutter[1].X * LayoutSize), (int)(overlay.ConnectCutter[1].Y * LayoutSize)));
                                 overlay.ConnectCutter = null;
                                 if (linkToCut.Count != 0)
@@ -2683,12 +2683,13 @@ namespace TK.NodalEditor.NodesLayout
                 {
                     continue;
                 }
-
+                
                 pts = liang_barsky_clipper(item.Value.GetBounds().Left, item.Value.GetBounds().Top, item.Value.GetBounds().Right, item.Value.GetBounds().Bottom,
                           inPoint1.X, inPoint1.Y, inPoint2.X, inPoint2.Y);
 
                 if (pts != null && pts.Count == 2) //If cutter is in link box
                 {
+                    //Cutter line
                     line = bresenham(new Point((int)pts[0].X, (int)pts[0].Y), new Point((int)pts[1].X, (int)pts[1].Y));
 
                     if(line.Count != 0)
@@ -3954,10 +3955,7 @@ namespace TK.NodalEditor.NodesLayout
 
             NodalDirector.Paste(Offset.X, Offset.Y);
         }
-
-
-
-
+        
         //private void pasteRenamedToolStripMenuItem_Click(object sender, EventArgs e)
         //{
         //    RichDialogResult rslt = TKMessageBox.ShowInput(InputTypes.String, "Please provide string to search", "Paste renamed search string");
@@ -4002,9 +4000,9 @@ namespace TK.NodalEditor.NodesLayout
             string replace = (string)rslt.Data;
 
             Point toClient = PointToClient(Cursor.Position);
-            Point Offset = new Point(toClient.X - (int)Manager.ClipBoard[0].UIx, toClient.Y - (int)Manager.ClipBoard[0].UIy);
+            Point Offset = new Point((int)(toClient.X / LayoutSize) - (int)Manager.ClipBoard[0].UIx, (int)(toClient.Y / LayoutSize) - (int)Manager.ClipBoard[0].UIy);
 
-            NodalDirector.Paste(Offset.X - 30, Offset.Y - 10, search, replace);
+            NodalDirector.Paste(Offset.X, Offset.Y, search, replace);
         }
 
         //private void exposeAllPortsToolStripMenuItem_Click(object sender, EventArgs e)
