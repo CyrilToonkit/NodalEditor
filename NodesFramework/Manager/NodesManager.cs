@@ -464,10 +464,61 @@ namespace TK.NodalEditor
         /// </summary>
         /// <param name="content">Nodes to be added to the compound</param>
         /// <returns>The new Compound</returns>
+        //public Compound AddCompound(List<Node> content)
+        //{
+        //    Compound NewComp = (Compound)Activator.CreateInstance(AvailableCompound.GetType(), new object[0], new object[0]);
+        //    NewComp.Copy(AvailableCompound, true);
+
+        //    AddNode(NewComp, CurCompound, (int)content[0].UIx, (int)content[0].UIy);
+
+        //    //Move Nodes
+        //    foreach (Node Node in content)
+        //    {
+        //        CurCompound.MoveNode(Node, NewComp);
+        //    }
+
+        //    Root.SortNodes();
+
+        //    //Manage ports visibilities (hide unlinked ports)
+
+        //    foreach (Port port2 in NewComp.Inputs)
+        //    {
+        //        if (!(port2 as PortInstance).IsLinked())
+        //        {
+        //            port2.Visible = false;
+        //        }
+        //    }
+
+        //    foreach (Port port2 in NewComp.Outputs)
+        //    {
+        //        if (!(port2 as PortInstance).IsLinked())
+        //        {
+        //            port2.Visible = false;
+        //        }
+        //    }
+
+        //    OnNodesChanged(new NodesChangedEventArgs(Operations.NodesMoved, content));
+        //    return NewComp;
+        //}
+
         public Compound AddCompound(List<Node> content)
         {
-            Compound NewComp = (Compound)Activator.CreateInstance(AvailableCompound.GetType(), new object[0], new object[0]);
-            NewComp.Copy(AvailableCompound, true);
+            return AddCompound(content, null);
+        }
+
+        public Compound AddCompound(List<Node> content, Compound inCompound)
+        {
+            Compound NewComp = null;
+            if (inCompound == null)
+            {
+                NewComp = (Compound)Activator.CreateInstance(AvailableCompound.GetType(), new object[0], new object[0]);
+                NewComp.Copy(AvailableCompound, true);
+            }
+            else
+            {
+                NewComp = inCompound;
+                inCompound.Deleted = false;
+            }
 
             AddNode(NewComp, CurCompound, (int)content[0].UIx, (int)content[0].UIy);
 
@@ -500,6 +551,7 @@ namespace TK.NodalEditor
             OnNodesChanged(new NodesChangedEventArgs(Operations.NodesMoved, content));
             return NewComp;
         }
+
 
         /// <summary>
         /// Add a new Compound, containing all nodes given as argument
