@@ -472,7 +472,6 @@ namespace TK.NodalEditor
                 {
                     isTrue = false;
                 }
-
             }
 
             if(isTrue == false)
@@ -2052,6 +2051,16 @@ namespace TK.NodalEditor
                 msg = rslt.Output == null ? "null" : rslt.Output.ToString();
                 Log("Returns : " + msg);
             }
+        }
+
+        /// <summary>
+        /// Executes arbitrary Python code at runtime
+        /// </summary>
+        /// <param name="inCode">The code to execute</param>
+        public static void EvaluatePython(string inCode)
+        {
+            //throw new NodalDirectorException("PYTHON INTERPRETER NOT IMPLEMENTED !\n"+inCode);
+            _instance.manager.Execute(inCode);
         }
     }
 }

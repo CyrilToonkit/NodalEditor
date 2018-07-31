@@ -33,6 +33,15 @@ namespace TK.NodalEditor
         {
             List<Port> ports = new List<Port>();
 
+            foreach (PortObj portObj in inNode.Elements)
+            {
+                if(portObj.FullName == inObj.FullName)
+                {
+                    NodalDirector.ShowError(string.Format("Node '{0}' already have a port object named '{1}'", inNode.FullName, inObj.FullName), "Cannot add Port");
+                    return ports;
+                }
+            }
+
             inObj.Owner = inNode;
             inNode.Elements.Insert(index, inObj);
 

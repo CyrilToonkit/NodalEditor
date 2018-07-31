@@ -4,6 +4,10 @@ using TK.NodalEditor;
 using TK.NodalEditor.NodesLayout;
 using System.IO;
 using System.Threading;
+using DevExpress.XtraRichEdit.API.Native;
+using System.Drawing;
+using DevExpress.XtraRichEdit.Services;
+using RichEditSyntax;
 
 namespace NodalTester
 {
@@ -18,6 +22,8 @@ namespace NodalTester
         public TestForm()
         {
             InitializeComponent();
+
+            InitializeCodeEditors();
 
             NodesSerializer.GetInstance().AddSerializer(NodeElement.Node, "CustomNode", typeof(CustomNode));
             ManagerCompanion comp = new ManagerCompanion();
@@ -66,6 +72,39 @@ namespace NodalTester
             manager.NewLayout();
             manager.AddNode(0, manager.Root, 50, 50);
             tK_NodalEditorUCtrl1.Init("C:\\Rigs\\NodesLayout", manager);
+        }
+
+        private void InitializeCodeEditors()
+        {
+            //CS
+            csEditControl.ReplaceService<ISyntaxHighlightService>(new CSharpSyntaxHighlightService(csEditControl));
+
+            csEditControl.Views.SimpleView.Padding = new Padding(60, 4, 4, 0);
+            csEditControl.Views.SimpleView.AllowDisplayLineNumbers = true;
+
+            csEditControl.Document.Sections[0].LineNumbering.Start = 1;
+            csEditControl.Document.Sections[0].LineNumbering.CountBy = 1;
+            csEditControl.Document.Sections[0].LineNumbering.Distance = 75f;
+            csEditControl.Document.Sections[0].LineNumbering.RestartType = LineNumberingRestart.Continuous;
+
+            csEditControl.Document.CharacterStyles["Line Number"].FontName = "Courier";
+            csEditControl.Document.CharacterStyles["Line Number"].FontSize = 10;
+            csEditControl.Document.CharacterStyles["Line Number"].ForeColor = Color.DarkGray;
+
+            //Python
+            pyEditControl.ReplaceService<ISyntaxHighlightService>(new PythonSyntaxHighlightService(pyEditControl.Document));
+
+            pyEditControl.Views.SimpleView.Padding = new Padding(60, 4, 4, 0);
+            pyEditControl.Views.SimpleView.AllowDisplayLineNumbers = true;
+
+            pyEditControl.Document.Sections[0].LineNumbering.Start = 1;
+            pyEditControl.Document.Sections[0].LineNumbering.CountBy = 1;
+            pyEditControl.Document.Sections[0].LineNumbering.Distance = 75f;
+            pyEditControl.Document.Sections[0].LineNumbering.RestartType = LineNumberingRestart.Continuous;
+
+            pyEditControl.Document.CharacterStyles["Line Number"].FontName = "Courier";
+            pyEditControl.Document.CharacterStyles["Line Number"].FontSize = 10;
+            pyEditControl.Document.CharacterStyles["Line Number"].ForeColor = Color.DarkGray;
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -139,7 +178,15 @@ namespace NodalTester
             try
             {
                 NodalDirector.Get().verbose = false;
-                NodalDirector.Evaluate(scriptEditorTB.Text);
+
+                if (tabControl1.SelectedIndex == 0)
+                {
+                    NodalDirector.Evaluate(csEditControl.Text.Replace("\f", "\n"));
+                }
+                else
+                {
+                    NodalDirector.EvaluatePython(pyEditControl.Text.Replace("\f", "\n"));
+                }
             }
             catch
             {

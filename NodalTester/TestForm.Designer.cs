@@ -31,7 +31,6 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TestForm));
             this.tgvImageList = new System.Windows.Forms.ImageList(this.components);
-            this.tK_NodalEditorUCtrl1 = new TK.NodalEditor.NodesLayout.TK_NodalEditorUCtrl();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,16 +40,24 @@
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.undoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.redoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+            this.sillyMethodToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.collapsibleGroup1 = new TK.GraphComponents.CollapsibleGroup();
-            this.scriptEditorTB = new System.Windows.Forms.TextBox();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.csInterpreterTab = new System.Windows.Forms.TabPage();
+            this.csEditControl = new DevExpress.XtraRichEdit.RichEditControl();
+            this.pyInterpreterTab = new System.Windows.Forms.TabPage();
+            this.pyEditControl = new DevExpress.XtraRichEdit.RichEditControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.nodalExecuteBT = new System.Windows.Forms.ToolStripButton();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.sillyMethodToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tK_NodalEditorUCtrl1 = new TK.NodalEditor.NodesLayout.TK_NodalEditorUCtrl();
             this.menuStrip1.SuspendLayout();
             this.collapsibleGroup1.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.csInterpreterTab.SuspendLayout();
+            this.pyInterpreterTab.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,11 +66,6 @@
             this.tgvImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
             resources.ApplyResources(this.tgvImageList, "tgvImageList");
             this.tgvImageList.TransparentColor = System.Drawing.Color.Transparent;
-            // 
-            // tK_NodalEditorUCtrl1
-            // 
-            resources.ApplyResources(this.tK_NodalEditorUCtrl1, "tK_NodalEditorUCtrl1");
-            this.tK_NodalEditorUCtrl1.Name = "tK_NodalEditorUCtrl1";
             // 
             // menuStrip1
             // 
@@ -128,6 +130,17 @@
             resources.ApplyResources(this.redoToolStripMenuItem, "redoToolStripMenuItem");
             this.redoToolStripMenuItem.Click += new System.EventHandler(this.redoToolStripMenuItem_Click);
             // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            resources.ApplyResources(this.toolStripMenuItem2, "toolStripMenuItem2");
+            // 
+            // sillyMethodToolStripMenuItem
+            // 
+            this.sillyMethodToolStripMenuItem.Name = "sillyMethodToolStripMenuItem";
+            resources.ApplyResources(this.sillyMethodToolStripMenuItem, "sillyMethodToolStripMenuItem");
+            this.sillyMethodToolStripMenuItem.Click += new System.EventHandler(this.sillyMethodToolStripMenuItem_Click);
+            // 
             // saveFileDialog1
             // 
             resources.ApplyResources(this.saveFileDialog1, "saveFileDialog1");
@@ -142,7 +155,7 @@
             this.collapsibleGroup1.AllowResize = true;
             this.collapsibleGroup1.Collapsed = false;
             this.collapsibleGroup1.CollapseOnClick = true;
-            this.collapsibleGroup1.Controls.Add(this.scriptEditorTB);
+            this.collapsibleGroup1.Controls.Add(this.tabControl1);
             this.collapsibleGroup1.Controls.Add(this.toolStrip1);
             resources.ApplyResources(this.collapsibleGroup1, "collapsibleGroup1");
             this.collapsibleGroup1.DockingChanges = TK.GraphComponents.DockingPossibilities.All;
@@ -151,12 +164,57 @@
             this.collapsibleGroup1.OpenedBaseWidth = 200;
             this.collapsibleGroup1.TabStop = false;
             // 
-            // scriptEditorTB
+            // tabControl1
             // 
-            this.scriptEditorTB.AcceptsReturn = true;
-            this.scriptEditorTB.AcceptsTab = true;
-            resources.ApplyResources(this.scriptEditorTB, "scriptEditorTB");
-            this.scriptEditorTB.Name = "scriptEditorTB";
+            this.tabControl1.Controls.Add(this.csInterpreterTab);
+            this.tabControl1.Controls.Add(this.pyInterpreterTab);
+            resources.ApplyResources(this.tabControl1, "tabControl1");
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            // 
+            // csInterpreterTab
+            // 
+            this.csInterpreterTab.Controls.Add(this.csEditControl);
+            resources.ApplyResources(this.csInterpreterTab, "csInterpreterTab");
+            this.csInterpreterTab.Name = "csInterpreterTab";
+            this.csInterpreterTab.UseVisualStyleBackColor = true;
+            // 
+            // csEditControl
+            // 
+            this.csEditControl.ActiveViewType = DevExpress.XtraRichEdit.RichEditViewType.Simple;
+            this.csEditControl.Appearance.Text.Font = ((System.Drawing.Font)(resources.GetObject("csEditControl.Appearance.Text.Font")));
+            this.csEditControl.Appearance.Text.Options.UseFont = true;
+            resources.ApplyResources(this.csEditControl, "csEditControl");
+            this.csEditControl.LayoutUnit = DevExpress.XtraRichEdit.DocumentLayoutUnit.Pixel;
+            this.csEditControl.LookAndFeel.SkinName = "Visual Studio 2013 Dark";
+            this.csEditControl.Name = "csEditControl";
+            this.csEditControl.Options.Behavior.ShowPopupMenu = DevExpress.XtraRichEdit.DocumentCapability.Hidden;
+            this.csEditControl.Options.Behavior.TabMarker = "    ";
+            this.csEditControl.Options.Comments.Visibility = DevExpress.XtraRichEdit.RichEditCommentVisibility.Hidden;
+            this.csEditControl.Views.SimpleView.AllowDisplayLineNumbers = true;
+            this.csEditControl.Views.SimpleView.WordWrap = false;
+            // 
+            // pyInterpreterTab
+            // 
+            this.pyInterpreterTab.Controls.Add(this.pyEditControl);
+            resources.ApplyResources(this.pyInterpreterTab, "pyInterpreterTab");
+            this.pyInterpreterTab.Name = "pyInterpreterTab";
+            this.pyInterpreterTab.UseVisualStyleBackColor = true;
+            // 
+            // pyEditControl
+            // 
+            this.pyEditControl.ActiveViewType = DevExpress.XtraRichEdit.RichEditViewType.Simple;
+            this.pyEditControl.Appearance.Text.Font = ((System.Drawing.Font)(resources.GetObject("pyEditControl.Appearance.Text.Font")));
+            this.pyEditControl.Appearance.Text.Options.UseFont = true;
+            resources.ApplyResources(this.pyEditControl, "pyEditControl");
+            this.pyEditControl.LayoutUnit = DevExpress.XtraRichEdit.DocumentLayoutUnit.Pixel;
+            this.pyEditControl.LookAndFeel.SkinName = "Visual Studio 2013 Dark";
+            this.pyEditControl.Name = "pyEditControl";
+            this.pyEditControl.Options.Behavior.ShowPopupMenu = DevExpress.XtraRichEdit.DocumentCapability.Hidden;
+            this.pyEditControl.Options.Behavior.TabMarker = "    ";
+            this.pyEditControl.Options.Comments.Visibility = DevExpress.XtraRichEdit.RichEditCommentVisibility.Hidden;
+            this.pyEditControl.Views.SimpleView.AllowDisplayLineNumbers = true;
+            this.pyEditControl.Views.SimpleView.WordWrap = false;
             // 
             // toolStrip1
             // 
@@ -172,16 +230,10 @@
             this.nodalExecuteBT.Name = "nodalExecuteBT";
             this.nodalExecuteBT.Click += new System.EventHandler(this.nodalExecuteBT_Click);
             // 
-            // toolStripMenuItem2
+            // tK_NodalEditorUCtrl1
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            resources.ApplyResources(this.toolStripMenuItem2, "toolStripMenuItem2");
-            // 
-            // sillyMethodToolStripMenuItem
-            // 
-            this.sillyMethodToolStripMenuItem.Name = "sillyMethodToolStripMenuItem";
-            resources.ApplyResources(this.sillyMethodToolStripMenuItem, "sillyMethodToolStripMenuItem");
-            this.sillyMethodToolStripMenuItem.Click += new System.EventHandler(this.sillyMethodToolStripMenuItem_Click);
+            resources.ApplyResources(this.tK_NodalEditorUCtrl1, "tK_NodalEditorUCtrl1");
+            this.tK_NodalEditorUCtrl1.Name = "tK_NodalEditorUCtrl1";
             // 
             // TestForm
             // 
@@ -196,6 +248,9 @@
             this.menuStrip1.PerformLayout();
             this.collapsibleGroup1.ResumeLayout(false);
             this.collapsibleGroup1.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
+            this.csInterpreterTab.ResumeLayout(false);
+            this.pyInterpreterTab.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -216,7 +271,6 @@
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private TK.GraphComponents.CollapsibleGroup collapsibleGroup1;
-        private System.Windows.Forms.TextBox scriptEditorTB;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton nodalExecuteBT;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
@@ -224,5 +278,10 @@
         private System.Windows.Forms.ToolStripMenuItem redoToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem sillyMethodToolStripMenuItem;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage csInterpreterTab;
+        private System.Windows.Forms.TabPage pyInterpreterTab;
+        private DevExpress.XtraRichEdit.RichEditControl pyEditControl;
+        private DevExpress.XtraRichEdit.RichEditControl csEditControl;
     }
 }
