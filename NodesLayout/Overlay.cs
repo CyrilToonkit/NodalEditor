@@ -47,14 +47,7 @@ namespace TK.NodalEditor.NodesLayout
 
             if(ConnectCutter != null)
             {
-                ConnectCutter[0].X = (int)(ConnectCutter[0].X * (Layout.LayoutSize));
-                ConnectCutter[0].Y = (int)(ConnectCutter[0].Y * (Layout.LayoutSize));
-                e.DrawLine(Hash, ConnectCutter[0], ConnectCutter[1]);
-                //e.DrawLine(Hash, new Point((int)(ConnectCutter[0].X * Layout.LayoutSize), (int)(ConnectCutter[0].Y * Layout.LayoutSize)), ConnectCutter[1]);
-                
-                //Layout.cutterPath = new GraphicsPath();
-                //Layout.cutterPath.AddLine(ConnectCutter[0], ConnectCutter[1]);
-                //e.DrawPath(Hash, Layout.cutterPath);
+                e.DrawLine(Hash, new Point((int)(ConnectCutter[0].X * Layout.LayoutSize), (int)(ConnectCutter[0].Y * Layout.LayoutSize)), new Point((int)(ConnectCutter[1].X * Layout.LayoutSize), (int)(ConnectCutter[1].Y * Layout.LayoutSize)));
             }
             
             // LINKS *********************************************************

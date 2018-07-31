@@ -1072,8 +1072,8 @@ namespace TK.NodalEditor
 
             Node node = (Node)Activator.CreateInstance(Node.GetType(), new object[0], new object[0]);
             node.Copy(Node, true);
-            node.UIx += 20;
-            node.UIy += 20;
+            //node.UIx += 20;
+            //node.UIy += 20;
             if (node is Compound)
             {
                 (node as Compound).ResolveAll(false);

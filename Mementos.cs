@@ -52,8 +52,8 @@ namespace TK.NodalEditor
 
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
-            IMemento<NodalDirector> inverse = new ReAddNodeMemento(removed, parent, connections, XOffset, YOffset);
-            target._AddNode(removed, parent, connections, XOffset, YOffset);
+            IMemento<NodalDirector> inverse = new ReAddNodeMemento(removed, parent, connections, 0, 0);
+            target._AddNode(removed, parent, connections, 0, 0);
             return inverse;
         }
     }

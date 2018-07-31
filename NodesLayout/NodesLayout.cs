@@ -682,18 +682,20 @@ namespace TK.NodalEditor.NodesLayout
 
                         if (overlay.DragSelect)
                         {
-                            if (isCutted)
+                            if (isCutted) //Link cutter
                             {
                                 List<Link> linkToCut = new List<Link>();
-                                linkToCut = GetHitLink2(overlay.ConnectCutter[0], overlay.ConnectCutter[1]);
+                                linkToCut = GetHitLink2(new Point ((int)(overlay.ConnectCutter[0].X*LayoutSize), (int)(overlay.ConnectCutter[0].Y * LayoutSize)), new Point((int)(overlay.ConnectCutter[1].X * LayoutSize), (int)(overlay.ConnectCutter[1].Y * LayoutSize)));
                                 overlay.ConnectCutter = null;
                                 if (linkToCut.Count != 0)
                                 {
+                                    NodalDirector.Get().history.BeginCompoundDo();
                                     foreach (Link link in linkToCut)
                                     {
                                         NodalDirector.Disconnect(link.Target.Owner.FullName, link.Target.FullName, link.Source.Owner.FullName, link.Source.FullName);
-                                        
+                                        NodalDirector.Get().history.Do(new DisconnectMemento(link));
                                     }
+                                    NodalDirector.Get().history.EndCompoundDo();
                                 }
                             }
                             else
@@ -1088,8 +1090,14 @@ namespace TK.NodalEditor.NodesLayout
                             if ((Control.ModifierKeys == (Keys.Shift | Keys.Alt)) && isRectDrag == false)
                             {
                                 isCutted = true;
-                                overlay.ConnectCutter = new Point[] { HitPoint, e.Location };
-                                //overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X * (LayoutSize)), (int)(HitPoint.Y * (LayoutSize))), e.Location };
+
+                                if (overlay.ConnectCutter == null)
+                                    overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / (LayoutSize)), (int)(HitPoint.Y / (LayoutSize))), new Point((int)(e.Location.X / (LayoutSize)), (int)(e.Location.Y / (LayoutSize))) };
+                                else
+                                    overlay.ConnectCutter[1] = new Point((int)(e.Location.X / (LayoutSize)), (int)(e.Location.Y / (LayoutSize)));
+
+                                //overlay.ConnectCutter = new Point[] { HitPoint, e.Location };
+                                //overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / 1/*(LayoutSize)*/), (int)(HitPoint.Y / 1/*(LayoutSize)*/)), new Point((int)(e.Location.X / (LayoutSize)), (int)(e.Location.Y / (LayoutSize))) };
                                 //overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / (LayoutSize)), (int)(HitPoint.Y / (LayoutSize))), e.Location };
                             }
                             else
@@ -2147,7 +2155,6 @@ namespace TK.NodalEditor.NodesLayout
         {
             if (hitNode != null)
             {
-                Console.WriteLine("Je suis là");
                 ConnectedNode = sender as Node;
                 Point Position = PointToScreen(e.Location);
                 Point parentPos = Parent.PointToClient(Position);
@@ -2197,7 +2204,6 @@ namespace TK.NodalEditor.NodesLayout
 
                 if (IsDragging)
                 {
-                    Console.WriteLine("Je suis là 2");
                     Point Translation = new Point(Position.X - HitPoint.X, Position.Y - HitPoint.Y);
                     if (!HasMoved && (Math.Abs(Translation.X) + Math.Abs(Translation.Y) > 3))
                     {
@@ -2229,7 +2235,6 @@ namespace TK.NodalEditor.NodesLayout
 
                     if (HasMoved)
                     {
-                        Console.WriteLine("Je suis là 3");
                         List<Node> selNodes = Selection.GetSelectedNodes();
 
                         foreach (Node NUctrl in selNodes)
@@ -2667,10 +2672,6 @@ namespace TK.NodalEditor.NodesLayout
         private List<Link> GetHitLink2(Point inPoint1, Point inPoint2)
         {
             List<Link> hitLinks = new List<Link>();
-
-            //PointF[] pathPoint = inPath.PathPoints;
-            //Point pt1 = new Point((int)pathPoint[0].X, (int)pathPoint[0].Y);
-            //Point pt2 = new Point((int)pathPoint[1].X, (int)pathPoint[1].Y);
 
             foreach (KeyValuePair<Link, GraphicsPath> item in paths)
             {
@@ -3934,21 +3935,55 @@ namespace TK.NodalEditor.NodesLayout
             //Manager.ClipBoard = Selection.GetSelectedNodes();
         }
 
+        //private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    Point toClient = PointToClient(Cursor.Position);
+        //    Point Offset = new Point(toClient.X - (int)Manager.ClipBoard[0].UIx, toClient.Y - (int)Manager.ClipBoard[0].UIy);
+
+        //    foreach (Node node in Manager.ClipBoard)
+        //    {
+        //        Manager.Copy(node, Manager.CurCompound, (int)((node.UIx + Offset.X - 30) / LayoutSize), (int)((node.UIy + Offset.Y - 10) / LayoutSize));
+        //    }
+        //    ChangeFocus(true);
+        //}
+
         private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Point toClient = PointToClient(Cursor.Position);
-            Point Offset = new Point(toClient.X - (int)Manager.ClipBoard[0].UIx, toClient.Y - (int)Manager.ClipBoard[0].UIy);
+            Point Offset = new Point((int)(toClient.X / LayoutSize) - (int)Manager.ClipBoard[0].UIx, (int)(toClient.Y / LayoutSize) - (int)Manager.ClipBoard[0].UIy);
 
-            foreach (Node node in Manager.ClipBoard)
-            {
-                Manager.Copy(node, Manager.CurCompound, (int)((node.UIx + Offset.X - 30) / LayoutSize), (int)((node.UIy + Offset.Y - 10) / LayoutSize));
-            }
-
-            ChangeFocus(true);
+            NodalDirector.Paste(Offset.X, Offset.Y);
         }
 
 
 
+
+        //private void pasteRenamedToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    RichDialogResult rslt = TKMessageBox.ShowInput(InputTypes.String, "Please provide string to search", "Paste renamed search string");
+        //    if (rslt.Result != DialogResult.OK)
+        //    {
+        //        return;
+        //    }
+        //    string search = (string)rslt.Data;
+
+        //    rslt = TKMessageBox.ShowInput(InputTypes.String, "Please provide string to replace", "Paste renamed replace string");
+        //    if (rslt.Result != DialogResult.OK)
+        //    {
+        //        return;
+        //    }
+        //    string replace = (string)rslt.Data;
+
+        //    Point toClient = PointToClient(Cursor.Position);
+        //    Point Offset = new Point(toClient.X - (int)Manager.ClipBoard[0].UIx, toClient.Y - (int)Manager.ClipBoard[0].UIy);
+
+        //    foreach (Node node in Manager.ClipBoard)
+        //    {
+        //        Manager.Copy(node, Manager.CurCompound, (int)((node.UIx + Offset.X - 30) / LayoutSize), (int)((node.UIy + Offset.Y - 10) / LayoutSize), search, replace);
+        //    }
+
+        //    ChangeFocus(true);
+        //}
 
         private void pasteRenamedToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -3969,12 +4004,7 @@ namespace TK.NodalEditor.NodesLayout
             Point toClient = PointToClient(Cursor.Position);
             Point Offset = new Point(toClient.X - (int)Manager.ClipBoard[0].UIx, toClient.Y - (int)Manager.ClipBoard[0].UIy);
 
-            foreach (Node node in Manager.ClipBoard)
-            {
-                Manager.Copy(node, Manager.CurCompound, (int)((node.UIx + Offset.X - 30) / LayoutSize), (int)((node.UIy + Offset.Y - 10) / LayoutSize), search, replace);
-            }
-
-            ChangeFocus(true);
+            NodalDirector.Paste(Offset.X - 30, Offset.Y - 10, search, replace);
         }
 
         //private void exposeAllPortsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4700,6 +4730,18 @@ namespace TK.NodalEditor.NodesLayout
             return m;
         }
 
+        /// <summary>
+        /// Clipping line Algorithm (source : wikipedia)
+        /// </summary>
+        /// <param name="xmin">Left of rectangle</param>
+        /// <param name="ymin">Bottom of rectangle</param>
+        /// <param name="xmax">Right of rectangle</param>
+        /// <param name="ymax">Top of rectangle</param>
+        /// <param name="x1">Line 1 first point</param>
+        /// <param name="y1">Line 1 Second point</param>
+        /// <param name="x2">Line 2 first point</param>
+        /// <param name="y2">Line 2 Second point</param>
+        /// <returns></returns>
         private List<PointF> liang_barsky_clipper(float xmin, float ymin, float xmax, float ymax,
                                   float x1, float y1, float x2, float y2)
         {
@@ -4942,6 +4984,12 @@ namespace TK.NodalEditor.NodesLayout
             }
         }
 
+        /// <summary>
+        /// Bresenham Algorithm
+        /// </summary>
+        /// <param name="p0">Line 1 first point</param>
+        /// <param name="p1">Line 1 second point</param>
+        /// <returns></returns>
         List<Point> bresenham(Point p0,Point p1)
         {
             List<Point> line = new List<Point>();
@@ -4954,9 +5002,6 @@ namespace TK.NodalEditor.NodesLayout
 
             return line;
         }
-
-
-
 
 
     }

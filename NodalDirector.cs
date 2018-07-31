@@ -1703,6 +1703,14 @@ namespace TK.NodalEditor
             return Paste(inXOffset, inYOffset, null, null);
         }
 
+        /// <summary>
+        /// Paste nodes
+        /// </summary>
+        /// <param name="inXOffset"></param>
+        /// <param name="inYOffset"></param>
+        /// <param name="inSearch"></param>
+        /// <param name="inReplace"></param>
+        /// <returns></returns>
         public static List<string> Paste(int inXOffset, int inYOffset, string inSearch, string inReplace)
         {
             if (_instance.manager == null)
@@ -1715,9 +1723,6 @@ namespace TK.NodalEditor
 
             List<string> pasteNodeName = new List<string>();
 
-            //int XOffset = inXOffset - (int)_instance.manager.ClipBoard[0].UIx;
-            //int YOffset = inYOffset - (int)_instance.manager.ClipBoard[0].UIy;
-
             if (_instance.manager.ClipBoard != null)
             {
                 _instance.history.BeginCompoundDo();
@@ -1726,8 +1731,9 @@ namespace TK.NodalEditor
                     foreach (Node node in _instance.manager.ClipBoard)
                     {
                         Node copyNode = new Node();
-                        copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)(node.UIx + ((inXOffset) / _instance.layout.LayoutSize)), (int)(node.UIy + ((inYOffset) / _instance.layout.LayoutSize)));
-                        if(copyNode == null)
+                        //copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)((node.UIx + (inXOffset)) / _instance.layout.LayoutSize), (int)((node.UIy + (inYOffset)) / _instance.layout.LayoutSize));
+                        copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)(node.UIx + (inXOffset)), (int)(node.UIy + (inYOffset)));
+                        if (copyNode == null)
                         {
                             throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste");
                         }
@@ -1740,7 +1746,7 @@ namespace TK.NodalEditor
                     foreach (Node node in _instance.manager.ClipBoard)
                     {
                         Node copyNode = new Node();
-                        copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)(node.UIx + ((inXOffset) / _instance.layout.LayoutSize)), (int)(node.UIy + ((inYOffset) / _instance.layout.LayoutSize)), inSearch, inReplace);
+                        copyNode = _instance.manager.Copy(node, _instance.manager.CurCompound, (int)((node.UIx + (inXOffset)) / _instance.layout.LayoutSize), (int)((node.UIy + (inYOffset)) / _instance.layout.LayoutSize), inSearch, inReplace);
                         if (copyNode == null)
                         {
                             throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste");
@@ -1760,7 +1766,7 @@ namespace TK.NodalEditor
                 return null;
 
             _instance.layout.ChangeFocus(true);
-            _instance.layout.Frame(_instance.manager.CurCompound.Nodes);
+            //_instance.layout.Frame(_instance.manager.CurCompound.Nodes);
             _instance.layout.Invalidate();
             return pasteNodeName;
         }
