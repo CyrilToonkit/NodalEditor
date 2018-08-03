@@ -104,6 +104,7 @@
     <Compile Include="NodesFramework\AlphaSorter.cs" />
     <Compile Include="NodesFramework\LevelSorter.cs" />
     <Compile Include="NodesFramework\NodeConnexions.cs" />
+    <Compile Include="NodesFramework\Ports\PortsSorter.cs" />
     <Compile Include="NodesLayout\DataMap.cs">
       <SubType>Form</SubType>
     </Compile>

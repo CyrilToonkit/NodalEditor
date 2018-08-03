@@ -28,9 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TestForm));
-            this.tgvImageList = new System.Windows.Forms.ImageList(this.components);
+            this.tgvImageList = new System.Windows.Forms.ImageList();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,6 +51,7 @@
             this.pyEditControl = new DevExpress.XtraRichEdit.RichEditControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.nodalExecuteBT = new System.Windows.Forms.ToolStripButton();
+            this.propertyGridControl1 = new DevExpress.XtraVerticalGrid.PropertyGridControl();
             this.tK_NodalEditorUCtrl1 = new TK.NodalEditor.NodesLayout.TK_NodalEditorUCtrl();
             this.menuStrip1.SuspendLayout();
             this.collapsibleGroup1.SuspendLayout();
@@ -59,6 +59,7 @@
             this.csInterpreterTab.SuspendLayout();
             this.pyInterpreterTab.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.propertyGridControl1)).BeginInit();
             this.SuspendLayout();
             // 
             // tgvImageList
@@ -230,6 +231,11 @@
             this.nodalExecuteBT.Name = "nodalExecuteBT";
             this.nodalExecuteBT.Click += new System.EventHandler(this.nodalExecuteBT_Click);
             // 
+            // propertyGridControl1
+            // 
+            resources.ApplyResources(this.propertyGridControl1, "propertyGridControl1");
+            this.propertyGridControl1.Name = "propertyGridControl1";
+            // 
             // tK_NodalEditorUCtrl1
             // 
             resources.ApplyResources(this.tK_NodalEditorUCtrl1, "tK_NodalEditorUCtrl1");
@@ -239,6 +245,7 @@
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.propertyGridControl1);
             this.Controls.Add(this.tK_NodalEditorUCtrl1);
             this.Controls.Add(this.collapsibleGroup1);
             this.Controls.Add(this.menuStrip1);
@@ -253,6 +260,7 @@
             this.pyInterpreterTab.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.propertyGridControl1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -283,5 +291,6 @@
         private System.Windows.Forms.TabPage pyInterpreterTab;
         private DevExpress.XtraRichEdit.RichEditControl pyEditControl;
         private DevExpress.XtraRichEdit.RichEditControl csEditControl;
+        private DevExpress.XtraVerticalGrid.PropertyGridControl propertyGridControl1;
     }
 }

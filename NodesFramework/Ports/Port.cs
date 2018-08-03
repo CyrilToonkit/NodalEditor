@@ -270,6 +270,7 @@ namespace TK.NodalEditor
         /// </summary>
         [CategoryAttribute("Debug")]
         [DescriptionAttribute("Dependencies of the port")]
+        [ReadOnlyAttribute(true)]
         public List<Link> Dependencies
         {
             get { return _dependencies; }

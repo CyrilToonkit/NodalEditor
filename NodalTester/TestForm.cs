@@ -8,6 +8,11 @@ using DevExpress.XtraRichEdit.API.Native;
 using System.Drawing;
 using DevExpress.XtraRichEdit.Services;
 using RichEditSyntax;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using DevExpress.XtraEditors.Repository;
+using DevExpress.XtraEditors.Controls;
+using System.ComponentModel.Design;
 
 namespace NodalTester
 {
@@ -72,7 +77,452 @@ namespace NodalTester
             manager.NewLayout();
             manager.AddNode(0, manager.Root, 50, 50);
             tK_NodalEditorUCtrl1.Init("C:\\Rigs\\NodesLayout", manager);
+
+            tK_NodalEditorUCtrl1.Layout.SelectionChangedEvent += Layout_SelectionChangedEvent;
+            propertyGridControl1.CellValueChanged += PropertyGridControl1_CellValueChanged;
+            //RepositoryItemButtonEdit edit = new RepositoryItemButtonEdit();//buttonEdit1.Properties.Buttons
+            //propertyGridControl1.DefaultEditors.Add(typeof(DevExpress.XtraEditors.Controls.EditorButtonCollection), edit);
+            //edit.ButtonClick += new ButtonPressedEventHandler(edit_ButtonClick);
+
+
+            TK.GraphComponents.CustomData.MyCollectionEditor.MyFormClosed += new TK.GraphComponents.CustomData.MyCollectionEditor.MyFormClosedEventHandler(MyCollectionEditor_MyFormClosed);
+
+
+
+
         }
+
+        private void PropertyGridControl1_CellValueChanged(object sender, DevExpress.XtraVerticalGrid.Events.CellValueChangedEventArgs e)
+        {
+            //Console.WriteLine("CellValueChanged " + e.CellIndex.ToString() + " " + e.Row.Name);
+            //for(int i = 0; i< propertyGridControl1.RecordCount; i++)
+            //{
+            //    Console.WriteLine("properties "+ e.Row.Name + " "+propertyGridControl1.GetCellValue(e.Row,i) );
+            //}
+
+            char[] rmv = { 'r', 'o', 'w' };
+            string propertyName = e.Row.Name.TrimStart(rmv);
+
+            List<NodeBase> nodes = tK_NodalEditorUCtrl1.Layout.Selection.Selection;
+            foreach(Node node in nodes)
+            {
+                NodalDirector.SetProperty(node.FullName, propertyName, propertyGridControl1.GetCellValue(e.Row, e.CellIndex));
+            }
+            Console.WriteLine("properties "+ e.Row.Name + " " + e.Value +" "+ propertyGridControl1.GetCellValue(e.Row, e.CellIndex));
+        }
+
+        
+
+        private void Layout_SelectionChangedEvent(object sender, SelectionChangedEventArgs e)
+        {
+            object[] obj = new object[e.Selection.Count];
+            
+            List<string> types = new List<string>();
+            int i = 0;
+
+            foreach (Node nd in e.Selection)
+            {
+                if (!types.Contains(nd.NativeName))
+                {
+                    types.Add(nd.NativeName);
+                }
+
+                Node node = (Node)Activator.CreateInstance(nd.GetType(), new object[0]);
+
+                node.Copy(nd, false);
+
+                //if (node is Compound)
+                //{
+                //    (node as RigCompound).Active = false;
+                //}
+                //else
+                //{
+                //    (node as RigNode).Active = false;
+                //}
+
+                obj[i] = node;
+                i++;
+            }
+            
+            propertyGridControl1.SelectedObjects = obj;
+            //propertyGridControl1.SelectedObjects = new object[] { e.Selection };
+        }
+
+
+
+        void MyCollectionEditor_MyFormClosed(object sender, FormClosedEventArgs e)
+        {
+
+
+            Console.WriteLine("FORM CLOSED");
+            TK.GraphComponents.CustomData.MyCollectionEditor closedCollection = sender as TK.GraphComponents.CustomData.MyCollectionEditor;
+            Console.WriteLine("Properties "+ closedCollection.propertyLabel);
+            List<NodeBase> nodes = tK_NodalEditorUCtrl1.Layout.Selection.Selection;
+            int k = 0;
+            
+            foreach (Node node in nodes)
+            {
+                Console.WriteLine("Node name " + node.FullName);
+                Port portCopy;
+                PortObj portObjCopy;
+                switch (closedCollection.propertyLabel)
+                {
+                    case "Inputs":
+                        int i = 0;
+                        node.Inputs.Sort(new PortsSorter((propertyGridControl1.SelectedObjects[k] as Node).Inputs));
+                        foreach (Port port in node.Inputs)
+                        {
+                            portCopy = (propertyGridControl1.SelectedObjects[k] as Node).Inputs[i];
+
+                            //Visible
+                            if (portCopy.Visible != port.Visible)
+                            {
+                                NodalDirector.SetPortProperty(node.FullName, port.FullName, false, "Visible", portCopy.Visible);
+                                //port.Visible = portCopy.Visible;
+                            }
+                            i++;
+                        }
+                        node.RefreshPortsIndices();
+                        node.Parent.RefreshPorts();
+                        tK_NodalEditorUCtrl1.Layout.InvalidateAll();
+                        break;
+                    case "Outputs":
+                        i = 0;
+                        node.Outputs.Sort(new PortsSorter((propertyGridControl1.SelectedObjects[k] as Node).Outputs));
+                        foreach (Port port in node.Outputs)
+                        {
+                            portCopy = (propertyGridControl1.SelectedObjects[k] as Node).Outputs[i];
+
+                            //Visible
+                            if (portCopy.Visible != port.Visible)
+                            {
+                                NodalDirector.SetPortProperty(node.FullName, port.FullName, true, "Visible", portCopy.Visible);
+                                //port.Visible = portCopy.Visible;
+                            }
+                            i++;
+                        }
+                        node.RefreshPortsIndices();
+                        node.Parent.RefreshPorts();
+                        tK_NodalEditorUCtrl1.Layout.InvalidateAll();
+                        break;
+                    case "Elements":
+                        //Re-order
+                        //node.Elements.Sort(new ElementsSorter((propertyGridControl1.SelectedObjects[k] as Node).Elements));
+
+                        //Update changed Values
+                        i = 0;
+                        foreach (PortObj port in node.Elements)
+                        {
+                            portObjCopy = (propertyGridControl1.SelectedObjects[k] as Node).Elements[i];
+                        }
+                        break;
+                }
+                k++;
+            }
+
+            //RigNode edited = null;
+
+            //bool updateDisplays = false;
+            //bool updateSizes = false;
+            //bool updateRig = false;
+            //bool updateBehaviour = true;
+
+            //if (storedRig.rig != null && storedRig.inspecting)
+            //{
+            //    if (!closedCollection.Cancelled)
+            //    {
+            //        edited = storedRig.rig;
+            //        updateDisplays = closedCollection.propertyLabel == "Elements";
+            //        storedRig.inspecting = false;
+            //        SavedRig.Copy(storedRig.rig, true);
+            //    }
+            //    else
+            //    {
+            //        storedRig.rig.Copy(SavedRig, true);
+            //    }
+            //}
+            //else
+            //{
+            //    if (!closedCollection.Cancelled && inspector.Inspected != null && inspector.Inspected.Count > 0 && inspector.Inspected[0].NodeType == "Node" && inspector.Inspected[0].Parent != null)
+            //    {
+            //        if (closedCollection.propertyLabel == "Helpers")
+            //        {
+            //            foreach (Node node in inspector.Inspected)
+            //            {
+            //                edited = node as RigNode;
+            //                if (edited != null)
+            //                {
+            //                    edited.GuideHelpers = (inspector.Mediator as RigNode).GuideHelpers.Copy();
+            //                    if (edited.CurrentState == ApparatusState.Guide)
+            //                    {
+            //                        edited.Update();
+            //                    }
+            //                }
+            //            }
+            //            return;
+            //        }
+
+            //        edited = inspector.Inspected[0] as RigNode;
+            //        edited.ReadDisplays();
+
+            //        Port curPort;
+            //        RigElement curPortObj;
+            //        CG_PortParam curPortParam;
+            //        int counter = 0;
+
+            //        switch (closedCollection.propertyLabel)
+            //        {
+            //            case "Inputs":
+            //                //Re-order
+            //                edited.Inputs.Sort(new PortsSorter(inspector.Mediator.Inputs));
+
+            //                //Update changed Values
+            //                counter = 0;
+            //                foreach (Port port in edited.Inputs)
+            //                {
+            //                    //Name
+            //                    curPort = inspector.Mediator.Inputs[counter];
+            //                    if (curPort.Name != port.Name)
+            //                    {
+            //                        port.Name = curPort.Name;
+            //                    }
+
+            //                    //Visible
+            //                    if (curPort.Visible != port.Visible)
+            //                    {
+            //                        port.Visible = curPort.Visible;
+            //                    }
+
+            //                    counter++;
+            //                }
+
+            //                edited.RefreshPortsIndices();
+            //                edited.Parent.RefreshPorts();
+
+            //                RigsLayout.InvalidateAll();
+            //                break;
+            //            case "Outputs":
+            //                //Re-order
+            //                edited.Outputs.Sort(new PortsSorter(inspector.Mediator.Outputs));
+
+            //                //Update changed Values
+            //                counter = 0;
+            //                foreach (Port port in edited.Outputs)
+            //                {
+            //                    //Name
+            //                    curPort = inspector.Mediator.Outputs[counter];
+            //                    if (curPort.Name != port.Name)
+            //                    {
+            //                        port.Name = curPort.Name;
+            //                    }
+
+            //                    //Visible
+            //                    if (curPort.Visible != port.Visible)
+            //                    {
+            //                        port.Visible = curPort.Visible;
+            //                    }
+
+            //                    counter++;
+            //                }
+
+            //                edited.RefreshPortsIndices();
+            //                edited.Parent.RefreshPorts();
+
+            //                RigsLayout.InvalidateAll();
+            //                break;
+            //            case "Elements":
+            //                //Re-order
+            //                edited.Elements.Sort(new ElementsSorter(inspector.Mediator.Elements));
+
+            //                //Update changed Values
+            //                counter = 0;
+            //                foreach (PortObj port in edited.Elements)
+            //                {
+            //                    RigElement portElem = port as RigElement;
+            //                    if (portElem != null)
+            //                    {
+            //                        curPortObj = inspector.Mediator.Elements[counter] as RigElement;
+
+            //                        //GuideSize
+            //                        if (curPortObj.GuideSize != portElem.GuideSize)
+            //                        {
+            //                            portElem.GuideSize = curPortObj.GuideSize;
+            //                            updateSizes = true;
+            //                        }
+
+            //                        //LOD
+            //                        if (curPortObj.LOD != portElem.LOD)
+            //                        {
+            //                            portElem.LOD = curPortObj.LOD;
+            //                            updateDisplays = true;
+            //                        }
+
+            //                        //Mirror
+            //                        if (curPortObj.Mirror != portElem.Mirror)
+            //                        {
+            //                            portElem.Mirror = curPortObj.Mirror;
+            //                            if (edited.CurrentState == ApparatusState.Rig && edited.HorizontalLocation == HorizontalLocations.Right || edited.VerticaLocation == VerticalLocations.Bottom || edited.DepthLocation == DepthLocations.Back)
+            //                            {
+            //                                updateRig = true;
+            //                            }
+            //                        }
+
+            //                        //MirrorRefObject
+            //                        if (curPortObj.MirrorRefObject != portElem.MirrorRefObject)
+            //                        {
+            //                            portElem.MirrorRefObject = curPortObj.MirrorRefObject;
+            //                        }
+
+            //                        //MirrorStrategy
+            //                        if (curPortObj.MirrorStrategy != portElem.MirrorStrategy)
+            //                        {
+            //                            portElem.MirrorStrategy = curPortObj.MirrorStrategy;
+            //                            if (edited.CurrentState == ApparatusState.Rig && edited.HorizontalLocation == HorizontalLocations.Right || edited.VerticaLocation == VerticalLocations.Bottom || edited.DepthLocation == DepthLocations.Back)
+            //                            {
+            //                                updateRig = true;
+            //                            }
+            //                        }
+
+            //                        //Size
+            //                        if (curPortObj.Size != portElem.Size)
+            //                        {
+            //                            portElem.Size = curPortObj.Size;
+            //                            updateSizes = true;
+            //                        }
+
+            //                        //CustomColor
+            //                        if (curPortObj.CustomColor != portElem.CustomColor)
+            //                        {
+            //                            portElem.CustomColor = curPortObj.CustomColor;
+            //                            updateDisplays = true;
+            //                        }
+
+            //                        //GuideVis
+            //                        if (curPortObj.OverrideGuideVis != portElem.OverrideGuideVis)
+            //                        {
+            //                            portElem.OverrideGuideVis = curPortObj.OverrideGuideVis;
+            //                        }
+
+            //                        //OverrideDisplay
+            //                        if (curPortObj.OverrideDisplay != portElem.OverrideDisplay)
+            //                        {
+            //                            portElem.OverrideDisplay = curPortObj.OverrideDisplay;
+            //                        }
+
+            //                        //CustomDisplay
+            //                        if (curPortObj.CustomDisplay != portElem.CustomDisplay)
+            //                        {
+            //                            portElem.CustomDisplay = curPortObj.CustomDisplay;
+            //                            updateDisplays = true;
+            //                        }
+
+            //                        //SpecialBehaviour
+            //                        if (curPortObj.SpecialBehavior != portElem.SpecialBehavior)
+            //                        {
+            //                            portElem.SpecialBehavior = curPortObj.SpecialBehavior;
+            //                            updateBehaviour = true;
+            //                        }
+
+            //                        //AbsoluteOffset
+            //                        if (!curPortObj.AbsoluteOffset.FuzzyEquals(portElem.AbsoluteOffset))
+            //                        {
+            //                            portElem.AbsoluteOffset = curPortObj.AbsoluteOffset.Copy();
+            //                            if (edited.CurrentState == ApparatusState.Rig)
+            //                            {
+            //                                updateRig = true;
+            //                            }
+            //                        }
+
+            //                        //AbsoluteOffsetMirror
+            //                        if (curPortObj.AbsoluteOffsetMirror != portElem.AbsoluteOffsetMirror)
+            //                        {
+            //                            portElem.AbsoluteOffsetMirror = curPortObj.AbsoluteOffsetMirror;
+            //                        }
+
+            //                        //AbsoluteOffsetCompensation
+            //                        if (curPortObj.AbsoluteOffsetCompensation != portElem.AbsoluteOffsetCompensation)
+            //                        {
+            //                            portElem.AbsoluteOffsetCompensation = curPortObj.AbsoluteOffsetCompensation;
+            //                            if (edited.CurrentState == ApparatusState.Rig)
+            //                            {
+            //                                updateRig = true;
+            //                            }
+            //                        }
+
+            //                        //Deepness
+            //                        if (curPortObj.Deepness != portElem.Deepness)
+            //                        {
+            //                            portElem.Deepness = curPortObj.Deepness;
+            //                            if (edited.CurrentState == ApparatusState.Rig)
+            //                            {
+            //                                updateRig = true;
+            //                            }
+            //                        }
+            //                    }
+            //                    else
+            //                    {
+            //                        CG_PortParam portParam = port as CG_PortParam;
+            //                        if (portParam != null)
+            //                        {
+            //                            curPortParam = inspector.Mediator.Elements[counter] as CG_PortParam;
+
+            //                            //Value
+            //                            if (portParam.Value != curPortParam.Value)
+            //                            {
+            //                                portParam.Value = curPortParam.Value;
+            //                                portParam.OwnerRig.ValueChanged(portParam);
+            //                            }
+
+            //                            //ValuesLabels
+            //                            if (TypesHelper.Join(portParam.ValuesLabels) != TypesHelper.Join(curPortParam.ValuesLabels))
+            //                            {
+            //                                portParam.ValuesLabels = curPortParam.ValuesLabels;
+            //                                if (edited.CurrentState == ApparatusState.Rig)
+            //                                {
+            //                                    updateRig = true;
+            //                                }
+            //                                //portParam.OwnerRig.DefinitionChanged(portParam);
+            //                            }
+            //                        }
+            //                    }
+            //                    counter++;
+            //                }
+            //                break;
+            //        }
+            //    }
+            //}
+
+            ////What about : Name ? DisplayOffset ? Trans ?
+            //if (edited != null)
+            //{
+            //    if (updateDisplays)
+            //    {
+            //        edited.UpdateDisplays(true);
+            //    }
+
+            //    if (updateSizes)
+            //    {
+            //        edited.ResizeElements();
+            //    }
+
+            //    if (updateRig)
+            //    {
+            //        edited.Update();
+            //    }
+            //    else if (updateBehaviour)
+            //    {
+            //        edited.UpdateElements();
+            //    }
+            //}
+        }
+
+
+
+
+
+
+
+
 
         private void InitializeCodeEditors()
         {
@@ -175,10 +625,10 @@ namespace NodalTester
 
         private void nodalExecuteBT_Click(object sender, EventArgs e)
         {
+            NodalDirector.Get().verbose = false;
+
             try
             {
-                NodalDirector.Get().verbose = false;
-
                 if (tabControl1.SelectedIndex == 0)
                 {
                     NodalDirector.Evaluate(csEditControl.Text.Replace("\f", "\n"));
@@ -190,9 +640,11 @@ namespace NodalTester
             }
             catch
             {
-                NodalDirector.Get().verbose = true;
+                
                 throw;
             }
+
+            NodalDirector.Get().verbose = true;
         }
 
         private void undoToolStripMenuItem_Click(object sender, EventArgs e)

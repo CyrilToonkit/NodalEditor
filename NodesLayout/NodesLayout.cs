@@ -1095,10 +1095,6 @@ namespace TK.NodalEditor.NodesLayout
                                     overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / (LayoutSize)), (int)(HitPoint.Y / (LayoutSize))), new Point((int)(e.Location.X / (LayoutSize)), (int)(e.Location.Y / (LayoutSize))) };
                                 else
                                     overlay.ConnectCutter[1] = new Point((int)(e.Location.X / (LayoutSize)), (int)(e.Location.Y / (LayoutSize)));
-
-                                //overlay.ConnectCutter = new Point[] { HitPoint, e.Location };
-                                //overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / 1/*(LayoutSize)*/), (int)(HitPoint.Y / 1/*(LayoutSize)*/)), new Point((int)(e.Location.X / (LayoutSize)), (int)(e.Location.Y / (LayoutSize))) };
-                                //overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / (LayoutSize)), (int)(HitPoint.Y / (LayoutSize))), e.Location };
                             }
                             else
                             {
