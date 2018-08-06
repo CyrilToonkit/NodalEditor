@@ -21,6 +21,9 @@ namespace TK.NodalEditor
         public bool verbose = true;
 
         public UndoRedoHistory<NodalDirector> history;
+        public UndoRedoHistory<NodalDirector> historyUI;
+
+        public bool haveChanged = false;
 
         #region Singleton declaration, getters and constructor
         protected static NodalDirector _instance = null;
@@ -28,6 +31,7 @@ namespace TK.NodalEditor
         protected NodalDirector()
         {
             history = new UndoRedoHistory<NodalDirector>(this);
+            historyUI = new UndoRedoHistory<NodalDirector>(this);
         }
 
         public static NodalDirector Get()
@@ -61,6 +65,11 @@ namespace TK.NodalEditor
             return _instance.history.CanUndo;
         }
 
+        public static bool CanUndoUI()
+        {
+            return _instance.historyUI.CanUndo;
+        }
+
         /// <summary>
         /// Checks if there are any stored state available on the redo stack.
         /// </summary>
@@ -68,6 +77,11 @@ namespace TK.NodalEditor
         public static bool CanRedo()
         {
             return _instance.history.CanRedo;
+        }
+
+        public static bool CanRedoUI()
+        {
+            return _instance.historyUI.CanRedo;
         }
 
         /// <summary>
@@ -81,8 +95,18 @@ namespace TK.NodalEditor
                 _instance.history.Undo();
                 return true;
             }
-
             return false;
+        }
+
+        public static bool UndoUI()
+        {
+            if (_instance.historyUI.CanUndo)
+            {
+                _instance.historyUI.Undo();
+                return true;
+            }
+            return false;
+
         }
 
         /// <summary>
@@ -100,12 +124,23 @@ namespace TK.NodalEditor
             return false;
         }
 
+        public static bool RedoUI()
+        {
+            if (_instance.historyUI.CanRedo)
+            {
+                _instance.historyUI.Redo();
+                return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// Clear the entire undo and redo stacks.
         /// </summary>
         public static void ClearHistory()
         {
             _instance.history.Clear();
+            _instance.historyUI.Clear();
         }
 
         #endregion
@@ -523,6 +558,7 @@ namespace TK.NodalEditor
             _instance.layout.ChangeFocus(false);
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
             return nodeName;
         }
 
@@ -571,7 +607,7 @@ namespace TK.NodalEditor
             _instance.layout.Selection.Selection.Clear();
             _instance.layout.ChangeFocus(true);
             _instance.manager.Companion.EndProcess();
-
+            _instance.haveChanged = true;
             return true;
         }
 
@@ -611,6 +647,7 @@ namespace TK.NodalEditor
             _instance.layout.ChangeFocus(true);
             _instance.manager.Companion.EndProcess();
 
+            _instance.haveChanged = true;
             return true;
         }
 
@@ -669,6 +706,7 @@ namespace TK.NodalEditor
             _instance.layout.Frame(_instance.manager.CurCompound.Nodes);
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
             return newNode.FullName;
         }
 
@@ -749,6 +787,7 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
             return true;
         }
 
@@ -782,17 +821,27 @@ namespace TK.NodalEditor
             {
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
             }
-
+            
             Port portOut = nodeOut.GetPort(outPortName, true);
             Port portIn = nodeIn.GetPort(inPortName, false);
 
             if (portIn == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portIn = nodeIn.GetPort(inPortName2, false);
+                if (portIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                }
             }
             if (portOut == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
+                string outPortName2 = string.Format("{0}_{1}", outNodeName, outPortName);
+                portOut = nodeOut.GetPort(outPortName2, true);
+                if (portOut == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
+                }
             }
 
             string error = string.Empty;
@@ -809,6 +858,8 @@ namespace TK.NodalEditor
                 return true;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -939,6 +990,7 @@ namespace TK.NodalEditor
                 return true;
 
             _instance.layout.Invalidate();
+            _instance.haveChanged = true;
             return true;
         }
 
@@ -1047,6 +1099,140 @@ namespace TK.NodalEditor
                 return true;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
+            return true;
+        }
+
+        public static bool CopyLinks(string inNodeName)
+        {
+            _instance.manager.ClipBoardLink = null;
+
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("CopyLinks(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            //_instance.manager.ClipBoardLink = nodeIn.InDependencies;
+            //_instance.manager.ClipBoardLink.AddRange(nodeIn.OutDependencies);
+
+            _instance.manager.ClipBoardLink = new NodeConnexions(nodeIn);
+
+            if (_instance.layout == null)
+                return true;
+
+            _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
+            return true;
+        }
+
+        public static bool PasteLinks(string inNodeName)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("PasteLinks(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            if (_instance.manager.ClipBoardLink != null)
+            {
+                Node node = _instance.manager.GetNode(_instance.manager.ClipBoardLink.NodeFullName);
+                string error = string.Empty;
+                if (node != null)
+                {
+                    List<Link> links = node.InDependencies;
+                    links.AddRange(node.OutDependencies);
+                    if (links != null)
+                    {
+                        _instance.history.BeginCompoundDo();
+                        foreach (Link link in links)
+                        {
+                            if (link.Source.Owner == node)
+                            {
+                                foreach (Port port in nodeIn.Outputs)
+                                {
+                                    if (link.Source.PortObj.ShortName == port.PortObj.ShortName)
+                                    {
+                                        Link copyLink = (Link)Activator.CreateInstance(link.GetType(), new object[0]);
+                                        copyLink.Copy(link);
+                                        link.Target.Owner.Connect(link.Target.Index, nodeIn, port.Index, "", out error, copyLink);
+                                        _instance.history.Do(new CopyLinkMemento(copyLink));
+                                        //if (error.Length != 0)
+                                        //{
+                                        //    throw new NodalDirectorException(nom_fct + "\n" + "Cannot Copy the link");
+                                        //}
+                                    }
+                                }
+                            }
+                            else if (link.Target.Owner == node)
+                            {
+                                foreach (Port port in nodeIn.Inputs)
+                                {
+                                    if (link.Target.PortObj.ShortName == port.PortObj.ShortName)
+                                    {
+                                        Link copyLink = (Link)Activator.CreateInstance(link.GetType(), new object[0]);
+                                        copyLink.Copy(link);
+                                        nodeIn.Connect(port.Index, link.Source.Owner, link.Source.Index, "", out error, copyLink);
+                                        _instance.history.Do(new CopyLinkMemento(copyLink));
+
+                                        
+                                        //if (error.Length != 0)
+                                        //{
+                                        //    throw new NodalDirectorException(nom_fct + "\n" + "Cannot Copy the link");
+                                        //}
+                                    }
+                                }
+                            }
+                        }
+                        _instance.history.EndCompoundDo();
+
+                    }
+                    else
+                    {
+                        throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste Links, there is no links to paste");
+                    }
+                    //string errors = _instance.manager.ClipBoardLink.Reconnect(nodeIn);
+                    //if (!string.IsNullOrEmpty(errors))
+                    //{
+                    //    CompanionForwarder.Log(errors, LogSeverity.Error);
+                    //}
+                }
+                else
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste Links");
+                }
+            }
+            else
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste Links");
+            }
+
+            if (_instance.layout == null)
+                return false;
+
+            _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
             return true;
         }
 
@@ -1126,6 +1312,8 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
+
             return true;
         }
 
@@ -1190,6 +1378,8 @@ namespace TK.NodalEditor
                 return true;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -1259,6 +1449,8 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
+
             return true;
         }
 
@@ -1305,6 +1497,8 @@ namespace TK.NodalEditor
                 return true;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -1369,6 +1563,8 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
+
             return true;
         }
 
@@ -1408,6 +1604,8 @@ namespace TK.NodalEditor
                 return true;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -1463,6 +1661,8 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
+
             return true;
         }
 
@@ -1504,6 +1704,8 @@ namespace TK.NodalEditor
                 return true;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -1554,6 +1756,8 @@ namespace TK.NodalEditor
                 return true;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -1617,6 +1821,8 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
+
             return true;
         }
 
@@ -1657,6 +1863,8 @@ namespace TK.NodalEditor
                 return false;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -1701,6 +1909,8 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
+
             return nodeIn.FullName;
         }
 
@@ -1735,6 +1945,8 @@ namespace TK.NodalEditor
             }
 
             _instance.manager.ClipBoard = Nodes;
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -1809,8 +2021,13 @@ namespace TK.NodalEditor
 
             _instance.layout.ChangeFocus(true);
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
+
             return pasteNodeName;
         }
+
+
         public static Dictionary<string, string> propertyPossibilities = new Dictionary<string, string>()
         {
             {"name", "Name" },
@@ -2016,6 +2233,8 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
+
             return true;
         }
 
@@ -2100,7 +2319,12 @@ namespace TK.NodalEditor
 
             if (portIn == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portIn = nodeIn.GetPort(inPortName2, inIsOutput);
+                if (portIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                }
             }
 
             string value = GetPortPropertyPossibilities(inPropertyName);
@@ -2131,6 +2355,8 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
+
             return true;
         }
 
@@ -2155,7 +2381,12 @@ namespace TK.NodalEditor
 
             if (portIn == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portIn = nodeIn.GetPort(inPortName2, inIsOutput);
+                if (portIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                }
             }
 
             string value = "";
@@ -2168,14 +2399,14 @@ namespace TK.NodalEditor
 
             if (prop != null)
             {
-                AttributeCollection attributes = TypeDescriptor.GetProperties(nodeIn)[inPropertyName].Attributes;
+                AttributeCollection attributes = TypeDescriptor.GetProperties(portIn)[inPropertyName].Attributes;
                 if (attributes[typeof(BrowsableAttribute)].Equals(BrowsableAttribute.No))
                 {
                     throw new NodalDirectorException(nom_fct + "\n" + "Cannot Get Property");
                 }
                 else
                 {
-                    Console.WriteLine("Get " + prop.GetValue(nodeIn));
+                    Console.WriteLine("Get " + prop.GetValue(portIn));
                     return prop.GetValue(portIn);
                 }
             }
@@ -2235,6 +2466,8 @@ namespace TK.NodalEditor
                 return true;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -2374,6 +2607,8 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = true;
+
             return true;
         }
 
@@ -2401,7 +2636,7 @@ namespace TK.NodalEditor
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
-            _instance.history.Do(new MoveNodeMemento(nodeIn));
+            _instance.historyUI.Do(new MoveNodeMemento(nodeIn));
             nodeIn.UIx = (int)(inX * (1 / _instance.layout.LayoutSize));
             nodeIn.UIy = (int)(inY * (1 / _instance.layout.LayoutSize));
 
@@ -2409,6 +2644,8 @@ namespace TK.NodalEditor
                 return false;
 
             _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
 
             return true;
         }
@@ -2420,7 +2657,7 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool Open(string inPath)
         {
-            return Open(inPath, true);
+            return Open(inPath, false);
         }
 
         /// <summary>
@@ -2439,6 +2676,11 @@ namespace TK.NodalEditor
             if (_instance.verbose)
                 Log(nom_fct);
 
+            if(_instance.haveChanged == true)
+            {
+                Console.WriteLine("Save before ?");
+            }
+
             Compound openedComp = null;
 
             using (FileStream fileStream = new FileStream(inPath, FileMode.Open))
@@ -2454,6 +2696,7 @@ namespace TK.NodalEditor
                 _instance.layout.Invalidate();
             }
 
+            _instance.haveChanged = false;
             return true;
         }
 

@@ -1754,6 +1754,54 @@ namespace TK.NodalEditor.NodesLayout
                     nodeLookUpEdit.Focus();
                 }
             }
+
+            if (e.KeyData == (Keys.Control | Keys.Alt | Keys.Z))
+            {
+                if (NodalDirector.CanUndoUI())
+                {
+                    NodalDirector.UndoUI();
+                }
+                else
+                {
+                    NodalDirector.Error("Nothing to undo !");
+                }
+            }
+
+            if (e.KeyData == (Keys.Control | Keys.Alt | Keys.Y))
+            {
+                if (NodalDirector.CanRedoUI())
+                {
+                    NodalDirector.RedoUI();
+                }
+                else
+                {
+                    NodalDirector.Error("Nothing to redo !");
+                }
+            }
+
+            if (e.KeyData == (Keys.Control | Keys.Z) && e.KeyData != Keys.Alt)
+            {
+                if (NodalDirector.CanUndo())
+                {
+                    NodalDirector.Undo();
+                }
+                else
+                {
+                    NodalDirector.Error("Nothing to undo !");
+                }
+            }
+
+            if(e.KeyData == (Keys.Control | Keys.Y) && e.KeyData != Keys.Alt)
+            {
+                if (NodalDirector.CanRedo())
+                {
+                    NodalDirector.Redo();
+                }
+                else
+                {
+                    NodalDirector.Error("Nothing to redo !");
+                }
+            }
             Invalidate();
         }
 
@@ -3929,6 +3977,7 @@ namespace TK.NodalEditor.NodesLayout
         {
             List<string> nodesName = NodalDirector.GetSelectedNodes();
             NodalDirector.Copy(nodesName);
+
             //Manager.ClipBoard = Selection.GetSelectedNodes();
         }
 

@@ -119,6 +119,56 @@ namespace TK.NodalEditor
             set { _clipboard = value; }
         }
 
+        //List<Link> _clipboardLink = new List<Link>();
+        //public List<Link> ClipBoardLink
+        //{
+        //    get
+        //    {
+        //        //Each time we get the clipboard,check if it's still valid
+        //        // (Same parent compound, no deleted nodes)
+        //        //if (_clipboardLink.Count > 0)
+        //        //{
+        //        //    Node node = _clipboardLink[0].Source.Owner;
+        //        //    foreach (Link link in _clipboardLink)
+        //        //    {
+        //        //        if (link.Source.Owner != node)
+        //        //        {
+        //        //            _clipboardLink.Clear();
+        //        //            break;
+        //        //        }
+        //        //    }
+        //        //}
+
+        //        return _clipboardLink;
+        //    }
+        //    set { _clipboardLink = value; }
+        //}
+
+        NodeConnexions _clipboardLink = new NodeConnexions();
+        public NodeConnexions ClipBoardLink
+        {
+            get
+            {
+                //Each time we get the clipboard,check if it's still valid
+                // (Same parent compound, no deleted nodes)
+                //if (_clipboardLink.Count > 0)
+                //{
+                //    Node node = _clipboardLink[0].Source.Owner;
+                //    foreach (Link link in _clipboardLink)
+                //    {
+                //        if (link.Source.Owner != node)
+                //        {
+                //            _clipboardLink.Clear();
+                //            break;
+                //        }
+                //    }
+                //}
+
+                return _clipboardLink;
+            }
+            set { _clipboardLink = value; }
+        }
+
         #endregion
 
         #region PROPERTIES

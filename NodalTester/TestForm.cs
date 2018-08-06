@@ -207,7 +207,7 @@ namespace NodalTester
                         break;
                     case "Elements":
                         //Re-order
-                        //node.Elements.Sort(new ElementsSorter((propertyGridControl1.SelectedObjects[k] as Node).Elements));
+                        node.Elements.Sort(new ElementsSorter((propertyGridControl1.SelectedObjects[k] as Node).Elements));
 
                         //Update changed Values
                         i = 0;
@@ -649,7 +649,7 @@ namespace NodalTester
 
         private void undoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(NodalDirector.CanUndo())
+            if (NodalDirector.CanUndo())
             {
                 NodalDirector.Undo();
             }
