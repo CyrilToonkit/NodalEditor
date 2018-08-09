@@ -80,26 +80,49 @@ namespace NodalTester
 
             tK_NodalEditorUCtrl1.Layout.SelectionChangedEvent += Layout_SelectionChangedEvent;
             propertyGridControl1.CellValueChanged += PropertyGridControl1_CellValueChanged;
-            //RepositoryItemButtonEdit edit = new RepositoryItemButtonEdit();//buttonEdit1.Properties.Buttons
-            //propertyGridControl1.DefaultEditors.Add(typeof(DevExpress.XtraEditors.Controls.EditorButtonCollection), edit);
-            //edit.ButtonClick += new ButtonPressedEventHandler(edit_ButtonClick);
+
 
 
             TK.GraphComponents.CustomData.MyCollectionEditor.MyFormClosed += new TK.GraphComponents.CustomData.MyCollectionEditor.MyFormClosedEventHandler(MyCollectionEditor_MyFormClosed);
 
+            //SCRIPT MENU ITEM -------------------------------------------------------------
+            //string path = @"\\NHAMDS\ToonKit\ToonKit\Rnd\OSCAR_Scripts";
 
+            string path = @"C:\\Users\amandinep\Documents\Toonkit\Maya2018\scripts\tkMenu";
+            NodesLayout.CreateScriptsMenu(scriptstoolStripMenuItem, path, MenuItemClickHandlerAll);
+            //------------------------------------------------------------------------------
 
+        }
 
+        private void MenuItemClickHandlerAll(object sender, EventArgs e)
+        {
+            ToolStripMenuItem clickedItem = (ToolStripMenuItem)sender;
+            string tag = (string)clickedItem.Tag;
+
+            if (tag == "ReloadMenuItemClickHandler")
+            {
+                scriptstoolStripMenuItem.DropDownItems.Clear();
+                string path = (string)scriptstoolStripMenuItem.Tag;
+                NodesLayout.CreateScriptsMenu(scriptstoolStripMenuItem, path, MenuItemClickHandlerAll);
+            }
+            else
+            {
+                string code = System.IO.File.ReadAllText(tag);
+                //Console.WriteLine(code);
+
+                if (tag.EndsWith(".py"))
+                {
+                    NodalDirector.EvaluatePython(code);
+                }
+                if (tag.EndsWith(".cs"))
+                {
+                    NodalDirector.Evaluate(code);
+                }
+            }
         }
 
         private void PropertyGridControl1_CellValueChanged(object sender, DevExpress.XtraVerticalGrid.Events.CellValueChangedEventArgs e)
         {
-            //Console.WriteLine("CellValueChanged " + e.CellIndex.ToString() + " " + e.Row.Name);
-            //for(int i = 0; i< propertyGridControl1.RecordCount; i++)
-            //{
-            //    Console.WriteLine("properties "+ e.Row.Name + " "+propertyGridControl1.GetCellValue(e.Row,i) );
-            //}
-
             char[] rmv = { 'r', 'o', 'w' };
             string propertyName = e.Row.Name.TrimStart(rmv);
 
@@ -110,8 +133,6 @@ namespace NodalTester
             }
             Console.WriteLine("properties "+ e.Row.Name + " " + e.Value +" "+ propertyGridControl1.GetCellValue(e.Row, e.CellIndex));
         }
-
-        
 
         private void Layout_SelectionChangedEvent(object sender, SelectionChangedEventArgs e)
         {
@@ -147,8 +168,6 @@ namespace NodalTester
             propertyGridControl1.SelectedObjects = obj;
             //propertyGridControl1.SelectedObjects = new object[] { e.Selection };
         }
-
-
 
         void MyCollectionEditor_MyFormClosed(object sender, FormClosedEventArgs e)
         {
@@ -516,14 +535,6 @@ namespace NodalTester
             //}
         }
 
-
-
-
-
-
-
-
-
         private void InitializeCodeEditors()
         {
             //CS
@@ -674,6 +685,11 @@ namespace NodalTester
         private void sillyMethodToolStripMenuItem_Click(object sender, EventArgs e)
         {
             NodalDirector.AddNode("testNode", "Coco", 10, 10);
+        }
+
+        private void scriptstoolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

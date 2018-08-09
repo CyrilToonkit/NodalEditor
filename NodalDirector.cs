@@ -718,6 +718,89 @@ namespace TK.NodalEditor
         /// <param name="outNodeName">Name of output node</param>
         /// <param name="outPortName">Name of the port of output node</param>
         /// <returns></returns>
+        //public static bool Disconnect(string inNodeName, string inPortName, string outNodeName, string outPortName)
+        //{
+        //    if (_instance.manager == null)
+        //        return false;
+
+        //    string nom_fct = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
+
+        //    if (_instance.verbose)
+        //        Log(nom_fct);
+
+        //    Node nodeIn = _instance.manager.GetNode(inNodeName);
+        //    Node nodeOut = _instance.manager.GetNode(outNodeName);
+
+        //    if (nodeIn == null)
+        //    {
+        //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+        //    }
+        //    if (nodeOut == null)
+        //    {
+        //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
+        //    }
+
+        //    Port portIn = nodeIn.GetPort(inPortName, false);
+        //    Port portOut = nodeOut.GetPort(outPortName, true);
+
+        //    if (portIn == null)
+        //    {
+        //        string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+        //        portIn = nodeIn.GetPort(inPortName2, false);
+        //        if (portIn == null)
+        //        {
+        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{0}\" does not exist!", inNodeName, inPortName));
+        //        }
+        //    }
+        //    if (portOut == null)
+        //    {
+        //        string outPortName2 = string.Format("{0}_{1}", outNodeName, outPortName);
+        //        portOut = nodeOut.GetPort(outPortName2, true);
+        //        if (portOut == null)
+        //        {
+        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{0}\" does not exist!", outNodeName, outPortName));
+        //        }
+        //    }
+
+        //    if (portIn.Dependencies.Count != 0)
+        //    {
+        //        List<Link> linkToDisconnect = new List<Link>();
+        //        foreach (Link link in portIn.Dependencies)
+        //        {
+
+        //            if (link.Source == portOut)
+        //            {
+        //                linkToDisconnect.Add(link);
+        //            }
+        //        }
+
+        //        if (linkToDisconnect.Count != 0)
+        //        {
+        //            foreach (Link link in linkToDisconnect)
+        //            {
+        //                _instance.manager.CurCompound.UnConnect(link);
+        //                _instance.history.Do(new DisconnectMemento(link));
+        //            }
+        //        }
+        //        else
+        //        {
+        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("Link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\" does not exist!", inPortName, inNodeName, outPortName, outNodeName));
+        //        }
+        //    }
+        //    else
+        //    {
+        //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+        //    }
+
+        //    if (_instance.layout == null)
+        //        return true;
+
+        //    _instance.layout.Invalidate();
+
+        //    _instance.haveChanged = true;
+        //    return true;
+        //}
+
         public static bool Disconnect(string inNodeName, string inPortName, string outNodeName, string outPortName)
         {
             if (_instance.manager == null)
@@ -728,58 +811,129 @@ namespace TK.NodalEditor
             if (_instance.verbose)
                 Log(nom_fct);
 
-            Node nodeIn = _instance.manager.GetNode(inNodeName);
-            Node nodeOut = _instance.manager.GetNode(outNodeName);
+            Node nodeIn, nodeOut;
+            Port portIn, portOut;
+            List<Link> linkToDisconnect = new List<Link>();
 
-            if (nodeIn == null)
+            if (String.IsNullOrEmpty(inNodeName) && String.IsNullOrEmpty(inPortName))
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
-            }
-            if (nodeOut == null)
-            {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
-            }
-
-            Port portIn = nodeIn.GetPort(inPortName, false);
-            Port portOut = nodeOut.GetPort(outPortName, true);
-
-            if (portIn == null)
-            {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{0}\" does not exist!", inNodeName, inPortName));
-            }
-            if (portOut == null)
-            {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{0}\" does not exist!", outNodeName, outPortName));
-            }
-
-            if (portIn.Dependencies.Count != 0)
-            {
-                List<Link> linkToDisconnect = new List<Link>();
-                foreach (Link link in portIn.Dependencies)
+                nodeOut = _instance.manager.GetNode(outNodeName);
+                if (nodeOut == null)
                 {
-
-                    if (link.Source == portOut)
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
+                }
+                portOut = nodeOut.GetPort(outPortName, true);
+                if (portOut == null)
+                {
+                    string outPortName2 = string.Format("{0}_{1}", outNodeName, outPortName);
+                    portOut = nodeOut.GetPort(outPortName2, true);
+                    if (portOut == null)
                     {
-                        linkToDisconnect.Add(link);
+                        throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{0}\" does not exist!", outNodeName, outPortName));
                     }
                 }
 
-                if (linkToDisconnect.Count != 0)
+                if(portOut.Dependencies.Count != 0)
                 {
-                    foreach (Link link in linkToDisconnect)
+                    linkToDisconnect = new List<Link>(portOut.Dependencies);
+                }
+                else
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", outPortName, outNodeName));
+                }
+
+            }
+            else if(String.IsNullOrEmpty(outNodeName) && String.IsNullOrEmpty(outPortName))
+            {
+                nodeIn = _instance.manager.GetNode(inNodeName);
+                if (nodeIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+                }
+                portIn = nodeIn.GetPort(inPortName, false);
+                if (portIn == null)
+                {
+                    string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                    portIn = nodeIn.GetPort(inPortName2, false);
+                    if (portIn == null)
                     {
-                        _instance.manager.CurCompound.UnConnect(link);
-                        _instance.history.Do(new DisconnectMemento(link));
+                        throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{0}\" does not exist!", inNodeName, inPortName));
+                    }
+                }
+
+                if(portIn.Dependencies.Count != 0)
+                {
+                    linkToDisconnect = new List<Link>(portIn.Dependencies);
+                }
+                else
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+                }
+            }
+            else if(!String.IsNullOrEmpty(inNodeName) && !String.IsNullOrEmpty(inPortName) && !String.IsNullOrEmpty(outNodeName) && !String.IsNullOrEmpty(outPortName))
+            {
+                nodeIn = _instance.manager.GetNode(inNodeName);
+                nodeOut = _instance.manager.GetNode(outNodeName);
+
+                if (nodeIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+                }
+                if (nodeOut == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
+                }
+
+                portIn = nodeIn.GetPort(inPortName, false);
+                portOut = nodeOut.GetPort(outPortName, true);
+
+                if (portIn == null)
+                {
+                    string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                    portIn = nodeIn.GetPort(inPortName2, false);
+                    if (portIn == null)
+                    {
+                        throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{0}\" does not exist!", inNodeName, inPortName));
+                    }
+                }
+                if (portOut == null)
+                {
+                    string outPortName2 = string.Format("{0}_{1}", outNodeName, outPortName);
+                    portOut = nodeOut.GetPort(outPortName2, true);
+                    if (portOut == null)
+                    {
+                        throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{0}\" does not exist!", outNodeName, outPortName));
+                    }
+                }
+                if (portIn.Dependencies.Count != 0)
+                {
+
+                    foreach (Link link in portIn.Dependencies)
+                    {
+
+                        if (link.Source == portOut)
+                        {
+                            linkToDisconnect.Add(link);
+                        }
                     }
                 }
                 else
                 {
-                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\" does not exist!", inPortName, inNodeName, outPortName, outNodeName));
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+                }
+            }
+            
+            if (linkToDisconnect.Count != 0)
+            {
+                foreach (Link link in linkToDisconnect)
+                {
+                    _instance.manager.CurCompound.UnConnect(link);
+                    _instance.history.Do(new DisconnectMemento(link));
                 }
             }
             else
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\" does not exist!", inPortName, inNodeName, outPortName, outNodeName));
             }
 
             if (_instance.layout == null)
@@ -929,19 +1083,39 @@ namespace TK.NodalEditor
 
             if (portInLocked == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portInLocked = nodeInLocked.GetPort(inPortName2, false);
+                if (portInLocked == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                }
             }
             if (portOut == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
+                string outPortName2 = string.Format("{0}_{1}", outNodeName, outPortName);
+                portOut = nodeOut.GetPort(outPortName2, true);
+                if (portOut == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
+                }
             }
             if (newPortIn == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", newinNodeName, newinPortName));
+                string newinPortName2 = string.Format("{0}_{1}", newinNodeName, newinPortName);
+                newPortIn = newNodeIn.GetPort(newinPortName2, false);
+                if (newPortIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", newinNodeName, newinPortName));
+                }
             }
             if (newPortOut == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", newoutNodeName, newoutPortName));
+                string newoutPortName2 = string.Format("{0}_{1}", newoutNodeName, newoutPortName);
+                newPortOut = newNodeOut.GetPort(newoutPortName2, true);
+                if (newPortOut == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", newoutNodeName, newoutPortName));
+                }
             }
 
             string error = string.Empty;
@@ -1046,19 +1220,39 @@ namespace TK.NodalEditor
 
             if (portInLocked == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portInLocked = nodeInLocked.GetPort(inPortName2, false);
+                if (portInLocked == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
+                }
             }
             if (portOut == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
+                string outPortName2 = string.Format("{0}_{1}", outNodeName, outPortName);
+                portOut = nodeOut.GetPort(outPortName2, true);
+                if (portOut == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
+                }
             }
             if (newPortIn == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", newinNodeName, newinPortName));
+                string newinPortName2 = string.Format("{0}_{1}", newinNodeName, newinPortName);
+                newPortIn = newNodeIn.GetPort(newinPortName2, false);
+                if (newPortIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", newinNodeName, newinPortName));
+                }
             }
             if (newPortOut == null)
             {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", newoutNodeName, newoutPortName));
+                string newoutPortName2 = string.Format("{0}_{1}", newoutNodeName, newoutPortName);
+                newPortOut = newNodeOut.GetPort(newoutPortName2, true);
+                if (newPortOut == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", newoutNodeName, newoutPortName));
+                }
             }
 
             string error = string.Empty;
@@ -1123,9 +1317,6 @@ namespace TK.NodalEditor
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
-            //_instance.manager.ClipBoardLink = nodeIn.InDependencies;
-            //_instance.manager.ClipBoardLink.AddRange(nodeIn.OutDependencies);
-
             _instance.manager.ClipBoardLink = new NodeConnexions(nodeIn);
 
             if (_instance.layout == null)
@@ -1157,7 +1348,7 @@ namespace TK.NodalEditor
             if (_instance.manager.ClipBoardLink != null)
             {
                 Node node = _instance.manager.GetNode(_instance.manager.ClipBoardLink.NodeFullName);
-                string error = string.Empty;
+                
                 if (node != null)
                 {
                     List<Link> links = node.InDependencies;
@@ -1171,16 +1362,16 @@ namespace TK.NodalEditor
                             {
                                 foreach (Port port in nodeIn.Outputs)
                                 {
+                                    string error = string.Empty;
                                     if (link.Source.PortObj.ShortName == port.PortObj.ShortName)
                                     {
                                         Link copyLink = (Link)Activator.CreateInstance(link.GetType(), new object[0]);
                                         copyLink.Copy(link);
                                         link.Target.Owner.Connect(link.Target.Index, nodeIn, port.Index, "", out error, copyLink);
-                                        _instance.history.Do(new CopyLinkMemento(copyLink));
-                                        //if (error.Length != 0)
-                                        //{
-                                        //    throw new NodalDirectorException(nom_fct + "\n" + "Cannot Copy the link");
-                                        //}
+                                        if (error.Length == 0)
+                                        {
+                                            _instance.history.Do(new CopyLinkMemento(copyLink));
+                                        }
                                     }
                                 }
                             }
@@ -1188,18 +1379,16 @@ namespace TK.NodalEditor
                             {
                                 foreach (Port port in nodeIn.Inputs)
                                 {
+                                    string error = string.Empty;
                                     if (link.Target.PortObj.ShortName == port.PortObj.ShortName)
                                     {
                                         Link copyLink = (Link)Activator.CreateInstance(link.GetType(), new object[0]);
                                         copyLink.Copy(link);
                                         nodeIn.Connect(port.Index, link.Source.Owner, link.Source.Index, "", out error, copyLink);
-                                        _instance.history.Do(new CopyLinkMemento(copyLink));
-
-                                        
-                                        //if (error.Length != 0)
-                                        //{
-                                        //    throw new NodalDirectorException(nom_fct + "\n" + "Cannot Copy the link");
-                                        //}
+                                        if (error.Length == 0)
+                                        {
+                                            _instance.history.Do(new CopyLinkMemento(copyLink));
+                                        }
                                     }
                                 }
                             }
@@ -1211,11 +1400,6 @@ namespace TK.NodalEditor
                     {
                         throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste Links, there is no links to paste");
                     }
-                    //string errors = _instance.manager.ClipBoardLink.Reconnect(nodeIn);
-                    //if (!string.IsNullOrEmpty(errors))
-                    //{
-                    //    CompanionForwarder.Log(errors, LogSeverity.Error);
-                    //}
                 }
                 else
                 {
@@ -2246,7 +2430,6 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static object GetProperty(string inNodeName, string inPropertyName)
         {
-
             if (_instance.manager == null)
                 return false;
 
@@ -2472,6 +2655,210 @@ namespace TK.NodalEditor
             return true;
         }
 
+        public static bool NodeExist(string inNodeName)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("NodeExist(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool PortExist(string inNodeName, string inPortName, bool inIsOutput)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("PortExist(\"{0}\", \"{1}\", {2});", inNodeName, inPortName, inIsOutput);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                return false;
+            }
+
+            Port portIn = nodeIn.GetPort(inPortName, inIsOutput);
+
+            if (portIn == null)
+            {
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portIn = nodeIn.GetPort(inPortName2, inIsOutput);
+                if (portIn == null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static bool PortHasLinks(string inNodeName, string inPortName, bool inIsOutput)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("PortHasLinks(\"{0}\", \"{1}\", {2});", inNodeName, inPortName, inIsOutput);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                return false;
+            }
+
+            Port portIn = nodeIn.GetPort(inPortName, inIsOutput);
+
+            if (portIn == null)
+            {
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portIn = nodeIn.GetPort(inPortName2, inIsOutput);
+                if (portIn == null)
+                {
+                    return false;
+                }
+            }
+
+            if (portIn.Dependencies.Count == 0)
+                return false;
+
+            return true;
+        }
+
+        public static object Input(string inType, string Message, string Caption)
+        {
+            return Input(inType, Message, Caption, "");
+        }
+
+        /// <summary>
+        /// Enter input Value
+        /// </summary>
+        /// <param name="inType">Input type : "string", "bool", "float", "double", "int"</param>
+        /// <param name="Message"></param>
+        /// <param name="Caption"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        //public static object Input(string inType, string Message, string Caption, string defaultValue)
+        //{
+
+        //    TK.GraphComponents.Dialogs.InputTypes type;
+        //    RichDialogResult rslt;
+
+        //    switch (inType)
+        //    {
+        //        case "double":
+        //            type = TK.GraphComponents.Dialogs.InputTypes.Double;
+        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+        //            {
+        //                return null;
+        //            }
+        //            return (double)rslt.Data;
+        //        case "bool":
+        //            type = TK.GraphComponents.Dialogs.InputTypes.Bool;
+        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+        //            {
+        //                return null;
+        //            }
+        //            return Convert.ToBoolean(rslt.Data);
+        //        case "float":
+        //            type = TK.GraphComponents.Dialogs.InputTypes.Float;
+        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+        //            {
+        //                return null;
+        //            }
+        //            return float.Parse((string)rslt.Data);
+        //        case "int":
+        //            type = TK.GraphComponents.Dialogs.InputTypes.Int;
+        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+        //            {
+        //                return null;
+        //            }
+        //            return Int32.Parse((string)rslt.Data);
+        //        case "string":
+        //            type = TK.GraphComponents.Dialogs.InputTypes.String;
+        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+        //            {
+        //                return null;
+        //            }
+        //            return (string)rslt.Data;
+        //        default:
+        //            throw new NodalDirectorException("Wrong Type");
+        //    }
+        //}
+
+        public static object Input(string inType, string Message, string Caption, string defaultValue)
+        {
+
+            TK.GraphComponents.Dialogs.InputTypes type;
+            RichDialogResult rslt;
+
+            switch (inType)
+            {
+                case "double":
+                    type = TK.GraphComponents.Dialogs.InputTypes.Double;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (double)rslt.Data;
+                case "bool":
+                    type = TK.GraphComponents.Dialogs.InputTypes.Bool;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (bool)rslt.Data;
+                case "float":
+                    type = TK.GraphComponents.Dialogs.InputTypes.Float;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (float)rslt.Data;
+                case "int":
+                    type = TK.GraphComponents.Dialogs.InputTypes.Int;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (int)rslt.Data;
+                case "string":
+                    type = TK.GraphComponents.Dialogs.InputTypes.String;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (string)rslt.Data;
+                default:
+                    throw new NodalDirectorException("Wrong Type");
+            }
+        }
         #endregion
 
         #region Getters Commands

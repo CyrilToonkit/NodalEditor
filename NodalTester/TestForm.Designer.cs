@@ -42,6 +42,7 @@
             this.redoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.sillyMethodToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.scriptstoolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.collapsibleGroup1 = new TK.GraphComponents.CollapsibleGroup();
@@ -73,7 +74,8 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.editToolStripMenuItem});
+            this.editToolStripMenuItem,
+            this.scriptstoolStripMenuItem});
             resources.ApplyResources(this.menuStrip1, "menuStrip1");
             this.menuStrip1.Name = "menuStrip1";
             // 
@@ -142,6 +144,12 @@
             this.sillyMethodToolStripMenuItem.Name = "sillyMethodToolStripMenuItem";
             resources.ApplyResources(this.sillyMethodToolStripMenuItem, "sillyMethodToolStripMenuItem");
             this.sillyMethodToolStripMenuItem.Click += new System.EventHandler(this.sillyMethodToolStripMenuItem_Click);
+            // 
+            // scriptstoolStripMenuItem
+            // 
+            this.scriptstoolStripMenuItem.Name = "scriptstoolStripMenuItem";
+            resources.ApplyResources(this.scriptstoolStripMenuItem, "scriptstoolStripMenuItem");
+            this.scriptstoolStripMenuItem.Click += new System.EventHandler(this.scriptstoolStripMenuItem_Click);
             // 
             // saveFileDialog1
             // 
@@ -293,5 +301,6 @@
         private DevExpress.XtraRichEdit.RichEditControl pyEditControl;
         private DevExpress.XtraRichEdit.RichEditControl csEditControl;
         private DevExpress.XtraVerticalGrid.PropertyGridControl propertyGridControl1;
+        private System.Windows.Forms.ToolStripMenuItem scriptstoolStripMenuItem;
     }
 }
