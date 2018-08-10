@@ -2261,16 +2261,16 @@ namespace TK.NodalEditor.NodesLayout
                             {
                                 case Keys.Shift:
                                     //Selection.AddToSelection(ConnectedNode);
-                                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Add);
+                                    NodalDirector.SelectNodes(nodesName, "Add");
                                     break;
 
                                 case Keys.Control:
                                     //Selection.ToggleSelection(ConnectedNode);
-                                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Toggle);
+                                    NodalDirector.SelectNodes(nodesName, "Toggle");
                                     break;
                                 default:
                                     //Selection.Select(ConnectedNode);
-                                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
+                                    NodalDirector.SelectNodes(nodesName, "Default");
                                     break;
                             }
 
@@ -3969,7 +3969,7 @@ namespace TK.NodalEditor.NodesLayout
                 }
             }
             //Selection.Select(affectedNodes);
-            NodalDirector.SelectNodes(affectedNodesName, TypeOfSelection.Default);
+            NodalDirector.SelectNodes(affectedNodesName, "Default");
             ChangeFocus(false);
         }
 
@@ -4257,7 +4257,7 @@ namespace TK.NodalEditor.NodesLayout
                     nodesName.Add(nodeName);
                 }
 
-                NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
+                NodalDirector.SelectNodes(nodesName, "Default");
                 Invalidate();
                 OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
                 OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));

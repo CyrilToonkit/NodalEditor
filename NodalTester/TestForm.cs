@@ -81,8 +81,6 @@ namespace NodalTester
             tK_NodalEditorUCtrl1.Layout.SelectionChangedEvent += Layout_SelectionChangedEvent;
             propertyGridControl1.CellValueChanged += PropertyGridControl1_CellValueChanged;
 
-
-
             TK.GraphComponents.CustomData.MyCollectionEditor.MyFormClosed += new TK.GraphComponents.CustomData.MyCollectionEditor.MyFormClosedEventHandler(MyCollectionEditor_MyFormClosed);
 
             //SCRIPT MENU ITEM -------------------------------------------------------------

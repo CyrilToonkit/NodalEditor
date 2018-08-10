@@ -158,7 +158,7 @@
     <value>Ctrl+Z</value>
   </data>
   <data name="undoToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>144, 22</value>
   </data>
   <data name="undoToolStripMenuItem.Text" xml:space="preserve">
     <value>Undo</value>
@@ -167,16 +167,16 @@
     <value>Ctrl+Y</value>
   </data>
   <data name="redoToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>144, 22</value>
   </data>
   <data name="redoToolStripMenuItem.Text" xml:space="preserve">
     <value>Redo</value>
   </data>
   <data name="toolStripMenuItem2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>177, 6</value>
+    <value>141, 6</value>
   </data>
   <data name="sillyMethodToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>144, 22</value>
   </data>
   <data name="sillyMethodToolStripMenuItem.Text" xml:space="preserve">
     <value>SillyMethod</value>
@@ -241,7 +241,7 @@
     <value>3, 3</value>
   </data>
   <data name="csEditControl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>699, 68</value>
+    <value>699, 69</value>
   </data>
   <data name="csEditControl.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -269,7 +269,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="csInterpreterTab.Size" type="System.Drawing.Size, System.Drawing">
-    <value>705, 74</value>
+    <value>705, 75</value>
   </data>
   <data name="csInterpreterTab.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -299,7 +299,7 @@
     <value>3, 3</value>
   </data>
   <data name="pyEditControl.Size" type="System.Drawing.Size, System.Drawing">
-    <value>699, 67</value>
+    <value>699, 68</value>
   </data>
   <data name="pyEditControl.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -327,7 +327,7 @@
     <value>3, 3, 3, 3</value>
   </data>
   <data name="pyInterpreterTab.Size" type="System.Drawing.Size, System.Drawing">
-    <value>705, 73</value>
+    <value>705, 74</value>
   </data>
   <data name="pyInterpreterTab.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -354,7 +354,7 @@
     <value>3, 41</value>
   </data>
   <data name="tabControl1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>713, 100</value>
+    <value>713, 101</value>
   </data>
   <data name="tabControl1.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -426,10 +426,10 @@
     <value>Bottom</value>
   </data>
   <data name="collapsibleGroup1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 410</value>
+    <value>0, 409</value>
   </data>
   <data name="collapsibleGroup1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>719, 144</value>
+    <value>719, 145</value>
   </data>
   <data name="collapsibleGroup1.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -459,7 +459,7 @@
     <value>5, 5, 5, 5</value>
   </data>
   <data name="propertyGridControl1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>370, 386</value>
+    <value>370, 385</value>
   </data>
   <data name="propertyGridControl1.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -483,7 +483,7 @@
     <value>0, 24</value>
   </data>
   <data name="tK_NodalEditorUCtrl1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>719, 386</value>
+    <value>719, 385</value>
   </data>
   <data name="tK_NodalEditorUCtrl1.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>

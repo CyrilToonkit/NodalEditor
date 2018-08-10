@@ -10,11 +10,41 @@ using TK.NodalEditor.NodesFramework;
 using System.IO;
 using System.Reflection;
 using System.ComponentModel;
+using System.Windows.Forms;
+using System.Xml.Serialization;
 
 namespace TK.NodalEditor
 {
     public class NodalDirector
     {
+        public delegate void DelegateHaveChanged(bool NewStatus);
+        public event DelegateHaveChanged ChangedStatus;
+        public bool haveChanged = false;
+        
+        public void ChangeOnStatus()
+        {
+            if(ChangedStatus != null)
+            {
+                ChangedStatus(haveChanged);
+            }
+        }
+        private void nd_ChangeOnStatus(bool newStatus)
+        {
+            Console.WriteLine("Have changed " + newStatus);
+        }
+        //public event HaveChangedEventHandler HaveChangedEvent;
+        //public delegate void HaveChangedEventHandler(object sender, NodesChangedEventArgs e);
+
+        //public class NodesChangedEventArgs : EventArgs
+        //{
+        //    public NodesChangedEventArgs(bool HaveChanged)
+        //    {
+        //        _changed = HaveChanged;
+        //    }
+
+        //    public bool _changed;
+        //}
+
         public NodesManager manager = null;
         public NodesLayout.NodesLayout layout = null;
 
@@ -22,8 +52,6 @@ namespace TK.NodalEditor
 
         public UndoRedoHistory<NodalDirector> history;
         public UndoRedoHistory<NodalDirector> historyUI;
-
-        public bool haveChanged = false;
 
         #region Singleton declaration, getters and constructor
         protected static NodalDirector _instance = null;
@@ -510,7 +538,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", inNodeName, inCompoundName, X, Y);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             string nodeName = null;
             Compound inCompound = null;
@@ -559,6 +587,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
             return nodeName;
         }
 
@@ -573,7 +602,7 @@ namespace TK.NodalEditor
                 return false;
 
             if (_instance.verbose)
-                Log(string.Format("DeleteNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodesNames, "\",\"")));
+                Info(string.Format("DeleteNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodesNames, "\",\"")));
 
             _instance.manager.Companion.LaunchProcess("Delete nodes", inNodesNames.Count);
 
@@ -607,7 +636,9 @@ namespace TK.NodalEditor
             _instance.layout.Selection.Selection.Clear();
             _instance.layout.ChangeFocus(true);
             _instance.manager.Companion.EndProcess();
+
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
             return true;
         }
 
@@ -622,7 +653,7 @@ namespace TK.NodalEditor
                 return false;
 
             if (_instance.verbose)
-                Log(string.Format("DeleteNode(\"{0}\");", inNodeName));
+                Info(string.Format("DeleteNode(\"{0}\");", inNodeName));
 
 
             Node node = _instance.manager.GetNode(inNodeName);
@@ -648,6 +679,7 @@ namespace TK.NodalEditor
             _instance.manager.Companion.EndProcess();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
             return true;
         }
 
@@ -670,7 +702,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("Duplicate(\"{0}\", \"{1}\", \"{2}\");", inNodeName, inSearch, inReplace);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -707,6 +739,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
             return newNode.FullName;
         }
 
@@ -809,7 +842,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn, nodeOut;
             Port portIn, portOut;
@@ -942,6 +975,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
             return true;
         }
 
@@ -962,7 +996,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\");", inNodeName, inPortName, outNodeName, outPortName, inMode);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
             Node nodeOut = _instance.manager.GetNode(outNodeName);
@@ -1014,6 +1048,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1052,7 +1087,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("ReConnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\");", inNodeName, inPortName, outNodeName, outPortName, newinNodeName, newinPortName, newoutNodeName, newoutPortName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeInLocked = _instance.manager.GetNode(inNodeName);
             Node nodeOut = _instance.manager.GetNode(outNodeName);
@@ -1165,6 +1200,7 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
             return true;
         }
 
@@ -1189,7 +1225,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("CopyLink(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\");", inNodeName, inPortName, outNodeName, outPortName, newinNodeName, newinPortName, newoutNodeName, newoutPortName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeInLocked = _instance.manager.GetNode(inNodeName);
             Node nodeOut = _instance.manager.GetNode(outNodeName);
@@ -1295,9 +1331,15 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
             return true;
         }
 
+        /// <summary>
+        /// Copy links from a node (for pasting on other one)
+        /// </summary>
+        /// <param name="inNodeName">Node name</param>
+        /// <returns></returns>
         public static bool CopyLinks(string inNodeName)
         {
             _instance.manager.ClipBoardLink = null;
@@ -1308,7 +1350,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("CopyLinks(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -1325,9 +1367,15 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
             return true;
         }
 
+        /// <summary>
+        /// Paste links previously copy 
+        /// </summary>
+        /// <param name="inNodeName">Node name</param>
+        /// <returns></returns>
         public static bool PasteLinks(string inNodeName)
         {
             if (_instance.manager == null)
@@ -1336,7 +1384,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("PasteLinks(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -1417,6 +1465,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
             return true;
         }
 
@@ -1433,7 +1482,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("DisconnectAll(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -1497,6 +1546,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1514,7 +1564,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("DisconnectInputs(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -1564,6 +1614,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1581,7 +1632,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("DisconnectOutputs(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -1634,6 +1685,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1652,7 +1704,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("ParentNode(\"{0}\", \"{1}\");", inNodeName, parentCompound);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
             Compound newParent = _instance.manager.GetNode(parentCompound) as Compound;
@@ -1683,6 +1735,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1702,7 +1755,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("ParentNodes(\"{0}\", \"{1}\");", TypesHelper.Join(inNodeNames, "\",\""), parentCompound);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             List<Node> Nodes = new List<Node>();
             Compound newParent = _instance.manager.GetNode(parentCompound) as Compound;
@@ -1748,6 +1801,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1765,7 +1819,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("UnParentNode(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -1790,6 +1844,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1807,7 +1862,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("UnParentNodes(\"{0}\");", TypesHelper.Join(inNodeNames, "\",\""));
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             List<Node> Nodes = new List<Node>();
 
@@ -1846,6 +1901,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1863,7 +1919,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("ExposeAllPorts(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -1890,6 +1946,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1907,7 +1964,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("HideAllPorts(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -1942,6 +1999,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -1960,7 +2018,7 @@ namespace TK.NodalEditor
 
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             List<string> nodesNameError = new List<string>();
             List<Node> nodes = new List<Node>();
@@ -2006,6 +2064,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -2023,7 +2082,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("Explode(\"{0}\");", inCompoundName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Compound Compound = _instance.manager.GetNode(inCompoundName) as Compound;
 
@@ -2049,6 +2108,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -2067,7 +2127,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("Rename(\"{0}\", \"{1}\");", inNewName, inNewName);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inName);
 
@@ -2094,6 +2154,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return nodeIn.FullName;
         }
@@ -2111,7 +2172,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("Copy(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodeNames, "\",\""));
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             List<Node> Nodes = new List<Node>();
 
@@ -2131,6 +2192,7 @@ namespace TK.NodalEditor
             _instance.manager.ClipBoard = Nodes;
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -2156,7 +2218,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("Paste({0}, {1}, \"{2}\", \"{3}\");", inXOffset, inYOffset, inSearch, inReplace);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             List<string> pasteNodeName = new List<string>();
 
@@ -2207,10 +2269,367 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return pasteNodeName;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inNodeName"></param>
+        /// <returns></returns>
+        public static bool IsCompound(string inNodeName)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("IsCompound(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Info(nom_fct);
+
+            Compound nodeIn = _instance.manager.GetNode(inNodeName) as Compound;
+
+            if (nodeIn == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Check is node exist
+        /// </summary>
+        /// <param name="inNodeName">Node name</param>
+        /// <returns></returns>
+        public static bool NodeExist(string inNodeName)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("NodeExist(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Info(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Check if port exist
+        /// </summary>
+        /// <param name="inNodeName"></param>
+        /// <param name="inPortName"></param>
+        /// <param name="inIsOutput"></param>
+        /// <returns></returns>
+        public static bool PortExist(string inNodeName, string inPortName, bool inIsOutput)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("PortExist(\"{0}\", \"{1}\", {2});", inNodeName, inPortName, inIsOutput);
+
+            if (_instance.verbose)
+                Info(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                return false;
+            }
+
+            Port portIn = nodeIn.GetPort(inPortName, inIsOutput);
+
+            if (portIn == null)
+            {
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portIn = nodeIn.GetPort(inPortName2, inIsOutput);
+                if (portIn == null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Check if port has a link
+        /// </summary>
+        /// <param name="inNodeName"></param>
+        /// <param name="inPortName"></param>
+        /// <param name="inIsOutput"></param>
+        /// <returns></returns>
+        public static bool PortHasLinks(string inNodeName, string inPortName, bool inIsOutput)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("PortHasLinks(\"{0}\", \"{1}\", {2});", inNodeName, inPortName, inIsOutput);
+
+            if (_instance.verbose)
+                Info(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                return false;
+            }
+
+            Port portIn = nodeIn.GetPort(inPortName, inIsOutput);
+
+            if (portIn == null)
+            {
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portIn = nodeIn.GetPort(inPortName2, inIsOutput);
+                if (portIn == null)
+                {
+                    return false;
+                }
+            }
+
+            if (portIn.Dependencies.Count == 0)
+                return false;
+
+            return true;
+        }
+
+        public static object Input(string inType, string Message, string Caption)
+        {
+            return Input(inType, Message, Caption, "");
+        }
+
+        /// <summary>
+        /// Enter input Value
+        /// </summary>
+        /// <param name="inType">Input type : "string", "bool", "float", "double", "int"</param>
+        /// <param name="Message"></param>
+        /// <param name="Caption"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public static object Input(string inType, string Message, string Caption, string defaultValue)
+        {
+
+            TK.GraphComponents.Dialogs.InputTypes type;
+            RichDialogResult rslt;
+
+            switch (inType)
+            {
+                case "double":
+                    type = TK.GraphComponents.Dialogs.InputTypes.Double;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (double)rslt.Data;
+                case "bool":
+                    type = TK.GraphComponents.Dialogs.InputTypes.Bool;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (bool)rslt.Data;
+                case "float":
+                    type = TK.GraphComponents.Dialogs.InputTypes.Float;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (float)rslt.Data;
+                case "int":
+                    type = TK.GraphComponents.Dialogs.InputTypes.Int;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (int)rslt.Data;
+                case "string":
+                    type = TK.GraphComponents.Dialogs.InputTypes.String;
+                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
+                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return null;
+                    }
+                    return (string)rslt.Data;
+                default:
+                    throw new NodalDirectorException("Wrong Type");
+            }
+        }
+
+
+        public static bool CommandScript()
+        {
+            New();
+            //The Root compound should be empty
+            List<string> children = GetChildren("", true, false, "");
+
+            if (children.Count > 1)
+            {
+                Error("Root compound should be empty after New()");
+            }
+
+            List<string> NodeName = GetNodes();
+
+            if (NodeName.Count == 0)
+            {
+                Error("No node available");
+            }
+            else
+            {
+                string node1 = AddNode(NodeName[0], null, 50, 50);
+                string node2 = AddNode(NodeName[0], null, 100, 100);
+
+                if(GetChildren("",true,false,"").Count == 3)
+                {
+
+                    //Connect(node1, node2);
+                    Console.WriteLine("ici");
+
+
+
+                }
+
+
+            }
+            return true;
+        }
+        #endregion
+
+        #region Getters Commands
+
+        /// <summary>
+        /// Getting selected nodes
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GetSelectedNodes()
+        {
+            List<string> NodeNames = new List<string>();
+
+            foreach (NodeBase elem in _instance.layout.Selection.Selection)
+            {
+                if (elem is Node)
+                {
+                    NodeNames.Add((elem as Node).FullName);
+                }
+            }
+
+            return NodeNames;
+        }
+
+        /// <summary>
+        /// Getting nodes existing
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GetNodes()
+        {
+            List<string> nodes = new List<string>();
+            foreach (Node node in _instance.manager.AvailableNodes)
+            {
+                nodes.Add(node.FullName);
+            }
+            return nodes;
+        }
+
+        public static List<string> GetInputPort(string inNodeName)
+        {
+            List<string> inputPortName = new List<string>();
+            List<Port> inputPort = new List<Port>();
+
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("GetInputPort(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            foreach(Port port in nodeIn.Inputs)
+            {
+                inputPortName.Add(port.FullName);
+            }
+            
+            return inputPortName;
+        }
+
+        public static List<string> GetOutputPort(string inNodeName)
+        {
+            List<string> outputPort = new List<string>();
+
+            return outputPort;
+        }
+
+        /// <summary>
+        /// Getting children of a compound
+        /// </summary>
+        /// <param name="inCompoundName">Compound name</param>
+        /// <param name="inRecursive">Recursivity : true or false</param>
+        /// <param name="IgnoreCompounds">Ignore the compound return only node names or not</param>
+        /// <param name="inType"></param>
+        /// <returns></returns>
+        public static List<string> GetChildren(string inCompoundName, bool inRecursive, bool IgnoreCompounds, string inType)
+        {
+            List<string> children = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("GetChildren(\"{0}\", {1}, {2}, \"{3}\");", inCompoundName, inRecursive, IgnoreCompounds, inType);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Compound CompoundIn;
+
+            if (String.IsNullOrEmpty(inCompoundName))
+            {
+                CompoundIn = _instance.manager.Root;
+            }
+            else
+            {
+                CompoundIn = _instance.manager.GetNode(inCompoundName) as Compound;
+
+                if (CompoundIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Compound \"{0}\" does not exist!", CompoundIn));
+                }
+            }
+
+            nodes = CompoundIn.GetChildren(IgnoreCompounds, inType, inRecursive);
+
+            foreach(Node node in nodes)
+            {
+                children.Add(node.FullName);
+            }
+
+            if (_instance.layout == null)
+                return null;
+
+            _instance.layout.Invalidate();
+
+            return children;
+        }
 
         public static Dictionary<string, string> propertyPossibilities = new Dictionary<string, string>()
         {
@@ -2233,6 +2652,11 @@ namespace TK.NodalEditor
             {"visibility", "Visible" },
         };
 
+        public static Dictionary<string, string> propertyLinkPossibilities = new Dictionary<string, string>()
+        {
+            {"name", "Name" }
+        };
+
         public static string GetPropertyPossibilities(string inProperty)
         {
             return GetAliases(inProperty, propertyPossibilities);
@@ -2246,6 +2670,11 @@ namespace TK.NodalEditor
         public static string GetElementPropertyPossibilities(string inProperty)
         {
             return GetAliases(inProperty, propertyElementPossibilities);
+        }
+
+        public static string GetLinkPropertyPossibilities(string inProperty)
+        {
+            return GetAliases(inProperty, propertyLinkPossibilities);
         }
 
         public static string GetAliases(string inProperty, Dictionary<string, string> inDictionary)
@@ -2346,22 +2775,22 @@ namespace TK.NodalEditor
             }
 
             string value = GetPropertyPossibilities(inPropertyName);
-            if ( value != null)
+            if (value != null)
             {
                 inPropertyName = value;
             }
-            
+
             switch (inPropertyName)
             {
                 case "Name":
                     nom_fct = string.Format("SetProperty(\"{0}\", \"{1}\", \"{2}\");", inNodeName, inPropertyName, inValue);
                     if (_instance.verbose)
-                        Log(nom_fct);
+                        Info(nom_fct);
                     if (inValue.GetType() == typeof(string))
                     {
                         int n;
                         bool isNum = int.TryParse((string)inValue, out n);
-                        if( isNum == false)
+                        if (isNum == false)
                         {
                             //_instance.history.Do(new SetPropetyMemento(nodeIn, inPropertyName));
                             _instance.verbose = false;
@@ -2380,7 +2809,7 @@ namespace TK.NodalEditor
                     break;
                 default:
                     if (_instance.verbose)
-                        Log(nom_fct);
+                        Info(nom_fct);
                     var prop = nodeIn.GetType().GetProperty(inPropertyName);
 
                     if (prop != null)
@@ -2418,58 +2847,9 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
-        }
-
-        /// <summary>
-        /// Get Node property
-        /// </summary>
-        /// <param name="inNodeName">Node name</param>
-        /// <param name="inPropertyName">Property name : "Name", "CustomColor", "Freezed", "Path"</param>
-        /// <returns></returns>
-        public static object GetProperty(string inNodeName, string inPropertyName)
-        {
-            if (_instance.manager == null)
-                return false;
-
-            string nom_fct = string.Format("GetProperty(\"{0}\", \"{1}\");", inNodeName, inPropertyName);
-
-            if (_instance.verbose)
-                Log(nom_fct);
-
-            Node nodeIn = _instance.manager.GetNode(inNodeName);
-
-            if (nodeIn == null)
-            {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
-            }
-
-            string value = "";
-            if (propertyPossibilities.TryGetValue(inPropertyName, out value))
-            {
-                inPropertyName = value;
-            }
-
-            PropertyInfo prop = nodeIn.GetType().GetProperty(inPropertyName);
-
-            if(prop != null)
-            {
-                AttributeCollection attributes = TypeDescriptor.GetProperties(nodeIn)[inPropertyName].Attributes;
-                if (attributes[typeof(BrowsableAttribute)].Equals(BrowsableAttribute.No))
-                {
-                    throw new NodalDirectorException(nom_fct + "\n" + "Cannot Get Property");
-                }
-                else
-                {
-                    Console.WriteLine("Get " + prop.GetValue(nodeIn));
-                    return prop.GetValue(nodeIn);
-                }
-            }
-            else
-            {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Get Property \"{0}\"", inPropertyName));
-            }
         }
 
         /// <summary>
@@ -2489,7 +2869,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("SetPortsProperty(\"{0}\", \"{1}\", {2}, \"{3}\", {4});", inNodeName, inPortName, inIsOutput, inPropertyName, inValue);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -2539,64 +2919,9 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
-        }
-
-        public static object GetPortProperty(string inNodeName, string inPortName, bool inIsOutput, string inPropertyName)
-        {
-            if (_instance.manager == null)
-                return false;
-
-            string nom_fct = string.Format("GetPortProperty(\"{0}\", \"{1}\", \"{2}\");", inNodeName, inPortName, inPropertyName);
-
-            if (_instance.verbose)
-                Log(nom_fct);
-
-            Node nodeIn = _instance.manager.GetNode(inNodeName);
-
-            if (nodeIn == null)
-            {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
-            }
-
-            Port portIn = nodeIn.GetPort(inPortName, inIsOutput);
-
-            if (portIn == null)
-            {
-                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
-                portIn = nodeIn.GetPort(inPortName2, inIsOutput);
-                if (portIn == null)
-                {
-                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
-                }
-            }
-
-            string value = "";
-            if (propertyPossibilities.TryGetValue(inPropertyName, out value))
-            {
-                inPropertyName = value;
-            }
-
-            PropertyInfo prop = portIn.GetType().GetProperty(inPropertyName);
-
-            if (prop != null)
-            {
-                AttributeCollection attributes = TypeDescriptor.GetProperties(portIn)[inPropertyName].Attributes;
-                if (attributes[typeof(BrowsableAttribute)].Equals(BrowsableAttribute.No))
-                {
-                    throw new NodalDirectorException(nom_fct + "\n" + "Cannot Get Property");
-                }
-                else
-                {
-                    Console.WriteLine("Get " + prop.GetValue(portIn));
-                    return prop.GetValue(portIn);
-                }
-            }
-            else
-            {
-                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Get Port Property \"{0}\"", inPropertyName));
-            }
         }
 
         public static bool SetElementProperty(string inNodeName, string inPortObjName, string inPropertyName, object inValue)
@@ -2607,7 +2932,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("SetElementProperty(\"{0}\", \"{1}\", \"{2}\", {3});", inNodeName, inPortObjName, inPropertyName, inValue);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -2616,7 +2941,7 @@ namespace TK.NodalEditor
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
-            PortObj portObjIn = nodeIn.GetElement(inPortObjName); 
+            PortObj portObjIn = nodeIn.GetElement(inPortObjName);
 
             if (portObjIn == null)
             {
@@ -2651,16 +2976,23 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
 
-        public static bool NodeExist(string inNodeName)
+        /// <summary>
+        /// Get Node property
+        /// </summary>
+        /// <param name="inNodeName">Node name</param>
+        /// <param name="inPropertyName">Property name : "Name", "CustomColor", "Freezed", "Path"</param>
+        /// <returns></returns>
+        public static object GetProperty(string inNodeName, string inPropertyName)
         {
             if (_instance.manager == null)
                 return false;
 
-            string nom_fct = string.Format("NodeExist(\"{0}\");", inNodeName);
+            string nom_fct = string.Format("GetProperty(\"{0}\", \"{1}\");", inNodeName, inPropertyName);
 
             if (_instance.verbose)
                 Log(nom_fct);
@@ -2669,18 +3001,42 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
-            return true;
+            string value = "";
+            if (propertyPossibilities.TryGetValue(inPropertyName, out value))
+            {
+                inPropertyName = value;
+            }
+
+            PropertyInfo prop = nodeIn.GetType().GetProperty(inPropertyName);
+
+            if (prop != null)
+            {
+                AttributeCollection attributes = TypeDescriptor.GetProperties(nodeIn)[inPropertyName].Attributes;
+                if (attributes[typeof(BrowsableAttribute)].Equals(BrowsableAttribute.No))
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + "Cannot Get Property");
+                }
+                else
+                {
+                    Console.WriteLine("Get " + prop.GetValue(nodeIn));
+                    return prop.GetValue(nodeIn);
+                }
+            }
+            else
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Get Property \"{0}\"", inPropertyName));
+            }
         }
 
-        public static bool PortExist(string inNodeName, string inPortName, bool inIsOutput)
+        public static object GetPortProperty(string inNodeName, string inPortName, bool inIsOutput, string inPropertyName)
         {
             if (_instance.manager == null)
                 return false;
 
-            string nom_fct = string.Format("PortExist(\"{0}\", \"{1}\", {2});", inNodeName, inPortName, inIsOutput);
+            string nom_fct = string.Format("GetPortProperty(\"{0}\", \"{1}\", \"{2}\");", inNodeName, inPortName, inPropertyName);
 
             if (_instance.verbose)
                 Log(nom_fct);
@@ -2689,7 +3045,7 @@ namespace TK.NodalEditor
 
             if (nodeIn == null)
             {
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
             Port portIn = nodeIn.GetPort(inPortName, inIsOutput);
@@ -2700,191 +3056,250 @@ namespace TK.NodalEditor
                 portIn = nodeIn.GetPort(inPortName2, inIsOutput);
                 if (portIn == null)
                 {
-                    return false;
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
                 }
             }
-            return true;
+
+            string value = "";
+            if (propertyPortPossibilities.TryGetValue(inPropertyName, out value))
+            {
+                inPropertyName = value;
+            }
+
+            PropertyInfo prop = portIn.GetType().GetProperty(inPropertyName);
+
+            if (prop != null)
+            {
+                AttributeCollection attributes = TypeDescriptor.GetProperties(portIn)[inPropertyName].Attributes;
+                if (attributes[typeof(BrowsableAttribute)].Equals(BrowsableAttribute.No))
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + "Cannot Get Property");
+                }
+                else
+                {
+                    Console.WriteLine("Get " + prop.GetValue(portIn));
+                    return prop.GetValue(portIn);
+                }
+            }
+            else
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Get Port Property \"{0}\"", inPropertyName));
+            }
         }
 
-        public static bool PortHasLinks(string inNodeName, string inPortName, bool inIsOutput)
+        public static object GetLinkProperty(string inNodeName, string inPortName, string outNodeName, string outPortName, string inPropertyName)
         {
             if (_instance.manager == null)
                 return false;
 
-            string nom_fct = string.Format("PortHasLinks(\"{0}\", \"{1}\", {2});", inNodeName, inPortName, inIsOutput);
+            string nom_fct = string.Format("GetLinkProperty(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\");", inNodeName, inPortName, outNodeName, outPortName, inPropertyName);
 
             if (_instance.verbose)
                 Log(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
-
+            Node nodeOut = _instance.manager.GetNode(outNodeName);
             if (nodeIn == null)
             {
-                return false;
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+            if (nodeOut == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
             }
 
-            Port portIn = nodeIn.GetPort(inPortName, inIsOutput);
+            Port portIn = nodeIn.GetPort(inPortName, false);
+            Port portOut = nodeIn.GetPort(outPortName, true);
 
             if (portIn == null)
             {
                 string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
-                portIn = nodeIn.GetPort(inPortName2, inIsOutput);
+                portIn = nodeIn.GetPort(inPortName2, false);
                 if (portIn == null)
                 {
-                    return false;
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortName));
                 }
             }
 
-            if (portIn.Dependencies.Count == 0)
-                return false;
-
-            return true;
-        }
-
-        public static object Input(string inType, string Message, string Caption)
-        {
-            return Input(inType, Message, Caption, "");
-        }
-
-        /// <summary>
-        /// Enter input Value
-        /// </summary>
-        /// <param name="inType">Input type : "string", "bool", "float", "double", "int"</param>
-        /// <param name="Message"></param>
-        /// <param name="Caption"></param>
-        /// <param name="defaultValue"></param>
-        /// <returns></returns>
-        //public static object Input(string inType, string Message, string Caption, string defaultValue)
-        //{
-
-        //    TK.GraphComponents.Dialogs.InputTypes type;
-        //    RichDialogResult rslt;
-
-        //    switch (inType)
-        //    {
-        //        case "double":
-        //            type = TK.GraphComponents.Dialogs.InputTypes.Double;
-        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-        //            {
-        //                return null;
-        //            }
-        //            return (double)rslt.Data;
-        //        case "bool":
-        //            type = TK.GraphComponents.Dialogs.InputTypes.Bool;
-        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-        //            {
-        //                return null;
-        //            }
-        //            return Convert.ToBoolean(rslt.Data);
-        //        case "float":
-        //            type = TK.GraphComponents.Dialogs.InputTypes.Float;
-        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-        //            {
-        //                return null;
-        //            }
-        //            return float.Parse((string)rslt.Data);
-        //        case "int":
-        //            type = TK.GraphComponents.Dialogs.InputTypes.Int;
-        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-        //            {
-        //                return null;
-        //            }
-        //            return Int32.Parse((string)rslt.Data);
-        //        case "string":
-        //            type = TK.GraphComponents.Dialogs.InputTypes.String;
-        //            rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-        //            if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-        //            {
-        //                return null;
-        //            }
-        //            return (string)rslt.Data;
-        //        default:
-        //            throw new NodalDirectorException("Wrong Type");
-        //    }
-        //}
-
-        public static object Input(string inType, string Message, string Caption, string defaultValue)
-        {
-
-            TK.GraphComponents.Dialogs.InputTypes type;
-            RichDialogResult rslt;
-
-            switch (inType)
+            if (portOut == null)
             {
-                case "double":
-                    type = TK.GraphComponents.Dialogs.InputTypes.Double;
-                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-                    {
-                        return null;
-                    }
-                    return (double)rslt.Data;
-                case "bool":
-                    type = TK.GraphComponents.Dialogs.InputTypes.Bool;
-                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-                    {
-                        return null;
-                    }
-                    return (bool)rslt.Data;
-                case "float":
-                    type = TK.GraphComponents.Dialogs.InputTypes.Float;
-                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-                    {
-                        return null;
-                    }
-                    return (float)rslt.Data;
-                case "int":
-                    type = TK.GraphComponents.Dialogs.InputTypes.Int;
-                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-                    {
-                        return null;
-                    }
-                    return (int)rslt.Data;
-                case "string":
-                    type = TK.GraphComponents.Dialogs.InputTypes.String;
-                    rslt = TKMessageBox.ShowInput(type, Message, Caption, defaultValue);
-                    if (rslt.Result != System.Windows.Forms.DialogResult.OK)
-                    {
-                        return null;
-                    }
-                    return (string)rslt.Data;
-                default:
-                    throw new NodalDirectorException("Wrong Type");
-            }
-        }
-        #endregion
-
-        #region Getters Commands
-
-        /// <summary>
-        /// Getting selected nodes
-        /// </summary>
-        /// <returns></returns>
-        public static List<string> GetSelectedNodes()
-        {
-            List<string> NodeNames = new List<string>();
-
-            foreach (NodeBase elem in _instance.layout.Selection.Selection)
-            {
-                if (elem is Node)
+                string outPortName2 = string.Format("{0}_{1}", outNodeName, outPortName);
+                portOut = nodeOut.GetPort(outPortName2, true);
+                if (portOut == null)
                 {
-                    NodeNames.Add((elem as Node).FullName);
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{1}\" does not exist!", outNodeName, outPortName));
                 }
             }
 
-            return NodeNames;
+            string value = "";
+            if (propertyLinkPossibilities.TryGetValue(inPropertyName, out value))
+            {
+                inPropertyName = value;
+            }
+
+            Link linki = new Link();
+            if (portIn.Dependencies.Count != 0)
+            {
+                foreach (Link link in portIn.Dependencies)
+                {
+
+                    if (link.Source == portOut)
+                    {
+                        linki = link;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+            }
+
+            if (linki != null)
+            {
+                PropertyInfo prop = linki.GetType().GetProperty(inPropertyName, BindingFlags.Public | BindingFlags.Instance);
+                if (null != prop && prop.CanWrite)
+                {
+                    AttributeCollection attributes = TypeDescriptor.GetProperties(nodeIn)[inPropertyName].Attributes;
+                    if (attributes[typeof(BrowsableAttribute)].Equals(BrowsableAttribute.No))
+                    {
+                        throw new NodalDirectorException(nom_fct + "\n" + "Cannot Get Link Property");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Get " + prop.GetValue(linki));
+                        return prop.GetValue(linki);
+                    }
+                }
+                else
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Get Link Property \"{0}\"", inPropertyName));
+                }
+            }
+            else
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\" does not exist!", inPortName, inNodeName, outPortName, outNodeName));
+            }
+
+
         }
 
         #endregion
 
         #region UI Commands
+
+        ///// <summary>
+        ///// Select a List of nodes
+        ///// </summary>
+        ///// <param name="inNodeNames">List of node Names</param>
+        ///// <returns></returns>
+        //public static bool SelectNodes(List<string> inNodeNames)
+        //{
+        //    return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Default);
+        //}
+
+        ///// <summary>
+        ///// Select a List of nodes with selection Types
+        ///// </summary>
+        ///// <param name="inNodeNames">List of node Names</param>
+        ///// <param name="inType">Type of Selection : "Default", "Add", "Toggle", "RemoveFrom"</param>
+        ///// <returns></returns>
+        //public static bool SelectNodes(List<string> inNodeNames, string inType)
+        //{
+        //    if(inType == "Default")
+        //        return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Default);
+        //    else if (inType == "Add")
+        //        return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Add);
+        //    else if (inType == "Toggle")
+        //        return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Toggle);
+        //    else if (inType == "RemoveFrom")
+        //        return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.RemoveFrom);
+        //    else
+        //    {
+        //        throw new NodalDirectorException("Cannot Select the Nodes, Wrong inType");
+        //    }
+        //}
+
+        ///// <summary>
+        ///// Select a List of nodes with selection Types
+        ///// </summary>
+        ///// <param name="inNodeNames">List of node Names</param>
+        ///// <param name="inType">Type of Selection : Default, Add, Toggle, RemoveFrom</param>
+        ///// <returns></returns>
+        //public static bool SelectNodes(List<string> inNodeNames, NodesLayout.TypeOfSelection inType)
+        //{
+        //    if (_instance.manager == null)
+        //        return false;
+
+        //    string nom_fct = string.Format("SelectNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodeNames, "\",\""));
+
+        //    if (_instance.verbose)
+        //        Info(nom_fct);
+
+        //    List<string> nodesNameError = new List<string>();
+        //    List<Node> nodes = new List<Node>();
+
+        //    if (inNodeNames.Count > 0)
+        //    {
+        //        foreach (string NodeName in inNodeNames)
+        //        {
+        //            Node Node = _instance.manager.GetNode(NodeName);
+
+        //            if (Node == null) //Node with NodeName do not exist
+        //            {
+        //                nodesNameError.Add(NodeName);
+        //            }
+        //            else //Node with NodeName exist
+        //            {
+        //                nodes.Add(Node);
+        //            }
+        //        }
+        //        if (nodesNameError.Count > 0)
+        //        {
+        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("Not all node names exist in List<string>{{\"{0}\"}} ", TypesHelper.Join(inNodeNames, "\",\"")));
+        //        }
+        //        else //All the nodes name exist
+        //        {
+        //            switch (inType)
+        //            {
+        //                case NodesLayout.TypeOfSelection.Default:
+        //                    _instance.layout.Selection.Select(nodes);
+        //                    break;
+        //                case NodesLayout.TypeOfSelection.Add:
+        //                    foreach (Node node in nodes)
+        //                    {
+        //                        _instance.layout.Selection.AddToSelection(node);
+        //                    }
+        //                    break;
+        //                case NodesLayout.TypeOfSelection.Toggle:
+        //                    foreach (Node node in nodes)
+        //                    {
+        //                        _instance.layout.Selection.ToggleSelection(node);
+        //                    }
+        //                    break;
+        //                case NodesLayout.TypeOfSelection.RemoveFrom:
+        //                    foreach (Node node in nodes)
+        //                    {
+        //                        _instance.layout.Selection.RemoveFromSelection(node);
+        //                    }
+        //                    break;
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        _instance.layout.Selection.DeselectAll();
+        //    }
+
+        //    if (_instance.layout == null)
+        //        return true;
+
+        //    _instance.layout.Invalidate();
+
+        //    _instance.haveChanged = true;
+
+        //    return true;
+        //}
 
         /// <summary>
         /// Select a List of nodes
@@ -2893,7 +3308,7 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool SelectNodes(List<string> inNodeNames)
         {
-            return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Default);
+            return SelectNodes(inNodeNames, "Default");
         }
 
         /// <summary>
@@ -2904,35 +3319,13 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool SelectNodes(List<string> inNodeNames, string inType)
         {
-            if(inType == "Default")
-                return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Default);
-            else if (inType == "Add")
-                return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Add);
-            else if (inType == "Toggle")
-                return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.Toggle);
-            else if (inType == "RemoveFrom")
-                return SelectNodes(inNodeNames, NodesLayout.TypeOfSelection.RemoveFrom);
-            else
-            {
-                throw new NodalDirectorException("Cannot Select the Nodes, Wrong inType");
-            }
-        }
-
-        /// <summary>
-        /// Select a List of nodes with selection Types
-        /// </summary>
-        /// <param name="inNodeNames">List of node Names</param>
-        /// <param name="inType">Type of Selection : Default, Add, Toggle, RemoveFrom</param>
-        /// <returns></returns>
-        public static bool SelectNodes(List<string> inNodeNames, NodesLayout.TypeOfSelection inType)
-        {
             if (_instance.manager == null)
                 return false;
 
             string nom_fct = string.Format("SelectNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodeNames, "\",\""));
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             List<string> nodesNameError = new List<string>();
             List<Node> nodes = new List<Node>();
@@ -2958,29 +3351,34 @@ namespace TK.NodalEditor
                 }
                 else //All the nodes name exist
                 {
-                    switch (inType)
+                    if (inType == "Default")
                     {
-                        case NodesLayout.TypeOfSelection.Default:
-                            _instance.layout.Selection.Select(nodes);
-                            break;
-                        case NodesLayout.TypeOfSelection.Add:
-                            foreach (Node node in nodes)
-                            {
-                                _instance.layout.Selection.AddToSelection(node);
-                            }
-                            break;
-                        case NodesLayout.TypeOfSelection.Toggle:
-                            foreach (Node node in nodes)
-                            {
-                                _instance.layout.Selection.ToggleSelection(node);
-                            }
-                            break;
-                        case NodesLayout.TypeOfSelection.RemoveFrom:
-                            foreach (Node node in nodes)
-                            {
-                                _instance.layout.Selection.RemoveFromSelection(node);
-                            }
-                            break;
+                        _instance.layout.Selection.Select(nodes);
+                    }
+                    else if (inType == "Add")
+                    {
+                        foreach (Node node in nodes)
+                        {
+                            _instance.layout.Selection.AddToSelection(node);
+                        }
+                    }
+                    else if (inType == "Toggle")
+                    {
+                        foreach (Node node in nodes)
+                        {
+                            _instance.layout.Selection.ToggleSelection(node);
+                        }
+                    }
+                    else if (inType == "RemoveFrom")
+                    {
+                        foreach (Node node in nodes)
+                        {
+                            _instance.layout.Selection.RemoveFromSelection(node);
+                        }
+                    }
+                    else
+                    {
+                        throw new NodalDirectorException("Cannot Select the Nodes, Wrong inType");
                     }
                 }
             }
@@ -2995,6 +3393,7 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -3014,7 +3413,7 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("MoveNode(\"{0}\", {1}, {2});", inNodeName, inX, inY);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
             Node nodeIn = _instance.manager.GetNode(inNodeName);
 
@@ -3032,7 +3431,10 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
+            DelegateHaveChanged delegateHaveChanged = _instance.nd_ChangeOnStatus;
+            _instance.ChangedStatus += delegateHaveChanged;
             _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
 
             return true;
         }
@@ -3061,11 +3463,15 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("Open(\"{0}\", {1});", inPath, inForce);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
 
-            if(_instance.haveChanged == true)
+            if (_instance.haveChanged == true && inForce == false)
             {
-                Console.WriteLine("Save before ?");
+                bool isconfirmed = TKMessageBox.Confirm("Open before saving changes ?", "WARNING");
+                if (!isconfirmed)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + "Open file has been canceled");
+                }
             }
 
             Compound openedComp = null;
@@ -3084,6 +3490,7 @@ namespace TK.NodalEditor
             }
 
             _instance.haveChanged = false;
+            _instance.ChangeOnStatus();
             return true;
         }
 
@@ -3093,7 +3500,7 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static bool New()
         {
-            return New(true);
+            return New(false);
         }
 
         /// <summary>
@@ -3109,12 +3516,52 @@ namespace TK.NodalEditor
             string nom_fct = string.Format("New({0});", inForce);
 
             if (_instance.verbose)
-                Log(nom_fct);
+                Info(nom_fct);
+
+            if (_instance.haveChanged == true && inForce == false)
+            {
+                bool isconfirmed = TKMessageBox.Confirm("Create New before saving changes ?", "WARNING");
+                if (!isconfirmed)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + "New has been canceled");
+                }
+            }
 
             _instance.manager.NewLayout();
             _instance.layout.Invalidate();
 
+            _instance.haveChanged = false;
+            _instance.ChangeOnStatus();
             return true;
+        }
+
+
+        public static bool Save()
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            System.Windows.Forms.DialogResult rslt = sfd.ShowDialog();
+
+            if (rslt == System.Windows.Forms.DialogResult.OK)
+            {
+                StreamWriter myWriter = null;
+
+                try
+                {
+                    myWriter = new StreamWriter(sfd.FileName);
+
+                    NodesSerializer.GetInstance().CompoundSerializers["Default"].Serialize(myWriter, _instance.manager.Root);
+                    _instance.haveChanged = false;
+                    _instance.ChangeOnStatus();
+                    return true;
+                }
+                finally
+                {
+                    if (myWriter != null)
+                        myWriter.Close();
+                }
+
+            }
+            return false;
         }
 
         #endregion
