@@ -4373,8 +4373,12 @@ namespace TK.NodalEditor.NodesLayout
 
         private void deletePortToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Port inPort = (Port)deletePortToolStripMenuItem.Tag;
+            //inPort.Owner.RemovePort(inPort);
+            //Invalidate();
+
             Port inPort = (Port)deletePortToolStripMenuItem.Tag;
-            inPort.Owner.RemovePort(inPort);
+            NodalDirector.DeletePort(inPort.Owner.FullName, inPort.FullName);
             Invalidate();
         }
 

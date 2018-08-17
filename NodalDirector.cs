@@ -11,14 +11,13 @@ using System.IO;
 using System.Reflection;
 using System.ComponentModel;
 using System.Windows.Forms;
-using System.Xml.Serialization;
 
 namespace TK.NodalEditor
 {
     public class NodalDirector
     {
         public delegate void DelegateHaveChanged(bool NewStatus);
-        public event DelegateHaveChanged ChangedStatus;
+        public static event DelegateHaveChanged ChangedStatus;
         public bool haveChanged = false;
         
         public void ChangeOnStatus()
@@ -28,10 +27,7 @@ namespace TK.NodalEditor
                 ChangedStatus(haveChanged);
             }
         }
-        private void nd_ChangeOnStatus(bool newStatus)
-        {
-            Console.WriteLine("Have changed " + newStatus);
-        }
+
         //public event HaveChangedEventHandler HaveChangedEvent;
         //public delegate void HaveChangedEventHandler(object sender, NodesChangedEventArgs e);
 
@@ -134,7 +130,6 @@ namespace TK.NodalEditor
                 return true;
             }
             return false;
-
         }
 
         /// <summary>
@@ -215,6 +210,15 @@ namespace TK.NodalEditor
             _instance.layout.Selection.Selection.Clear();
             _instance.layout.ChangeFocus(true);
             _instance.manager.Companion.EndProcess();
+        }
+
+        public void _DeletePort(Port inPort)
+        {
+            inPort.Owner.RemovePort(inPort);
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
         }
 
         /// <summary>
@@ -459,6 +463,8 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
+       
+
         #endregion
 
         #region Logging
@@ -578,7 +584,7 @@ namespace TK.NodalEditor
             {
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("No Node named \"{0}\"!", inNodeName));
             }
-
+            
 
             if (_instance.layout == null)
                 return nodeName;
@@ -677,6 +683,53 @@ namespace TK.NodalEditor
             _instance.layout.Selection.Selection.Clear();
             _instance.layout.ChangeFocus(true);
             _instance.manager.Companion.EndProcess();
+
+            _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
+            return true;
+        }
+
+        /// <summary>
+        /// Delete a port
+        /// </summary>
+        /// <param name="inNodeName">Node name of the port</param>
+        /// <param name="inPortName">Port name</param>
+        /// <returns></returns>
+        public static bool DeletePort(string inNodeName, string inPortName)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("DeletePort(\"{0}\", \"{1}\");", inNodeName, inPortName);
+
+            if (_instance.verbose)
+                Info(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            Port portIn = nodeIn.GetPort(inPortName, false);
+
+            if (portIn == null)
+            {
+                string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+                portIn = nodeIn.GetPort(inPortName2, false);
+                if (portIn == null)
+                {
+                    return false;
+                }
+            }
+
+            nodeIn.RemovePort(portIn);
+
+            if (_instance.layout == null)
+                return true;
+
+            _instance.layout.Invalidate();
 
             _instance.haveChanged = true;
             _instance.ChangeOnStatus();
@@ -2574,9 +2627,29 @@ namespace TK.NodalEditor
 
         public static List<string> GetOutputPort(string inNodeName)
         {
-            List<string> outputPort = new List<string>();
+            List<string> outputPortName = new List<string>();
 
-            return outputPort;
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("GetInputPort(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            foreach (Port port in nodeIn.Outputs)
+            {
+                outputPortName.Add(port.FullName);
+            }
+
+            return outputPortName;
         }
 
         /// <summary>
@@ -3004,8 +3077,8 @@ namespace TK.NodalEditor
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
-            string value = "";
-            if (propertyPossibilities.TryGetValue(inPropertyName, out value))
+            string value = GetPropertyPossibilities(inPropertyName);
+            if (value != null)
             {
                 inPropertyName = value;
             }
@@ -3060,8 +3133,8 @@ namespace TK.NodalEditor
                 }
             }
 
-            string value = "";
-            if (propertyPortPossibilities.TryGetValue(inPropertyName, out value))
+            string value = GetPortPropertyPossibilities(inPropertyName);
+            if (value != null)
             {
                 inPropertyName = value;
             }
@@ -3131,8 +3204,8 @@ namespace TK.NodalEditor
                 }
             }
 
-            string value = "";
-            if (propertyLinkPossibilities.TryGetValue(inPropertyName, out value))
+            string value = GetLinkPropertyPossibilities(inPropertyName);
+            if (value != null)
             {
                 inPropertyName = value;
             }
@@ -3431,8 +3504,6 @@ namespace TK.NodalEditor
 
             _instance.layout.Invalidate();
 
-            DelegateHaveChanged delegateHaveChanged = _instance.nd_ChangeOnStatus;
-            _instance.ChangedStatus += delegateHaveChanged;
             _instance.haveChanged = true;
             _instance.ChangeOnStatus();
 
@@ -3467,7 +3538,7 @@ namespace TK.NodalEditor
 
             if (_instance.haveChanged == true && inForce == false)
             {
-                bool isconfirmed = TKMessageBox.Confirm("Open before saving changes ?", "WARNING");
+                bool isconfirmed = TKMessageBox.Confirm("Current file have unsaved modifications, Are you sure you want to lose modifications ?", "WARNING");
                 if (!isconfirmed)
                 {
                     throw new NodalDirectorException(nom_fct + "\n" + "Open file has been canceled");
@@ -3520,7 +3591,7 @@ namespace TK.NodalEditor
 
             if (_instance.haveChanged == true && inForce == false)
             {
-                bool isconfirmed = TKMessageBox.Confirm("Create New before saving changes ?", "WARNING");
+                bool isconfirmed = TKMessageBox.Confirm("Current file have unsaved modifications, Are you sure you want to lose modifications ?", "WARNING");
                 if (!isconfirmed)
                 {
                     throw new NodalDirectorException(nom_fct + "\n" + "New has been canceled");
@@ -3559,7 +3630,6 @@ namespace TK.NodalEditor
                     if (myWriter != null)
                         myWriter.Close();
                 }
-
             }
             return false;
         }

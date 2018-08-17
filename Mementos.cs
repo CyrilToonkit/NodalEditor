@@ -313,4 +313,24 @@ namespace TK.NodalEditor
             return inverse;
         }
     }
+
+    class OverrideDisplayMemento : NodalEditorMemento
+    {
+        private string newName;
+        private Node Node;
+        private string nodeName;
+
+        public OverrideDisplayMemento(Node inNode, string inNewName)
+        {
+            this.newName = inNewName;
+            this.Node = inNode;
+            this.nodeName = inNode.FullName;
+        }
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            IMemento<NodalDirector> inverse = new OverrideDisplayMemento(Node, nodeName);
+            target._Rename(Node, nodeName);
+            return inverse;
+        }
+    }
 }
