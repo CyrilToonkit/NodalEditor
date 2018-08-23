@@ -2353,7 +2353,7 @@ namespace TK.NodalEditor
         }
 
         /// <summary>
-        /// Check is node exist
+        /// Check if node exist
         /// </summary>
         /// <param name="inNodeName">Node name</param>
         /// <returns></returns>
@@ -2543,13 +2543,42 @@ namespace TK.NodalEditor
             }
             else
             {
-                string node1 = AddNode(NodeName[0], null, 50, 50);
-                string node2 = AddNode(NodeName[0], null, 100, 100);
-
-                if(GetChildren("",true,false,"").Count == 3)
+                string nodeIn = AddNode(NodeName[0], null, 50, 50);
+                if(!NodeExist(nodeIn))
                 {
+                    Error("Node does not exist");
+                }
+                string nodeOut = AddNode(NodeName[0], null, 100, 100);
+                if (!NodeExist(nodeOut))
+                {
+                    Error("Node does not exist");
+                }
 
-                    //Connect(node1, node2);
+                if (GetChildren("",true,false,"").Count == 3)
+                {
+                    bool connected = false;
+                    bool disconnected = false;
+                    List<string> inputPorts = GetInputPort(nodeIn);
+                    List<string> outputPorts = GetOutputPort(nodeOut);
+                    if(inputPorts.Count != 0 && outputPorts.Count != 0)
+                    {
+                        connected = Connect(nodeIn, inputPorts[0], nodeOut, outputPorts[0]);
+                    }
+                    if (!connected)
+                    {
+                        Error("Cannot connect");
+                    }
+                    if (inputPorts.Count >= 2)
+                    {
+                        CopyLink(nodeIn, inputPorts[0], nodeOut, outputPorts[0], nodeIn, inputPorts[1], nodeOut, outputPorts[0]);
+                    }
+
+                    disconnected = Disconnect(nodeIn, inputPorts[0], nodeOut, outputPorts[0]);
+                    if (!disconnected)
+                    {
+                        Error("Cannot disconnect");
+                    }
+
                     Console.WriteLine("ici");
 
 
