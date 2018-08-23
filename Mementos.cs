@@ -7,7 +7,7 @@ using TK.NodalEditor.NodesFramework;
 
 namespace TK.NodalEditor
 {
-    abstract class NodalEditorMemento : IMemento<NodalDirector>
+    public abstract class NodalEditorMemento : IMemento<NodalDirector>
     {
         public abstract IMemento<NodalDirector> Restore(NodalDirector target);
     }
@@ -76,7 +76,7 @@ namespace TK.NodalEditor
     }
 
 
-    class DisconnectMemento : NodalEditorMemento
+    public class DisconnectMemento : NodalEditorMemento
     {
         Link disconnected;
         string mode = null;
@@ -94,7 +94,7 @@ namespace TK.NodalEditor
         }
     }
 
-    class ConnectMemento : NodalEditorMemento
+    public class ConnectMemento : NodalEditorMemento
     {
         private Link link;
         private string mode;
