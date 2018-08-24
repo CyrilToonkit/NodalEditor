@@ -765,22 +765,28 @@ namespace TK.NodalEditor
             }
 
             Node newNode = new Node();
+            int inXOffset = (int)(30 / _instance.layout.LayoutSize);
+            int inYOffset = (int)(-10 / _instance.layout.LayoutSize);
 
             if (string.IsNullOrEmpty(inSearch))
             {
-                newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)(nodeIn.UIx + (30 / _instance.layout.LayoutSize)), (int)(nodeIn.UIy - (10 / _instance.layout.LayoutSize)));
+                //newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)(nodeIn.UIx + (30 / _instance.layout.LayoutSize)), (int)(nodeIn.UIy - (10 / _instance.layout.LayoutSize)));
+                newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)(nodeIn.UIx + inXOffset), (int)(nodeIn.UIy + inYOffset));
                 if (newNode == null)
                 {
                     throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
                 }
+                _instance.history.Do(new ReAddNodeMemento(newNode, newNode.Parent, new NodeConnexions(newNode), inXOffset, inYOffset));
             }
             else
             {
-                newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)(nodeIn.UIx + (30 / _instance.layout.LayoutSize)), (int)(nodeIn.UIy - (10 / _instance.layout.LayoutSize)), inSearch, inReplace);
+                //newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)(nodeIn.UIx + (30 / _instance.layout.LayoutSize)), (int)(nodeIn.UIy - (10 / _instance.layout.LayoutSize)), inSearch, inReplace);
+                newNode = _instance.manager.Copy(nodeIn, _instance.manager.CurCompound, (int)(nodeIn.UIx + inXOffset), (int)(nodeIn.UIy + inYOffset));
                 if (newNode == null)
                 {
                     throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
                 }
+                _instance.history.Do(new ReAddNodeMemento(newNode, newNode.Parent, new NodeConnexions(newNode), inXOffset, inYOffset));
             }
 
             if (_instance.layout == null)
@@ -2472,7 +2478,6 @@ namespace TK.NodalEditor
         /// <returns></returns>
         public static object Input(string inType, string Message, string Caption, string defaultValue)
         {
-
             TK.GraphComponents.Dialogs.InputTypes type;
             RichDialogResult rslt;
 
