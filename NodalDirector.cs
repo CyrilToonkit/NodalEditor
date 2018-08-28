@@ -463,7 +463,26 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
-       
+        internal void _SelectNodes(List<Node> inNodes)
+        {
+            _instance.layout.Selection.Select(inNodes);
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
+        }
+
+        internal void _DeselectNodes()
+        {
+            _instance.layout.Selection.DeselectAll();
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
+        }
+
 
         #endregion
 
@@ -2528,7 +2547,6 @@ namespace TK.NodalEditor
             }
         }
 
-
         public static bool CommandScript()
         {
             New();
@@ -3460,6 +3478,7 @@ namespace TK.NodalEditor
                 {
                     if (inType == "Default")
                     {
+                        _instance.historyUI.Do(new SelectNodesMemento(nodes));
                         _instance.layout.Selection.Select(nodes);
                     }
                     else if (inType == "Add")
@@ -3468,6 +3487,7 @@ namespace TK.NodalEditor
                         {
                             _instance.layout.Selection.AddToSelection(node);
                         }
+                        _instance.historyUI.Do(new SelectNodesMemento(nodes));
                     }
                     else if (inType == "Toggle")
                     {
@@ -3475,6 +3495,7 @@ namespace TK.NodalEditor
                         {
                             _instance.layout.Selection.ToggleSelection(node);
                         }
+                        _instance.historyUI.Do(new SelectNodesMemento(nodes));
                     }
                     else if (inType == "RemoveFrom")
                     {
@@ -3482,6 +3503,7 @@ namespace TK.NodalEditor
                         {
                             _instance.layout.Selection.RemoveFromSelection(node);
                         }
+                        _instance.historyUI.Do(new SelectNodesMemento(nodes));
                     }
                     else
                     {
@@ -3639,7 +3661,6 @@ namespace TK.NodalEditor
             _instance.ChangeOnStatus();
             return true;
         }
-
 
         public static bool Save()
         {

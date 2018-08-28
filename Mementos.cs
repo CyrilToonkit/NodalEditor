@@ -333,4 +333,37 @@ namespace TK.NodalEditor
             return inverse;
         }
     }
+
+    class SelectNodesMemento : NodalEditorMemento
+    {
+        private List<Node> nodes;
+
+        public SelectNodesMemento(List<Node> inNodes)
+        {
+            this.nodes = inNodes;
+        }
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            IMemento<NodalDirector> inverse = new DeselectNodesMemento(nodes);
+            target._DeselectNodes();
+            return inverse;
+        }
+    }
+
+    class DeselectNodesMemento : NodalEditorMemento
+    {
+        private List<Node> nodes;
+
+        public DeselectNodesMemento(List<Node> inNodes)
+        {
+            this.nodes = inNodes;
+        }
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            IMemento<NodalDirector> inverse = new SelectNodesMemento(nodes);
+            target._SelectNodes(nodes);
+            return inverse;
+        }
+    }
+
 }
