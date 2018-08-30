@@ -3478,7 +3478,7 @@ namespace TK.NodalEditor
                 {
                     if (inType == "Default")
                     {
-                        _instance.historyUI.Do(new SelectNodesMemento(nodes));
+                        _instance.history.Do(new SelectNodesMemento(nodes));
                         _instance.layout.Selection.Select(nodes);
                     }
                     else if (inType == "Add")
@@ -3487,7 +3487,7 @@ namespace TK.NodalEditor
                         {
                             _instance.layout.Selection.AddToSelection(node);
                         }
-                        _instance.historyUI.Do(new SelectNodesMemento(nodes));
+                        _instance.history.Do(new SelectNodesMemento(nodes));
                     }
                     else if (inType == "Toggle")
                     {
@@ -3495,7 +3495,7 @@ namespace TK.NodalEditor
                         {
                             _instance.layout.Selection.ToggleSelection(node);
                         }
-                        _instance.historyUI.Do(new SelectNodesMemento(nodes));
+                        _instance.history.Do(new SelectNodesMemento(nodes));
                     }
                     else if (inType == "RemoveFrom")
                     {
@@ -3503,7 +3503,7 @@ namespace TK.NodalEditor
                         {
                             _instance.layout.Selection.RemoveFromSelection(node);
                         }
-                        _instance.historyUI.Do(new SelectNodesMemento(nodes));
+                        _instance.history.Do(new SelectNodesMemento(nodes));
                     }
                     else
                     {
