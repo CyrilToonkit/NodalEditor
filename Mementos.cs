@@ -12,7 +12,7 @@ namespace TK.NodalEditor
         public abstract IMemento<NodalDirector> Restore(NodalDirector target);
     }
 
-    class ReAddNodeMemento : NodalEditorMemento
+    public class ReAddNodeMemento : NodalEditorMemento
     {
         Node node;
         Compound parent;
@@ -35,7 +35,7 @@ namespace TK.NodalEditor
         }
     }
 
-    class DeleteNodeMemento : NodalEditorMemento
+    public class DeleteNodeMemento : NodalEditorMemento
     {
         Node removed;
         Compound parent;
@@ -58,7 +58,7 @@ namespace TK.NodalEditor
         }
     }
 
-    class AddNodeMemento : NodalEditorMemento
+    public class AddNodeMemento : NodalEditorMemento
     {
         private string nodeName;
         public AddNodeMemento(string inName)
@@ -336,32 +336,36 @@ namespace TK.NodalEditor
 
     class SelectNodesMemento : NodalEditorMemento
     {
+        private NodeBase[] nodeBase;
         private List<Node> nodes;
 
-        public SelectNodesMemento(List<Node> inNodes)
+        public SelectNodesMemento(NodeBase[] inNodesBase, List<Node> inNodes)
         {
+            this.nodeBase = inNodesBase;
             this.nodes = inNodes;
         }
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
-            IMemento<NodalDirector> inverse = new DeselectNodesMemento(nodes);
-            target._DeselectNodes();
+            IMemento<NodalDirector> inverse = new DeselectNodesMemento(nodeBase, nodes);
+            target._DeselectNodes(nodeBase, nodes);
             return inverse;
         }
     }
 
     class DeselectNodesMemento : NodalEditorMemento
     {
+        private NodeBase[] nodeBase;
         private List<Node> nodes;
 
-        public DeselectNodesMemento(List<Node> inNodes)
+        public DeselectNodesMemento(NodeBase[] inNodesBase, List<Node> inNodes)
         {
+            this.nodeBase = inNodesBase;
             this.nodes = inNodes;
         }
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
-            IMemento<NodalDirector> inverse = new SelectNodesMemento(nodes);
-            target._SelectNodes(nodes);
+            IMemento<NodalDirector> inverse = new SelectNodesMemento(nodeBase, nodes);
+            target._SelectNodes(nodeBase, nodes);
             return inverse;
         }
     }

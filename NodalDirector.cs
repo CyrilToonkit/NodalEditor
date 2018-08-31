@@ -463,9 +463,22 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
-        internal void _SelectNodes(List<Node> inNodes)
+        internal void _SelectNodes(NodeBase[] inNodesBase, List<Node> inNodes)
         {
-            _instance.layout.Selection.Select(inNodes);
+            List<Node> nodes = new List<Node>();
+            for(int i =0; i< inNodesBase.Length; i++)
+            {
+                nodes.Add((Node)inNodesBase[i]);
+            }
+            if(inNodes != null)
+            {
+                foreach (Node node in inNodes)
+                {
+                    if (!nodes.Contains(node))
+                        nodes.Add(node);
+                }
+            }
+            _instance.layout.Selection.Select(nodes);
 
             if (_instance.layout == null)
                 return;
@@ -473,9 +486,34 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
-        internal void _DeselectNodes()
+        internal void _DeselectNodes(NodeBase[] inNodesBase, List<Node> inNodes)
         {
-            _instance.layout.Selection.DeselectAll();
+
+            //foreach (Node node in inNodesBase)
+            //{
+            //    _instance.layout.Selection.RemoveFromSelection(node);
+            //}
+
+            //List<Node> nodes = new List<Node>();
+            //for (int i = 0; i < inNodesBase.Length; i++)
+            //{
+            //    nodes.Add((Node)inNodesBase[i]);
+            //}
+            //_instance.layout.Selection.Select(nodes);
+            if (inNodes == null)
+            {
+                foreach (Node node in inNodesBase)
+                {
+                    _instance.layout.Selection.RemoveFromSelection(node);
+                }
+            }
+            else if (inNodes != null)
+            {
+                foreach(Node node in inNodes)
+                {
+                    _instance.layout.Selection.RemoveFromSelection(node);
+                }
+            }
 
             if (_instance.layout == null)
                 return;
@@ -2549,67 +2587,142 @@ namespace TK.NodalEditor
 
         public static bool CommandScript()
         {
+            //-----------------------------------------------------------------------------------
+            //---------------------------  NodalDirector.New()  ---------------------------------
+            //-----------------------------------------------------------------------------------
             New();
-            //The Root compound should be empty
+
+            //-----------------------------------------------------------------------------------
+            //--------------------------  NodalDirector.GetChildren()  --------------------------
+            //-----------------------------------------------------------------------------------
             List<string> children = GetChildren("", true, false, "");
 
+            //The Root compound should be empty
             if (children.Count > 1)
             {
                 Error("Root compound should be empty after New()");
             }
 
-            List<string> NodeName = GetNodes();
+            //-----------------------------------------------------------------------------------
+            //------------------------  NodalDirector.GetNodesPreset()  -------------------------
+            //-----------------------------------------------------------------------------------
+            List<string> NodeName = GetNodesPreset();
 
             if (NodeName.Count == 0)
             {
                 Error("No node available");
             }
-            else
+
+            //-----------------------------------------------------------------------------------
+            //----------------------------  NodalDirector.AddNode()  ----------------------------
+            //-----------------------------------------------------------------------------------
+            string nodeIn = AddNode(NodeName[0], null, 50, 50);
+
+            //-----------------------------------------------------------------------------------
+            //---------------------------  NodalDirector.NodeExist()  ---------------------------
+            //-----------------------------------------------------------------------------------
+            if (!NodeExist(nodeIn))
             {
-                string nodeIn = AddNode(NodeName[0], null, 50, 50);
-                if(!NodeExist(nodeIn))
-                {
-                    Error("Node does not exist");
-                }
-                string nodeOut = AddNode(NodeName[0], null, 100, 100);
-                if (!NodeExist(nodeOut))
-                {
-                    Error("Node does not exist");
-                }
-
-                if (GetChildren("",true,false,"").Count == 3)
-                {
-                    bool connected = false;
-                    bool disconnected = false;
-                    List<string> inputPorts = GetInputPort(nodeIn);
-                    List<string> outputPorts = GetOutputPort(nodeOut);
-                    if(inputPorts.Count != 0 && outputPorts.Count != 0)
-                    {
-                        connected = Connect(nodeIn, inputPorts[0], nodeOut, outputPorts[0]);
-                    }
-                    if (!connected)
-                    {
-                        Error("Cannot connect");
-                    }
-                    if (inputPorts.Count >= 2)
-                    {
-                        CopyLink(nodeIn, inputPorts[0], nodeOut, outputPorts[0], nodeIn, inputPorts[1], nodeOut, outputPorts[0]);
-                    }
-
-                    disconnected = Disconnect(nodeIn, inputPorts[0], nodeOut, outputPorts[0]);
-                    if (!disconnected)
-                    {
-                        Error("Cannot disconnect");
-                    }
-
-                    Console.WriteLine("ici");
-
-
-
-                }
-
-
+                Error("Node does not exist");
             }
+            //-----------------------------------------------------------------------------------
+            //----------------------------  NodalDirector.Undo()  -------------------------------
+            //-----------------------------------------------------------------------------------
+            Undo();
+
+            children = GetChildren("", true, false, "");
+            if (children.Count > 1)
+            {
+                Error("Undo AddNode does not work");
+            }
+
+            //-----------------------------------------------------------------------------------
+            //----------------------------  NodalDirector.Redo()  -------------------------------
+            //-----------------------------------------------------------------------------------
+            Redo();
+
+            children = GetChildren("", true, false, "");
+            if (children.Count < 2)
+            {
+                Error("Redo AddNode does not work");
+            }
+
+            string nodeOut = AddNode(NodeName[0], null, 100, 100);
+            if (!NodeExist(nodeOut))
+            {
+                Error("Node does not exist");
+            }
+
+
+            //if (GetChildren("",true,false,"").Count == 3)
+            //{
+            bool connected = false;
+            bool disconnected = false;
+            bool copylink = false;
+            bool error = false;
+
+            //-----------------------------------------------------------------------------------
+            //-------------------------  NodalDirector.GetInputPort()  --------------------------
+            //-----------------------------------------------------------------------------------
+            List<string> inputPorts = GetInputPort(nodeIn);
+
+            //-----------------------------------------------------------------------------------
+            //-------------------------  NodalDirector.GetOutputPort()  -------------------------
+            //-----------------------------------------------------------------------------------
+            List<string> outputPorts = GetOutputPort(nodeOut);
+
+            if(inputPorts.Count != 0 && outputPorts.Count != 0)
+            {
+
+            //-----------------------------------------------------------------------------------
+            //----------------------------  NodalDirector.Connect()  ----------------------------
+            //-----------------------------------------------------------------------------------
+                connected = Connect(nodeIn, inputPorts[0], nodeOut, outputPorts[0]);
+            }
+
+            if (!connected)
+            {
+                Error("Cannot connect");
+            }
+
+            List<string> dependents = GetDependentNodes(nodeOut, false);
+
+            if (inputPorts.Count >= 2)
+            {
+            //-----------------------------------------------------------------------------------
+            //---------------------------  NodalDirector.CopyLink()  ----------------------------
+            //-----------------------------------------------------------------------------------
+                copylink = CopyLink(nodeIn, inputPorts[0], nodeOut, outputPorts[0], nodeIn, inputPorts[1], nodeOut, outputPorts[0]);
+
+                if (!copylink)
+                {
+                    Error("Cannot copylink");
+                }
+            }
+
+            //-----------------------------------------------------------------------------------
+            //--------------------------  NodalDirector.Disconnect()  ---------------------------
+            //-----------------------------------------------------------------------------------
+            disconnected = Disconnect(nodeIn, inputPorts[0], nodeOut, outputPorts[0]);
+
+            if (!disconnected)
+            {
+                Error("Cannot disconnect");
+            }
+
+            error = ReConnect(nodeIn, inputPorts[0], nodeOut, outputPorts[1], 
+                                nodeIn, inputPorts[0], nodeOut, outputPorts[0]);
+
+            if (!error)
+            {
+                Error("Cannot reconnect");
+            }
+
+
+            //}
+
+
+
             return true;
         }
         #endregion
@@ -2639,7 +2752,7 @@ namespace TK.NodalEditor
         /// Getting nodes existing
         /// </summary>
         /// <returns></returns>
-        public static List<string> GetNodes()
+        public static List<string> GetNodesPreset()
         {
             List<string> nodes = new List<string>();
             foreach (Node node in _instance.manager.AvailableNodes)
@@ -2754,6 +2867,57 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
 
             return children;
+        }
+
+        public static List<string> GetDependentNodes(string inNodeName, bool inRecursive)
+        {
+            List<string> dependents = new List<string>();
+            List<Node> nodes = new List<Node>();
+
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("GetDependentNodes(\"{0}\", {1});", inNodeName, inRecursive);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            //Compound CompoundIn;
+
+            //if (String.IsNullOrEmpty(inCompoundName))
+            //{
+            //    CompoundIn = nodeIn.Parent;
+            //}
+            //else
+            //{
+            //    CompoundIn = _instance.manager.GetNode(inCompoundName) as Compound;
+
+            //    if (CompoundIn == null)
+            //    {
+            //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Compound \"{0}\" does not exist!", CompoundIn));
+            //    }
+            //}
+
+            nodes = nodeIn.GetDependentNodes(inRecursive);
+
+            foreach (Node node in nodes)
+            {
+                dependents.Add(node.FullName);
+            }
+
+            if (_instance.layout == null)
+                return null;
+
+            _instance.layout.Invalidate();
+
+            return dependents;
         }
 
         public static Dictionary<string, string> propertyPossibilities = new Dictionary<string, string>()
@@ -3478,32 +3642,41 @@ namespace TK.NodalEditor
                 {
                     if (inType == "Default")
                     {
-                        _instance.history.Do(new SelectNodesMemento(nodes));
                         _instance.layout.Selection.Select(nodes);
+                        NodeBase[] nb_cp = new NodeBase[_instance.layout.Selection.Selection.Count];
+                        _instance.layout.Selection.Selection.CopyTo(nb_cp);
+                        _instance.history.Do(new SelectNodesMemento(nb_cp, null));
                     }
                     else if (inType == "Add")
                     {
+                        NodeBase[] nb_cp = new NodeBase[_instance.layout.Selection.Selection.Count];
+                        _instance.layout.Selection.Selection.CopyTo(nb_cp);
+                        _instance.history.Do(new SelectNodesMemento(nb_cp, nodes));
                         foreach (Node node in nodes)
                         {
                             _instance.layout.Selection.AddToSelection(node);
                         }
-                        _instance.history.Do(new SelectNodesMemento(nodes));
+
                     }
                     else if (inType == "Toggle")
                     {
+                        NodeBase[] nb_cp = new NodeBase[_instance.layout.Selection.Selection.Count];
+                        _instance.layout.Selection.Selection.CopyTo(nb_cp);
+                        _instance.history.Do(new SelectNodesMemento(nb_cp, nodes));
                         foreach (Node node in nodes)
                         {
                             _instance.layout.Selection.ToggleSelection(node);
                         }
-                        _instance.history.Do(new SelectNodesMemento(nodes));
                     }
                     else if (inType == "RemoveFrom")
                     {
+                        NodeBase[] nb_cp = new NodeBase[_instance.layout.Selection.Selection.Count];
+                        _instance.layout.Selection.Selection.CopyTo(nb_cp);
+                        _instance.history.Do(new DeselectNodesMemento(nb_cp, nodes));
                         foreach (Node node in nodes)
                         {
                             _instance.layout.Selection.RemoveFromSelection(node);
                         }
-                        _instance.history.Do(new SelectNodesMemento(nodes));
                     }
                     else
                     {
