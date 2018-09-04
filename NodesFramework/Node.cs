@@ -1070,6 +1070,99 @@ namespace TK.NodalEditor
             }
         }
 
+        public List<Node> GetConnectionNodes(bool RecursiveCompound, int inDepth)
+        {
+            List<Node> Depend = new List<Node>();
+            int count = 0;
+            GetConnectionNodes(this, RecursiveCompound, inDepth, Depend, this.Parent, ref count);
+
+            return Depend;
+        }
+
+        private static void GetConnectionNodes(Node curNode, bool RecursiveCompound, int inDepth, List<Node> Depend, Compound inParent, ref int count)
+        {
+            foreach (Link link in curNode.OutDependencies)
+            {
+                Node target = link.Target.Owner;
+                if (target.Parent == inParent)
+                {
+                    if (!Depend.Contains(target))
+                    {
+                        if (inDepth == 0)
+                        {
+                            Depend.Add(curNode);
+                            break;
+                        }
+                        else
+                        {
+                            Depend.Add(target);
+                            if (inDepth == -1)
+                            {
+                                GetConnectionNodes(target, RecursiveCompound, inDepth, Depend, inParent, ref count);
+                            }
+                            else if (inDepth == 1)
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                if (count < (inDepth - 1))
+                                {
+                                    count++;
+                                    GetConnectionNodes(target, RecursiveCompound, inDepth, Depend, inParent, ref count);
+                                    count = 0;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (RecursiveCompound)
+                {
+                    Compound parent = target.Level(inParent) as Compound;
+                    if (parent != null)
+                    {
+                        if (!Depend.Contains(target))
+                        {
+                            if (inDepth == 0)
+                            {
+                                Depend.Add(curNode);
+                                break;
+                            }
+                            else
+                            {
+                                Depend.Add(target);
+                                if (inDepth == -1)
+                                {
+                                    GetConnectionNodes(target, true, inDepth, Depend, inParent, ref count);
+                                }
+                                else if (inDepth == 1)
+                                {
+                                    continue; ;
+                                }
+                                else
+                                {
+                                    if (count < (inDepth - 1))
+                                    {
+                                        count++;
+                                        GetConnectionNodes(target, RecursiveCompound, inDepth, Depend, inParent, ref count);
+                                        count = 0;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Return the node by which this instance is available on te given Compound (itself if it's contained in the given Compound or the Compound containing it)
         /// </summary>
