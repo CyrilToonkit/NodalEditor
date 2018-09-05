@@ -3775,7 +3775,7 @@ namespace TK.NodalEditor.NodesLayout
 
             if (nodesName.Count > 0)
             {
-                bool test = NodalDirector.CreateCompound(nodesName);
+                NodalDirector.CreateCompound(nodesName);
             }
             ChangeFocus(true);
             Frame(Manager.CurCompound.Nodes);
