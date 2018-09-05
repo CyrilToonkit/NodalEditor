@@ -1742,7 +1742,7 @@ namespace TK.NodalEditor
                                 Depend.Add(node, temp);
                             }
 
-                            inResult.Add(new List<List<string>> { new List<string> { link.Source.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
+                            inResult.Add(new List<List<string>> { new List<string> { link.Source.Owner.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
 
                             if (inDepth == -1)
                             {
@@ -1788,7 +1788,7 @@ namespace TK.NodalEditor
                                     Depend.Add(node, temp);
                                 }
 
-                                inResult.Add(new List<List<string>> { new List<string> { link.Source.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
+                                inResult.Add(new List<List<string>> { new List<string> { link.Source.Owner.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
 
                                 if (inDepth == -1)
                                 {
@@ -1817,7 +1817,7 @@ namespace TK.NodalEditor
                 }
                 else if (RecursiveCompound)
                 {
-                    Compound parent = node.Level(inParent) as Compound;
+                    Compound parent = node.Parent as Compound;
                     if (parent != null)
                     {
                         if (!Depend.ContainsKey(node))
@@ -1839,7 +1839,7 @@ namespace TK.NodalEditor
                                     Depend.Add(node, temp);
                                 }
 
-                                inResult.Add(new List<List<string>> { new List<string> { link.Source.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
+                                inResult.Add(new List<List<string>> { new List<string> { link.Source.Owner.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
 
                                 if (inDepth == -1)
                                 {
@@ -1885,7 +1885,7 @@ namespace TK.NodalEditor
                                         Depend.Add(node, temp);
                                     }
 
-                                    inResult.Add(new List<List<string>> { new List<string> { link.Source.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
+                                    inResult.Add(new List<List<string>> { new List<string> { link.Source.Owner.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
 
                                     if (inDepth == -1)
                                     {
