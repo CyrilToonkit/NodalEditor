@@ -694,7 +694,9 @@ namespace TK.NodalEditor.NodesLayout
                                     foreach (Link link in linkToCut)
                                     {
                                         NodalDirector.Disconnect(link.Target.Owner.FullName, link.Target.FullName, link.Source.Owner.FullName, link.Source.FullName);
-                                        NodalDirector.Get().history.Do(new DisconnectMemento(link));
+                                        string inverse_nom_fct = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", link.Target.Owner.FullName, link.Target.FullName, link.Source.Owner.FullName, link.Source.FullName);
+                                        string nom_fct = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\");", link.Target.Owner.FullName, link.Target.FullName, link.Source.Owner.FullName, link.Source.FullName);
+                                        NodalDirector.Get().history.Do(new DisconnectMemento(nom_fct, inverse_nom_fct, link));
                                     }
                                     NodalDirector.Get().history.EndCompoundDo();
                                 }

@@ -116,11 +116,10 @@ namespace TK.NodalEditor
         {
             string nom_fct = "Undo()";
 
-            if (_instance.verbose)
-                Info(nom_fct);
-
             if (_instance.history.CanUndo)
             {
+                if (_instance.verbose)
+                    Info(string.Format("{0} : {1}",nom_fct, _instance.history.PeekUndo().GetName()) );
                 _instance.history.Undo();
                 return true;
             }
@@ -129,8 +128,11 @@ namespace TK.NodalEditor
 
         public static bool UndoUI()
         {
+            string nom_fct = "UndoUI()";
             if (_instance.historyUI.CanUndo)
             {
+                if (_instance.verbose)
+                    Info(string.Format("{0} : {1}", nom_fct, _instance.historyUI.PeekUndo().GetName()));
                 _instance.historyUI.Undo();
                 return true;
             }
@@ -145,11 +147,10 @@ namespace TK.NodalEditor
         {
             string nom_fct = "Redo()";
 
-            if (_instance.verbose)
-                Info(nom_fct);
-
             if (_instance.history.CanRedo)
             {
+                if (_instance.verbose)
+                    Info(string.Format("{0} : {1}", nom_fct, _instance.history.PeekRedo().GetName()));
                 _instance.history.Redo();
                 return true;
             }
@@ -159,8 +160,11 @@ namespace TK.NodalEditor
 
         public static bool RedoUI()
         {
+            string nom_fct = "RedoUI()";
             if (_instance.historyUI.CanRedo)
             {
+                if (_instance.verbose)
+                    Info(string.Format("{0} : {1}", nom_fct, _instance.historyUI.PeekRedo().GetName()));
                 _instance.historyUI.Redo();
                 return true;
             }
@@ -598,6 +602,7 @@ namespace TK.NodalEditor
                 return null;
 
             string nom_fct = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", inNodeName, inCompoundName, X, Y);
+            string inverse_nom_fct = string.Format("DeleteNode(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
                 Info(nom_fct);
@@ -625,7 +630,7 @@ namespace TK.NodalEditor
                 if (inNodeName == Node.FullName)
                 {
                     Node node = _instance.manager.AddNode(inNodeName, inCompound, X, Y);
-                    _instance.history.Do(new AddNodeMemento(node.FullName));
+                    _instance.history.Do(new AddNodeMemento(nom_fct, inverse_nom_fct, node.FullName));
                     nodeName = node.FullName;
                     isTrue = true;
                     break;
@@ -663,8 +668,10 @@ namespace TK.NodalEditor
             if (_instance.manager == null)
                 return false;
 
+            string nom_fct = string.Format("DeleteNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodesNames, "\",\""));
+
             if (_instance.verbose)
-                Info(string.Format("DeleteNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodesNames, "\",\"")));
+                Info(nom_fct);
 
             _instance.manager.Companion.LaunchProcess("Delete nodes", inNodesNames.Count);
 
@@ -681,7 +688,10 @@ namespace TK.NodalEditor
                 }
                 else
                 {
-                    _instance.history.Do(new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node), 0, 0));
+                    string nom_fctbis = string.Format("DeleteNode(\"{0}\");", nodeName);
+                    string inverse_nom_fctbis = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", nodeName, node.Parent.FullName, node.UIx, node.UIy);
+
+                    _instance.history.Do(new DeleteNodeMemento(nom_fctbis, inverse_nom_fctbis, node, node.Parent, new NodeConnexions(node), 0, 0));
                     _instance.manager.RemoveNode(node);
                     node.Deleted = true;
 
@@ -714,8 +724,10 @@ namespace TK.NodalEditor
             if (_instance.manager == null)
                 return false;
 
+            string nom_fct = string.Format("DeleteNode(\"{0}\");", inNodeName);
+            
             if (_instance.verbose)
-                Info(string.Format("DeleteNode(\"{0}\");", inNodeName));
+                Info(nom_fct);
 
 
             Node node = _instance.manager.GetNode(inNodeName);
@@ -727,7 +739,8 @@ namespace TK.NodalEditor
             }
             else
             {
-                _instance.history.Do(new DeleteNodeMemento(node, node.Parent, new NodeConnexions(node), 0, 0));
+                string inverse_nom_fct = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", inNodeName, node.Parent.FullName, node.UIx, node.UIy);
+                _instance.history.Do(new DeleteNodeMemento(nom_fct, inverse_nom_fct, node, node.Parent, new NodeConnexions(node), 0, 0));
                 _instance.manager.RemoveNode(node);
                 node.Deleted = true;
             }
@@ -832,7 +845,9 @@ namespace TK.NodalEditor
                 {
                     throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
                 }
-                _instance.history.Do(new ReAddNodeMemento(newNode, newNode.Parent, new NodeConnexions(newNode), inXOffset, inYOffset));
+                string nom_fctbis = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", newNode.FullName, newNode.Parent.FullName, inXOffset, inYOffset);
+                string inverse_nom_fctbis = string.Format("DeleteNode(\"{0}\");", newNode.FullName);
+                _instance.history.Do(new ReAddNodeMemento(nom_fctbis, inverse_nom_fctbis, newNode, newNode.Parent, new NodeConnexions(newNode), inXOffset, inYOffset));
             }
             else
             {
@@ -842,7 +857,9 @@ namespace TK.NodalEditor
                 {
                     throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot duplicate \"{0}\"", inNodeName));
                 }
-                _instance.history.Do(new ReAddNodeMemento(newNode, newNode.Parent, new NodeConnexions(newNode), inXOffset, inYOffset));
+                string nom_fctbis = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", newNode.FullName, newNode.Parent.FullName, inXOffset, inYOffset);
+                string inverse_nom_fctbis = string.Format("DeleteNode(\"{0}\");", newNode.FullName);
+                _instance.history.Do(new ReAddNodeMemento(nom_fctbis, inverse_nom_fctbis, newNode, newNode.Parent, new NodeConnexions(newNode), inXOffset, inYOffset));
             }
 
             if (_instance.layout == null)
@@ -955,6 +972,7 @@ namespace TK.NodalEditor
                 return false;
 
             string nom_fct = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
+            string inverse_nom_fct = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
 
             if (_instance.verbose)
                 Info(nom_fct);
@@ -1076,7 +1094,7 @@ namespace TK.NodalEditor
                 foreach (Link link in linkToDisconnect)
                 {
                     _instance.manager.CurCompound.UnConnect(link);
-                    _instance.history.Do(new DisconnectMemento(link));
+                    _instance.history.Do(new DisconnectMemento(nom_fct, inverse_nom_fct, link));
                 }
             }
             else
@@ -1109,6 +1127,7 @@ namespace TK.NodalEditor
                 return false;
 
             string nom_fct = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\");", inNodeName, inPortName, outNodeName, outPortName, inMode);
+            string inverse_nom_fct = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
 
             if (_instance.verbose)
                 Info(nom_fct);
@@ -1150,7 +1169,7 @@ namespace TK.NodalEditor
             string error = string.Empty;
 
             Link connected = nodeIn.Connect(portIn.Index, nodeOut, portOut.Index, inMode, out error, nodeIn.Companion.Manager.Preferences.CheckCycles);
-            _instance.history.Do(new ConnectMemento(connected, inMode));
+            _instance.history.Do(new ConnectMemento(nom_fct, inverse_nom_fct, connected, inMode));
 
             if (error.Length != 0)
             {
@@ -1175,6 +1194,7 @@ namespace TK.NodalEditor
         /// <param name="inPortName">Name of the port of input node</param>
         /// <param name="outNodeName">Name of output node</param>
         /// <param name="outPortName">Name of the port of output node</param>
+        /// <param name="inMode">The connection "mode" is empty</param>
         /// <returns></returns>
         public static bool Connect(string inNodeName, string inPortName, string outNodeName, string outPortName)
         {
@@ -1200,6 +1220,7 @@ namespace TK.NodalEditor
                 return false;
 
             string nom_fct = string.Format("ReConnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\");", inNodeName, inPortName, outNodeName, outPortName, newinNodeName, newinPortName, newoutNodeName, newoutPortName);
+            string inverse_nom_fct = string.Format("ReConnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\");", newinNodeName, newinPortName, newoutNodeName, newoutPortName, inNodeName, inPortName, outNodeName, outPortName);
 
             if (_instance.verbose)
                 Info(nom_fct);
@@ -1302,7 +1323,7 @@ namespace TK.NodalEditor
             if (linkToDisconnect.Count != 0)
             {
                 newNodeIn.Connect(newPortIn.Index, newNodeOut, newPortOut.Index, "", out error, linkToDisconnect[0]);
-                _instance.history.Do(new ReconnectMemento(inNodeName, outNodeName, inPortName, outPortName, linkToDisconnect[0], ""));
+                _instance.history.Do(new ReconnectMemento(nom_fct, inverse_nom_fct, inNodeName, outNodeName, inPortName, outPortName, linkToDisconnect[0], ""));
             }
 
             if (error.Length != 0)
@@ -1428,7 +1449,11 @@ namespace TK.NodalEditor
             {
                 copyLink.Copy(linkToConnect[0]);
                 newNodeIn.Connect(newPortIn.Index, newNodeOut, newPortOut.Index, "", out error, copyLink);
-                _instance.history.Do(new CopyLinkMemento(copyLink));
+
+                string inverse_nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", copyLink.Source.Owner.FullName, copyLink.Source.FullName, copyLink.Target.Owner.FullName, copyLink.Target.FullName);
+                string nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", copyLink.Source.Owner.FullName, copyLink.Source.FullName, copyLink.Target.Owner.FullName, copyLink.Target.FullName);
+
+                _instance.history.Do(new CopyLinkMemento(nom_fctbis, inverse_nom_fctbis, copyLink));
             }
             else
             {
@@ -1507,7 +1532,8 @@ namespace TK.NodalEditor
             {
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
-
+            string inverse_nom_fctbis = "";
+            string nom_fctbis = "";
             if (_instance.manager.ClipBoardLink != null)
             {
                 Node node = _instance.manager.GetNode(_instance.manager.ClipBoardLink.NodeFullName);
@@ -1533,7 +1559,9 @@ namespace TK.NodalEditor
                                         link.Target.Owner.Connect(link.Target.Index, nodeIn, port.Index, "", out error, copyLink);
                                         if (error.Length == 0)
                                         {
-                                            _instance.history.Do(new CopyLinkMemento(copyLink));
+                                            inverse_nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", copyLink.Source.Owner.FullName, copyLink.Source.FullName, copyLink.Target.Owner.FullName, copyLink.Target.FullName);
+                                            nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", copyLink.Source.Owner.FullName, copyLink.Source.FullName, copyLink.Target.Owner.FullName, copyLink.Target.FullName);
+                                            _instance.history.Do(new CopyLinkMemento(nom_fctbis, inverse_nom_fctbis, copyLink));
                                         }
                                     }
                                 }
@@ -1550,7 +1578,10 @@ namespace TK.NodalEditor
                                         nodeIn.Connect(port.Index, link.Source.Owner, link.Source.Index, "", out error, copyLink);
                                         if (error.Length == 0)
                                         {
-                                            _instance.history.Do(new CopyLinkMemento(copyLink));
+                                            inverse_nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", copyLink.Source.Owner.FullName, copyLink.Source.FullName, copyLink.Target.Owner.FullName, copyLink.Target.FullName);
+                                            nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", copyLink.Source.Owner.FullName, copyLink.Source.FullName, copyLink.Target.Owner.FullName, copyLink.Target.FullName);
+
+                                            _instance.history.Do(new CopyLinkMemento(nom_fctbis, inverse_nom_fctbis, copyLink));
                                         }
                                     }
                                 }
@@ -1620,7 +1651,10 @@ namespace TK.NodalEditor
                 {
                     if (!Dep.Source.Owner.IsIn(curComp))
                     {
-                        _instance.history.Do(new DisconnectMemento(Dep));
+                        string nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+                        string inverse_nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+
+                        _instance.history.Do(new DisconnectMemento(nom_fctbis, inverse_nom_fctbis, Dep));
                         _instance.manager.CurCompound.UnConnect(Dep);
                     }
                 }
@@ -1632,7 +1666,10 @@ namespace TK.NodalEditor
                 {
                     if (!Dep.Target.Owner.IsIn(curComp))
                     {
-                        _instance.history.Do(new DisconnectMemento(Dep));
+                        string nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+                        string inverse_nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+
+                        _instance.history.Do(new DisconnectMemento(nom_fctbis, inverse_nom_fctbis, Dep));
                         _instance.manager.CurCompound.UnConnect(Dep);
                     }
                 }
@@ -1647,7 +1684,10 @@ namespace TK.NodalEditor
 
                 foreach (Link Dep in ToRemove)
                 {
-                    _instance.history.Do(new DisconnectMemento(Dep));
+                    string nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+                    string inverse_nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+
+                    _instance.history.Do(new DisconnectMemento(nom_fctbis, inverse_nom_fctbis, Dep));
                     _instance.manager.CurCompound.UnConnect(Dep);
                 }
             }
@@ -1704,7 +1744,10 @@ namespace TK.NodalEditor
                 {
                     if (!Dep.Source.Owner.IsIn(curComp))
                     {
-                        _instance.history.Do(new DisconnectMemento(Dep));
+                        string nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+                        string inverse_nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+
+                        _instance.history.Do(new DisconnectMemento(nom_fctbis, inverse_nom_fctbis, Dep));
                         _instance.manager.CurCompound.UnConnect(Dep);
                     }
                 }
@@ -1717,7 +1760,10 @@ namespace TK.NodalEditor
 
                 foreach (Link Dep in ToRemove)
                 {
-                    _instance.history.Do(new DisconnectMemento(Dep));
+                    string nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+                    string inverse_nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+
+                    _instance.history.Do(new DisconnectMemento(nom_fctbis, inverse_nom_fctbis, Dep));
                     _instance.manager.CurCompound.UnConnect(Dep);
                 }
             }
@@ -1773,7 +1819,10 @@ namespace TK.NodalEditor
                 {
                     if (!Dep.Target.Owner.IsIn(curComp))
                     {
-                        _instance.history.Do(new DisconnectMemento(Dep));
+                        string nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+                        string inverse_nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+
+                        _instance.history.Do(new DisconnectMemento(nom_fctbis, inverse_nom_fctbis, Dep));
                         _instance.manager.CurCompound.UnConnect(Dep);
                     }
                 }
@@ -1788,7 +1837,10 @@ namespace TK.NodalEditor
 
                 foreach (Link Dep in ToRemove)
                 {
-                    _instance.history.Do(new DisconnectMemento(Dep));
+                    string nom_fctbis = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+                    string inverse_nom_fctbis = string.Format("Connect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", Dep.Source.Owner.FullName, Dep.Source.FullName, Dep.Target.Owner.FullName, Dep.Target.FullName);
+
+                    _instance.history.Do(new DisconnectMemento(nom_fctbis, inverse_nom_fctbis, Dep));
                     _instance.manager.CurCompound.UnConnect(Dep);
                 }
             }
@@ -1817,6 +1869,7 @@ namespace TK.NodalEditor
                 return false;
 
             string nom_fct = string.Format("ParentNode(\"{0}\", \"{1}\");", inNodeName, parentCompound);
+            string inverse_nom_fct = string.Format("UnParentNode(\"{0}\");", inNodeName);
 
             if (_instance.verbose)
                 Info(nom_fct);
@@ -1836,7 +1889,7 @@ namespace TK.NodalEditor
 
             if (nodeIn.Parent != null && nodeIn.Parent != newParent)
             {
-                _instance.history.Do(new ParentMemento(nodeIn.FullName, newParent.FullName));
+                _instance.history.Do(new ParentMemento(nom_fct, inverse_nom_fct, nodeIn.FullName, newParent.FullName));
                 _instance.manager.MoveNodes(new List<Node> { nodeIn }, newParent);
             }
             else
@@ -1905,7 +1958,10 @@ namespace TK.NodalEditor
             _instance.history.BeginCompoundDo();
             foreach (Node Node in Nodes)
             {
-                _instance.history.Do(new ParentMemento(Node.FullName, newParent.FullName));
+                string nom_fctbis = string.Format("ParentNode(\"{0}\", \"{1}\");", Node.FullName, newParent.FullName);
+                string inverse_nom_fctbis = string.Format("UnParentNode(\"{0}\");", Node.FullName);
+
+                _instance.history.Do(new ParentMemento(nom_fctbis, inverse_nom_fctbis, Node.FullName, newParent.FullName));
                 _instance.manager.MoveNodes(new List<Node> { Node }, newParent);
             }
             _instance.history.EndCompoundDo();
@@ -1942,10 +1998,12 @@ namespace TK.NodalEditor
             {
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
+            string inverse_nom_fct = string.Format("ParentNode(\"{0}\", \"{1}\");", inNodeName, nodeIn.Parent.FullName);
+
             _instance.history.BeginCompoundDo();
             if (nodeIn.Parent != null && nodeIn.Parent.Parent != null)
             {
-                _instance.history.Do(new UnParentMemento(nodeIn.FullName, nodeIn.Parent.FullName));
+                _instance.history.Do(new UnParentMemento(nom_fct, inverse_nom_fct, nodeIn.FullName, nodeIn.Parent.FullName));
                 _instance.manager.MoveNodes(new List<Node> { nodeIn }, nodeIn.Parent.Parent);
             }
             else
@@ -1975,7 +2033,7 @@ namespace TK.NodalEditor
                 return false;
 
             string nom_fct = string.Format("UnParentNodes(\"{0}\");", TypesHelper.Join(inNodeNames, "\",\""));
-
+            
             if (_instance.verbose)
                 Info(nom_fct);
 
@@ -2005,7 +2063,10 @@ namespace TK.NodalEditor
             _instance.history.BeginCompoundDo();
             foreach (Node Node in Nodes)
             {
-                _instance.history.Do(new UnParentMemento(Node.FullName, Node.Parent.FullName));
+                string inverse_nom_fctbis = string.Format("ParentNode(\"{0}\", \"{1}\");", Node.FullName, Node.Parent.FullName);
+                string nom_fctbis = string.Format("UnParentNode(\"{0}\");", Node.FullName);
+
+                _instance.history.Do(new UnParentMemento(nom_fctbis, inverse_nom_fctbis, Node.FullName, Node.Parent.FullName));
                 _instance.manager.MoveNodes(new List<Node> { Node }, Node.Parent.Parent);
             }
             _instance.history.EndCompoundDo();
@@ -2189,7 +2250,7 @@ namespace TK.NodalEditor
             if (_instance.manager == null)
                 return null;
 
-            string nom_fct = "CreateCompound(new List {\"TestNode1\"});";
+            string nom_fct = string.Format("CreateCompound(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodeNames, "\",\""));
 
 
             if (_instance.verbose)
@@ -2225,7 +2286,9 @@ namespace TK.NodalEditor
                     if (compound != null)
                     {
                         _instance.manager.EnterCompound(compound);
-                        _instance.history.Do(new CreateCompoundMemento(nodes, compound));
+
+                        string inverse_nom_fct = string.Format("Explode(\"{0}\");", compound.FullName);
+                        _instance.history.Do(new CreateCompoundMemento(nom_fct, inverse_nom_fct, nodes, compound));
                     }
                     else
                     {
@@ -2273,8 +2336,13 @@ namespace TK.NodalEditor
                     _instance.manager.ExitCompound();
                     _instance.layout.ChangeFocus(true);
                 }
-
-                _instance.history.Do(new ExplodeMemento(Compound, new List<Node>(Compound.Nodes)));
+                List<string> names = new List<string>();
+                foreach(Node node in Compound.Nodes)
+                {
+                    names.Add(node.FullName);
+                }
+                string inverse_nom_fct = string.Format("CreateCompound(new List<string>{{\"{0}\"}});", TypesHelper.Join(names, "\",\""));
+                _instance.history.Do(new ExplodeMemento(nom_fct, inverse_nom_fct, Compound, new List<Node>(Compound.Nodes)));
                 _instance.manager.ExplodeCompound(Compound);
             }
             else
@@ -2304,7 +2372,7 @@ namespace TK.NodalEditor
             if (_instance.manager == null)
                 return null;
 
-            string nom_fct = string.Format("Rename(\"{0}\", \"{1}\");", inNewName, inNewName);
+            string nom_fct = string.Format("Rename(\"{0}\", \"{1}\");", inName, inNewName);
 
             if (_instance.verbose)
                 Info(nom_fct);
@@ -2316,8 +2384,10 @@ namespace TK.NodalEditor
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inName));
             }
 
+            string inverse_nom_fct = string.Format("Rename(\"{0}\", \"{1}\");", inNewName, inName);
+
             string UniqueName = _instance.manager.SetNodeUniqueName(inNewName, nodeIn);
-            _instance.history.Do(new RenameMemento(nodeIn, inNewName));
+            _instance.history.Do(new RenameMemento(nom_fct, inverse_nom_fct, nodeIn, inNewName));
 
             if (UniqueName == null)
             {
@@ -2422,7 +2492,9 @@ namespace TK.NodalEditor
                         {
                             throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste");
                         }
-                        _instance.history.Do(new ReAddNodeMemento(copyNode, copyNode.Parent, new NodeConnexions(copyNode), inXOffset, inYOffset));
+                        string nom_fctbis = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", copyNode.FullName, copyNode.Parent.FullName, inXOffset, inYOffset);
+                        string inverse_nom_fctbis = string.Format("DeleteNode(\"{0}\");", copyNode.FullName);
+                        _instance.history.Do(new ReAddNodeMemento(nom_fctbis, inverse_nom_fctbis, copyNode, copyNode.Parent, new NodeConnexions(copyNode), inXOffset, inYOffset));
                         pasteNodeName.Add(copyNode.FullName);
                     }
                 }
@@ -2437,7 +2509,9 @@ namespace TK.NodalEditor
                         {
                             throw new NodalDirectorException(nom_fct + "\n" + "Cannot Paste");
                         }
-                        _instance.history.Do(new ReAddNodeMemento(copyNode, copyNode.Parent, new NodeConnexions(copyNode), inXOffset, inYOffset));
+                        string nom_fctbis = string.Format("AddNode(\"{0}\", \"{1}\", {2}, {3});", copyNode.FullName, copyNode.Parent.FullName, inXOffset, inYOffset);
+                        string inverse_nom_fctbis = string.Format("DeleteNode(\"{0}\");", copyNode.FullName);
+                        _instance.history.Do(new ReAddNodeMemento(nom_fctbis, inverse_nom_fctbis, copyNode, copyNode.Parent, new NodeConnexions(copyNode), inXOffset, inYOffset));
                         pasteNodeName.Add(copyNode.FullName);
                     }
                 }
@@ -3380,7 +3454,8 @@ namespace TK.NodalEditor
 
                             if (inValueType == prop.PropertyType)
                             {
-                                _instance.history.Do(new SetPropetyMemento(nodeIn, inPropertyName));
+                                string inverse_nom_fct = string.Format("SetProperty(\"{0}\", \"{1}\", {2});", inNodeName, inPropertyName, nodeIn.GetType().GetProperty(inPropertyName).GetValue(nodeIn));
+                                _instance.history.Do(new SetPropetyMemento(nom_fct, inverse_nom_fct, nodeIn, inPropertyName));
                                 prop.SetValue(nodeIn, inValue);
                             }
                             else
@@ -3456,7 +3531,8 @@ namespace TK.NodalEditor
                 case "Visible":
                     if (inValue.GetType() == typeof(Boolean))
                     {
-                        _instance.history.Do(new SetPortPropetyMemento(portIn, inPropertyName));
+                        string inverse_nom_fct = string.Format("SetPortsProperty(\"{0}\", \"{1}\", {2}, \"{3}\", {4});", inNodeName, inPortName, inIsOutput, inPropertyName, portIn.GetType().GetProperty(inPropertyName).GetValue(portIn));
+                        _instance.history.Do(new SetPortPropetyMemento(nom_fct, inverse_nom_fct, portIn, inPropertyName));
                         portIn.Visible = (bool)inValue;
                     }
                     else
@@ -3902,7 +3978,8 @@ namespace TK.NodalEditor
             if (_instance.manager == null)
                 return false;
 
-            string nom_fct = string.Format("SelectNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodeNames, "\",\""));
+            string nom_fct = string.Format("SelectNodes(new List<string>{{\"{0}\"}}, \"{1}\");", TypesHelper.Join(inNodeNames, "\",\""), inType);
+            string inverse_nom_fct = string.Format("DeselectNodes(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodeNames, "\",\""));
 
             if (_instance.verbose)
                 Info(nom_fct);
@@ -3936,13 +4013,13 @@ namespace TK.NodalEditor
                         _instance.layout.Selection.Select(nodes);
                         NodeBase[] nb_cp = new NodeBase[_instance.layout.Selection.Selection.Count];
                         _instance.layout.Selection.Selection.CopyTo(nb_cp);
-                        _instance.history.Do(new SelectNodesMemento(nb_cp, null));
+                        _instance.history.Do(new SelectNodesMemento(nom_fct, inverse_nom_fct, nb_cp, null));
                     }
                     else if (inType == "Add")
                     {
                         NodeBase[] nb_cp = new NodeBase[_instance.layout.Selection.Selection.Count];
                         _instance.layout.Selection.Selection.CopyTo(nb_cp);
-                        _instance.history.Do(new SelectNodesMemento(nb_cp, nodes));
+                        _instance.history.Do(new SelectNodesMemento(nom_fct, inverse_nom_fct, nb_cp, nodes));
                         foreach (Node node in nodes)
                         {
                             _instance.layout.Selection.AddToSelection(node);
@@ -3953,7 +4030,7 @@ namespace TK.NodalEditor
                     {
                         NodeBase[] nb_cp = new NodeBase[_instance.layout.Selection.Selection.Count];
                         _instance.layout.Selection.Selection.CopyTo(nb_cp);
-                        _instance.history.Do(new SelectNodesMemento(nb_cp, nodes));
+                        _instance.history.Do(new SelectNodesMemento(nom_fct, inverse_nom_fct, nb_cp, nodes));
                         foreach (Node node in nodes)
                         {
                             _instance.layout.Selection.ToggleSelection(node);
@@ -3963,7 +4040,7 @@ namespace TK.NodalEditor
                     {
                         NodeBase[] nb_cp = new NodeBase[_instance.layout.Selection.Selection.Count];
                         _instance.layout.Selection.Selection.CopyTo(nb_cp);
-                        _instance.history.Do(new DeselectNodesMemento(nb_cp, nodes));
+                        _instance.history.Do(new DeselectNodesMemento(inverse_nom_fct, nom_fct, nb_cp, nodes));
                         foreach (Node node in nodes)
                         {
                             _instance.layout.Selection.RemoveFromSelection(node);
@@ -4015,7 +4092,8 @@ namespace TK.NodalEditor
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
             }
 
-            _instance.historyUI.Do(new MoveNodeMemento(nodeIn));
+            string inverse_nom_fct = string.Format("MoveNode(\"{0}\", {1}, {2});", inNodeName, nodeIn.UIx, nodeIn.UIy);
+            _instance.historyUI.Do(new MoveNodeMemento(nom_fct, inverse_nom_fct, nodeIn));
             nodeIn.UIx = (int)(inX * (1 / _instance.layout.LayoutSize));
             nodeIn.UIy = (int)(inY * (1 / _instance.layout.LayoutSize));
 
