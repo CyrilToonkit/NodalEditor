@@ -2799,6 +2799,7 @@ namespace TK.NodalEditor
 
 
             bool error = false;
+            bool error1 = false;
             string name = null;
 
             //-----------------------------------------------------------------------------------
@@ -2813,7 +2814,6 @@ namespace TK.NodalEditor
 
             if(inputPorts.Count != 0 && outputPorts.Count != 0)
             {
-
                 //-----------------------------------------------------------------------------------
                 //----------------------------  NodalDirector.Connect()  ----------------------------
                 //-----------------------------------------------------------------------------------
@@ -2824,8 +2824,11 @@ namespace TK.NodalEditor
             {
                 Error("Cannot Connect");
             }
-
-            //List<string> dependents = GetDependentNodes(nodeOut, false);
+            List<List<List<string>>> dependentPorts = GetConnectionNodesAndPorts(nodeOut, true, 1, false, true);
+            if(dependentPorts[0][0][1] != outputPorts[0] || dependentPorts[0][1][1] != inputPorts[0])
+            {
+                Error("Cannot Connect");
+            }
 
             if (inputPorts.Count >= 2)
             {
@@ -2838,6 +2841,24 @@ namespace TK.NodalEditor
                 {
                     Error("Cannot Copylink");
                 }
+                dependentPorts.Clear();
+                dependentPorts = GetConnectionNodesAndPorts(nodeOut, true, 1, false, true);
+                error = false;
+                foreach (List<List<string>> un in dependentPorts)
+                {
+                    if (un[0][1] == outputPorts[0] && un[1][1] == inputPorts[0])
+                    {
+                        error = true;
+                    }
+                    if (un[0][1] == outputPorts[0] && un[1][1] == inputPorts[1])
+                    {
+                        error1 = true;
+                    }
+                }
+                if (!error && !error1)
+                {
+                    Error("Cannot CopyLink");
+                }
             }
 
             //-----------------------------------------------------------------------------------
@@ -2849,7 +2870,26 @@ namespace TK.NodalEditor
             {
                 Error("Cannot Disconnect");
             }
+            dependentPorts.Clear();
+            dependentPorts = GetConnectionNodesAndPorts(nodeOut, true, 1, false, true);
 
+            error = false;
+            foreach (List<List<string>> un in dependentPorts)
+            {
+                if(un[0][1] == outputPorts[0] && un[1][1] == inputPorts[0])
+                {
+                    error = true;
+                    break;
+                }
+            }
+            if(error)
+            {
+                Error("Cannot Disconnect");
+            }
+
+            //-----------------------------------------------------------------------------------
+            //--------------------------  NodalDirector.ReConnect()  ---------------------------
+            //-----------------------------------------------------------------------------------
             error = ReConnect(nodeIn, inputPorts[1], nodeOut, outputPorts[0],
                                 nodeIn, inputPorts[1], nodeOut, outputPorts[1]);
 
@@ -2870,7 +2910,6 @@ namespace TK.NodalEditor
             {
                 Error("Cannot Duplicate");
             }
-
 
             //-----------------------------------------------------------------------------------
             //-----------------------------  NodalDirector.Copy()  ------------------------------
@@ -2931,6 +2970,12 @@ namespace TK.NodalEditor
             {
                 Error("Cannot Delete node");
             }
+
+            if(NodeExist(pasteNodes[0]))
+            {
+                Error("Cannot Delete node");
+            }
+            pasteNodes.RemoveAt(0);
 
             //-----------------------------------------------------------------------------------
             //--------------------------  NodalDirector.ParentNode()  ---------------------------
@@ -3106,6 +3151,33 @@ namespace TK.NodalEditor
             return outputPortName;
         }
 
+        public static string GetParent(string inNodeName)
+        {
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("GetParent(\"{0}\");", inNodeName);
+
+            if (_instance.verbose)
+                Log(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            Compound compound = nodeIn.Parent;
+
+            if(compound == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not have parent!", inNodeName));
+            }
+
+            return compound.FullName;
+        }
+
         /// <summary>
         /// Getting children of a compound
         /// </summary>
@@ -3260,6 +3332,7 @@ namespace TK.NodalEditor
 
             return result;
         }
+
         public static Dictionary<string, string> propertyPossibilities = new Dictionary<string, string>()
         {
             {"name", "Name" },
