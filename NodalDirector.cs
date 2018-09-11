@@ -595,7 +595,7 @@ namespace TK.NodalEditor
         /// <param name="inCompoundName">Name of input compound</param>
         /// <param name="X">Location X in pixels</param>
         /// <param name="Y">Location Y in pixels</param>
-        /// <returns></returns>
+        /// <returns>Node name added</returns>
         public static string AddNode(string inNodeName, string inCompoundName, int X, int Y)
         {
             if (_instance.manager == null)
@@ -809,7 +809,7 @@ namespace TK.NodalEditor
         /// Duplicate a node
         /// </summary>
         /// <param name="inNodeName">Name of node we want to duplicate</param>
-        /// <returns></returns>
+        /// <returns>Node name duplicated</returns>
         public static string Duplicate(string inNodeName)
         {
             return Duplicate(inNodeName, null, null);
@@ -883,89 +883,6 @@ namespace TK.NodalEditor
         /// <param name="outNodeName">Name of output node</param>
         /// <param name="outPortName">Name of the port of output node</param>
         /// <returns></returns>
-        //public static bool Disconnect(string inNodeName, string inPortName, string outNodeName, string outPortName)
-        //{
-        //    if (_instance.manager == null)
-        //        return false;
-
-        //    string nom_fct = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
-
-        //    if (_instance.verbose)
-        //        Log(nom_fct);
-
-        //    Node nodeIn = _instance.manager.GetNode(inNodeName);
-        //    Node nodeOut = _instance.manager.GetNode(outNodeName);
-
-        //    if (nodeIn == null)
-        //    {
-        //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
-        //    }
-        //    if (nodeOut == null)
-        //    {
-        //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
-        //    }
-
-        //    Port portIn = nodeIn.GetPort(inPortName, false);
-        //    Port portOut = nodeOut.GetPort(outPortName, true);
-
-        //    if (portIn == null)
-        //    {
-        //        string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
-        //        portIn = nodeIn.GetPort(inPortName2, false);
-        //        if (portIn == null)
-        //        {
-        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{0}\" does not exist!", inNodeName, inPortName));
-        //        }
-        //    }
-        //    if (portOut == null)
-        //    {
-        //        string outPortName2 = string.Format("{0}_{1}", outNodeName, outPortName);
-        //        portOut = nodeOut.GetPort(outPortName2, true);
-        //        if (portOut == null)
-        //        {
-        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{0}\" does not exist!", outNodeName, outPortName));
-        //        }
-        //    }
-
-        //    if (portIn.Dependencies.Count != 0)
-        //    {
-        //        List<Link> linkToDisconnect = new List<Link>();
-        //        foreach (Link link in portIn.Dependencies)
-        //        {
-
-        //            if (link.Source == portOut)
-        //            {
-        //                linkToDisconnect.Add(link);
-        //            }
-        //        }
-
-        //        if (linkToDisconnect.Count != 0)
-        //        {
-        //            foreach (Link link in linkToDisconnect)
-        //            {
-        //                _instance.manager.CurCompound.UnConnect(link);
-        //                _instance.history.Do(new DisconnectMemento(link));
-        //            }
-        //        }
-        //        else
-        //        {
-        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("Link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\" does not exist!", inPortName, inNodeName, outPortName, outNodeName));
-        //        }
-        //    }
-        //    else
-        //    {
-        //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
-        //    }
-
-        //    if (_instance.layout == null)
-        //        return true;
-
-        //    _instance.layout.Invalidate();
-
-        //    _instance.haveChanged = true;
-        //    return true;
-        //}
-
         public static bool Disconnect(string inNodeName, string inPortName, string outNodeName, string outPortName)
         {
             if (_instance.manager == null)
@@ -1111,6 +1028,89 @@ namespace TK.NodalEditor
             _instance.ChangeOnStatus();
             return true;
         }
+
+        //public static bool Disconnect(string inNodeName, string inPortName, string outNodeName, string outPortName)
+        //{
+        //    if (_instance.manager == null)
+        //        return false;
+
+        //    string nom_fct = string.Format("Disconnect(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, outNodeName, outPortName);
+
+        //    if (_instance.verbose)
+        //        Log(nom_fct);
+
+        //    Node nodeIn = _instance.manager.GetNode(inNodeName);
+        //    Node nodeOut = _instance.manager.GetNode(outNodeName);
+
+        //    if (nodeIn == null)
+        //    {
+        //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+        //    }
+        //    if (nodeOut == null)
+        //    {
+        //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Node \"{0}\" does not exist!", outNodeName));
+        //    }
+
+        //    Port portIn = nodeIn.GetPort(inPortName, false);
+        //    Port portOut = nodeOut.GetPort(outPortName, true);
+
+        //    if (portIn == null)
+        //    {
+        //        string inPortName2 = string.Format("{0}_{1}", inNodeName, inPortName);
+        //        portIn = nodeIn.GetPort(inPortName2, false);
+        //        if (portIn == null)
+        //        {
+        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Port \"{0}\" from \"{0}\" does not exist!", inNodeName, inPortName));
+        //        }
+        //    }
+        //    if (portOut == null)
+        //    {
+        //        string outPortName2 = string.Format("{0}_{1}", outNodeName, outPortName);
+        //        portOut = nodeOut.GetPort(outPortName2, true);
+        //        if (portOut == null)
+        //        {
+        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("output Port \"{0}\" from \"{0}\" does not exist!", outNodeName, outPortName));
+        //        }
+        //    }
+
+        //    if (portIn.Dependencies.Count != 0)
+        //    {
+        //        List<Link> linkToDisconnect = new List<Link>();
+        //        foreach (Link link in portIn.Dependencies)
+        //        {
+
+        //            if (link.Source == portOut)
+        //            {
+        //                linkToDisconnect.Add(link);
+        //            }
+        //        }
+
+        //        if (linkToDisconnect.Count != 0)
+        //        {
+        //            foreach (Link link in linkToDisconnect)
+        //            {
+        //                _instance.manager.CurCompound.UnConnect(link);
+        //                _instance.history.Do(new DisconnectMemento(link));
+        //            }
+        //        }
+        //        else
+        //        {
+        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("Link between port \"{0}\" from Node \"{1}\" and port \"{2}\" from Node \"{3}\" does not exist!", inPortName, inNodeName, outPortName, outNodeName));
+        //        }
+        //    }
+        //    else
+        //    {
+        //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("Port \"{0}\" from Node \"{1}\" has no link", inPortName, inNodeName));
+        //    }
+
+        //    if (_instance.layout == null)
+        //        return true;
+
+        //    _instance.layout.Invalidate();
+
+        //    _instance.haveChanged = true;
+        //    return true;
+        //}
 
         /// <summary>
         /// Connect a link
@@ -2184,67 +2184,7 @@ namespace TK.NodalEditor
         /// Create a compound with a list of input node
         /// </summary>
         /// <param name="inNodeNames">List of input nodes names</param>
-        /// <returns></returns>
-        //public static bool CreateCompound(List<string> inNodeNames)
-        //{
-        //    if (_instance.manager == null)
-        //        return false;
-
-        //    string nom_fct = "CreateCompound(new List {\"TestNode1\"});";
-
-
-        //    if (_instance.verbose)
-        //        Info(nom_fct);
-
-        //    List<string> nodesNameError = new List<string>();
-        //    List<Node> nodes = new List<Node>();
-
-        //    if (inNodeNames.Count > 0)
-        //    {
-        //        foreach (string NodeName in inNodeNames)
-        //        {
-        //            Node Node = _instance.manager.GetNode(NodeName);
-
-        //            if (Node == null) //Node with NodeName do not exist
-        //            {
-        //                nodesNameError.Add(NodeName);
-        //            }
-        //            else //Node with NodeName exist
-        //            {
-        //                nodes.Add(Node);
-        //            }
-        //        }
-        //        if (nodesNameError.Count > 0)
-        //        {
-        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("Not all node names in \"{0}\" exist", inNodeNames));
-        //        }
-        //        else //All the nodes name exist
-        //        {
-        //            Compound compound = _instance.manager.AddCompound(nodes);
-
-        //            if (compound != null)
-        //            {
-        //                _instance.manager.EnterCompound(compound);
-        //                _instance.history.Do(new CreateCompoundMemento(nodes, compound));
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        throw new NodalDirectorException(nom_fct + "\n" + "Cannot Create Compound, List<string> has no element!");
-        //    }
-
-        //    if (_instance.layout == null)
-        //        return true;
-
-        //    _instance.layout.Invalidate();
-
-        //    _instance.haveChanged = true;
-        //    _instance.ChangeOnStatus();
-
-        //    return true;
-        //}
-
+        /// <returns>Compound name</returns>
         public static string CreateCompound(List<string> inNodeNames)
         {
             if (_instance.manager == null)
@@ -2311,6 +2251,66 @@ namespace TK.NodalEditor
 
             return compound.FullName;
         }
+
+        //public static bool CreateCompound(List<string> inNodeNames)
+        //{
+        //    if (_instance.manager == null)
+        //        return false;
+
+        //    string nom_fct = "CreateCompound(new List {\"TestNode1\"});";
+
+
+        //    if (_instance.verbose)
+        //        Info(nom_fct);
+
+        //    List<string> nodesNameError = new List<string>();
+        //    List<Node> nodes = new List<Node>();
+
+        //    if (inNodeNames.Count > 0)
+        //    {
+        //        foreach (string NodeName in inNodeNames)
+        //        {
+        //            Node Node = _instance.manager.GetNode(NodeName);
+
+        //            if (Node == null) //Node with NodeName do not exist
+        //            {
+        //                nodesNameError.Add(NodeName);
+        //            }
+        //            else //Node with NodeName exist
+        //            {
+        //                nodes.Add(Node);
+        //            }
+        //        }
+        //        if (nodesNameError.Count > 0)
+        //        {
+        //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("Not all node names in \"{0}\" exist", inNodeNames));
+        //        }
+        //        else //All the nodes name exist
+        //        {
+        //            Compound compound = _instance.manager.AddCompound(nodes);
+
+        //            if (compound != null)
+        //            {
+        //                _instance.manager.EnterCompound(compound);
+        //                _instance.history.Do(new CreateCompoundMemento(nodes, compound));
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        throw new NodalDirectorException(nom_fct + "\n" + "Cannot Create Compound, List<string> has no element!");
+        //    }
+
+        //    if (_instance.layout == null)
+        //        return true;
+
+        //    _instance.layout.Invalidate();
+
+        //    _instance.haveChanged = true;
+        //    _instance.ChangeOnStatus();
+
+        //    return true;
+        //}
 
         /// <summary>
         /// Explode a compound
@@ -2452,7 +2452,7 @@ namespace TK.NodalEditor
         /// </summary>
         /// <param name="inXOffset">Location in X</param>
         /// <param name="inYOffset">Location in Y</param>
-        /// <returns></returns>
+        /// <returns>List of pasted nodes</returns>
         public static List<string> Paste(int inXOffset, int inYOffset)
         {
             return Paste(inXOffset, inYOffset, null, null);
@@ -2465,7 +2465,7 @@ namespace TK.NodalEditor
         /// <param name="inYOffset"></param>
         /// <param name="inSearch"></param>
         /// <param name="inReplace"></param>
-        /// <returns></returns>
+        /// <returns>List of pasted nodes</returns>
         public static List<string> Paste(int inXOffset, int inYOffset, string inSearch, string inReplace)
         {
             if (_instance.manager == null)
@@ -2535,10 +2535,10 @@ namespace TK.NodalEditor
         }
 
         /// <summary>
-        /// 
+        /// Check if compound exist
         /// </summary>
-        /// <param name="inNodeName"></param>
-        /// <returns></returns>
+        /// <param name="inNodeName">Node name</param>
+        /// <returns>True : inNodeName is a compound; False : inNodeName is not a compound</returns>
         public static bool IsCompound(string inNodeName)
         {
             if (_instance.manager == null)
@@ -2563,7 +2563,7 @@ namespace TK.NodalEditor
         /// Check if node exist
         /// </summary>
         /// <param name="inNodeName">Node name</param>
-        /// <returns></returns>
+        /// <returns>True : inNodeName exists; False : inNodeName does not exist</returns>
         public static bool NodeExist(string inNodeName)
         {
             if (_instance.manager == null)
@@ -2590,7 +2590,7 @@ namespace TK.NodalEditor
         /// <param name="inNodeName"></param>
         /// <param name="inPortName"></param>
         /// <param name="inIsOutput"></param>
-        /// <returns></returns>
+        /// <returns>True : inPortName exists; False : inPortName does not exists</returns>
         public static bool PortExist(string inNodeName, string inPortName, bool inIsOutput)
         {
             if (_instance.manager == null)
@@ -2628,7 +2628,7 @@ namespace TK.NodalEditor
         /// <param name="inNodeName"></param>
         /// <param name="inPortName"></param>
         /// <param name="inIsOutput"></param>
-        /// <returns></returns>
+        /// <returns>True : inPortName has a link; False : inPortName does not have</returns>
         public static bool PortHasLinks(string inNodeName, string inPortName, bool inIsOutput)
         {
             if (_instance.manager == null)
@@ -2796,8 +2796,7 @@ namespace TK.NodalEditor
             {
                 Error("Node does not exist");
             }
-
-
+            
             bool error = false;
             bool error1 = false;
             string name = null;
@@ -2841,7 +2840,7 @@ namespace TK.NodalEditor
                 {
                     Error("Cannot Copylink");
                 }
-                dependentPorts.Clear();
+
                 dependentPorts = GetConnectionNodesAndPorts(nodeOut, true, 1, false, true);
                 error = false;
                 foreach (List<List<string>> un in dependentPorts)
@@ -2870,19 +2869,22 @@ namespace TK.NodalEditor
             {
                 Error("Cannot Disconnect");
             }
-            dependentPorts.Clear();
+
+            Undo();
+            Redo();
+
             dependentPorts = GetConnectionNodesAndPorts(nodeOut, true, 1, false, true);
 
             error = false;
             foreach (List<List<string>> un in dependentPorts)
             {
-                if(un[0][1] == outputPorts[0] && un[1][1] == inputPorts[0])
+                if (un[0][1] == outputPorts[0] && un[1][1] == inputPorts[0])
                 {
                     error = true;
                     break;
                 }
             }
-            if(error)
+            if (error)
             {
                 Error("Cannot Disconnect");
             }
@@ -2898,12 +2900,37 @@ namespace TK.NodalEditor
                 Error("Cannot Reconnect");
             }
 
+            Undo();
+            Redo();
+
+            dependentPorts = GetConnectionNodesAndPorts(nodeOut, true, 1, false, true);
+            error = false;
+            error1 = false;
+            foreach (List<List<string>> un in dependentPorts)
+            {
+                if (un[0][1] == outputPorts[0] && un[1][1] == inputPorts[1])
+                {
+                    error = true;
+                }
+                if (un[0][1] == outputPorts[1] && un[1][1] == inputPorts[1])
+                {
+                    error1 = true;
+                }
+            }
+            if (error && !error1)
+            {
+                Error("Cannot Reconnect");
+            }
+
             //-----------------------------------------------------------------------------------
             //---------------------------  NodalDirector.Duplicate()  ---------------------------
             //-----------------------------------------------------------------------------------
             children = GetChildren("", false, true, "");
             int count = children.Count;
             string nodeDuplicate = Duplicate(nodeIn);
+
+            Undo();
+            Redo();
 
             children = GetChildren("", false, true, "");
             if (nodeDuplicate == null || !(children.Count == count + 1))
@@ -2931,6 +2958,9 @@ namespace TK.NodalEditor
                 Error("Cannot Paste");
             }
 
+            Undo();
+            Redo();
+
             //-----------------------------------------------------------------------------------
             //------------------------  NodalDirector.CreateCompound()  -------------------------
             //-----------------------------------------------------------------------------------
@@ -2940,6 +2970,9 @@ namespace TK.NodalEditor
             {
                 Error("Cannot Create a compound");
             }
+
+            Undo();
+            Redo();
 
             //-----------------------------------------------------------------------------------
             //--------------------------  NodalDirector.IsCompound()  ---------------------------
@@ -2961,6 +2994,15 @@ namespace TK.NodalEditor
                 Error("Cannot Unparent node");
             }
 
+            Undo();
+            Redo();
+
+            children = GetChildren("", false, true, "");
+            if (!children.Contains(pasteNodes[0]))
+            {
+                Error("Cannot Unparent node");
+            }
+
             //-----------------------------------------------------------------------------------
             //--------------------------  NodalDirector.DeleteNode()  ---------------------------
             //-----------------------------------------------------------------------------------
@@ -2971,7 +3013,7 @@ namespace TK.NodalEditor
                 Error("Cannot Delete node");
             }
 
-            if(NodeExist(pasteNodes[0]))
+            if (NodeExist(pasteNodes[0]))
             {
                 Error("Cannot Delete node");
             }
@@ -2987,6 +3029,12 @@ namespace TK.NodalEditor
                 Error("Cannot Parent node");
             }
 
+            children = GetChildren(name, false, true, "");
+            if (!children.Contains(nodeDuplicate))
+            {
+                Error("Cannot Parent node");
+            }
+
             List<string> inputPort = GetInputPort(nodeDuplicate);
 
             if (inputPort == null)
@@ -2997,18 +3045,17 @@ namespace TK.NodalEditor
             bool ok = false;
             foreach (string port in inputPort)
             {
-
-            //-----------------------------------------------------------------------------------
-            //--------------------------  NodalDirector.PortHasLinks()  -------------------------
-            //-----------------------------------------------------------------------------------
+                //-----------------------------------------------------------------------------------
+                //--------------------------  NodalDirector.PortHasLinks()  -------------------------
+                //-----------------------------------------------------------------------------------
                 if (PortHasLinks(nodeDuplicate, port, false))
                     ok = true;
             }
-            if(ok)
+            if (ok)
             {
-            //-----------------------------------------------------------------------------------
-            //------------------------  NodalDirector.DisconnectInputs()  -----------------------
-            //-----------------------------------------------------------------------------------
+                //-----------------------------------------------------------------------------------
+                //------------------------  NodalDirector.DisconnectInputs()  -----------------------
+                //-----------------------------------------------------------------------------------
                 error = DisconnectInputs(nodeDuplicate);
                 ok = false;
                 foreach (string port in inputPort)
@@ -3016,7 +3063,7 @@ namespace TK.NodalEditor
                     if (PortHasLinks(nodeDuplicate, port, false))
                         ok = true;
                 }
-                if(ok)
+                if (ok)
                 {
                     Error("Cannot Disconnect inputs");
                 }
@@ -3043,9 +3090,13 @@ namespace TK.NodalEditor
             {
                 Error("Cannot Explode");
             }
-        
 
+            if (IsCompound(name))
+            {
+                Error("Cannot Explode");
+            }
 
+            
 
             return true;
         }
@@ -3056,7 +3107,7 @@ namespace TK.NodalEditor
         /// <summary>
         /// Getting selected nodes
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of selected nodes names</returns>
         public static List<string> GetSelectedNodes()
         {
             List<string> NodeNames = new List<string>();
@@ -3075,7 +3126,7 @@ namespace TK.NodalEditor
         /// <summary>
         /// Getting nodes existing
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of preset nodes names</returns>
         public static List<string> GetNodesPreset()
         {
             List<string> nodes = new List<string>();
@@ -3090,7 +3141,7 @@ namespace TK.NodalEditor
         /// Getting input ports from a node
         /// </summary>
         /// <param name="inNodeName">Node name</param>
-        /// <returns></returns>
+        /// <returns>List of input ports names</returns>
         public static List<string> GetInputPort(string inNodeName)
         {
             List<string> inputPortName = new List<string>();
@@ -3123,7 +3174,7 @@ namespace TK.NodalEditor
         /// Getting outpout ports from a node
         /// </summary>
         /// <param name="inNodeName">Node name</param>
-        /// <returns></returns>
+        /// <returns>List of output ports names</returns>
         public static List<string> GetOutputPort(string inNodeName)
         {
             List<string> outputPortName = new List<string>();
@@ -3151,6 +3202,11 @@ namespace TK.NodalEditor
             return outputPortName;
         }
 
+        /// <summary>
+        /// Get parent
+        /// </summary>
+        /// <param name="inNodeName">Node name</param>
+        /// <returns>Parent name</returns>
         public static string GetParent(string inNodeName)
         {
             if (_instance.manager == null)
@@ -3185,7 +3241,7 @@ namespace TK.NodalEditor
         /// <param name="inRecursive">Recursivity : true or false</param>
         /// <param name="IgnoreCompounds">Ignore the compound return only node names or not</param>
         /// <param name="inType"></param>
-        /// <returns></returns>
+        /// <returns>List of children nodes names</returns>
         public static List<string> GetChildren(string inCompoundName, bool inRecursive, bool IgnoreCompounds, string inType)
         {
             List<string> children = new List<string>();
@@ -3234,7 +3290,7 @@ namespace TK.NodalEditor
         /// Getting nodes connected from node "inNodeName" (including nodes in compound)
         /// </summary>
         /// <param name="inNodeName">Node name</param>
-        /// <returns></returns>
+        /// <returns>List of connected nodes names</returns>
         public static List<string> GetConnectionNodes(string inNodeName, bool inSource, bool inDestination)
         {
             return GetConnectionNodes(inNodeName, true, -1, inSource, inDestination);
@@ -3245,7 +3301,7 @@ namespace TK.NodalEditor
         /// </summary>
         /// <param name="inNodeName">Node name</param>
         /// <param name="inRecursiveCompound">True : include nodes in compound; False : exclude nodes in compound</param>
-        /// <returns></returns>
+        /// <returns>List of connected nodes names</returns>
         public static List<string> GetConnectionNodes(string inNodeName, bool inRecursiveCompound, bool inSource, bool inDestination)
         {
             return GetConnectionNodes(inNodeName, inRecursiveCompound, -1, inSource, inDestination);
@@ -3255,9 +3311,11 @@ namespace TK.NodalEditor
         /// Getting nodes connected from node "inNodeName"
         /// </summary>
         /// <param name="inNodeName">Node name</param>
-        /// <param name="inRecursive">True : include nodes in compound; False : exclude nodes in compound</param>
+        /// <param name="inRecursiveCompound">True : include nodes in compound; False : exclude nodes in compound</param>
         /// <param name="inDepth">Depth we want nodes (-1: recursivity; 0 : node "inNodeName" itself; 1 : recursivity with depth 1; 2 : ....)</param>
-        /// <returns></returns>
+        /// <param name="inSource">True : all source nodes connected</param>
+        /// <param name="inDestination">True : all destination nodes connected</param>
+        /// <returns>List of nodes names connected</returns>
         public static List<string> GetConnectionNodes(string inNodeName, bool inRecursiveCompound, int inDepth, bool inSource, bool inDestination)
         {
             List<string> dependents = new List<string>();
@@ -3293,6 +3351,15 @@ namespace TK.NodalEditor
             return dependents;
         }
 
+        /// <summary>
+        /// Getting ports connected from node "inNodeName"
+        /// </summary>
+        /// <param name="inNodeName">Node name</param>
+        /// <param name="inRecursiveCompound">True : include nodes in compound; False : exclude nodes in compound</param>
+        /// <param name="inDepth">Depth we want nodes (-1: recursivity; 0 : node "inNodeName" itself; 1 : recursivity with depth 1; 2 : ....)</param>
+        /// <param name="inSource">True : all source ports connected</param>
+        /// <param name="inDestination">True : all destination ports connected</param>
+        /// <returns>List of Pairs of nodes connected with their ports</returns>
         public static List<List<List<string>>> GetConnectionNodesAndPorts(string inNodeName, bool inRecursiveCompound, int inDepth, bool inSource, bool inDestination)
         {
             List<List<List<string>>> result = new List<List<List<string>>>();
@@ -3350,8 +3417,42 @@ namespace TK.NodalEditor
 
         public static Dictionary<string, string> propertyElementPossibilities = new Dictionary<string, string>()
         {
-            {"visible", "Visible" },
-            {"visibility", "Visible" },
+            {"name", "Name" },
+            {"max", "Max" },
+            {"min", "Min" },
+            {"paramvalue", "ParamValue"},
+            {"Symmetrizable", "symmetrizable"},
+            {"valuetype", "ValueType"},
+            {"guidesize", "GuideSize" },
+            {"lod", "LOD" },
+            {"mirror", "Mirror"},
+            {"mirrorstartegy", "MirrorStrategy"},
+            {"overridedisplay", "OverrideDisplay"},
+            {"overrideguidevis", "OverrideGuideVis" },
+            {"size", "Size" },
+            {"specialbehavior", "SpecialBehavior" },
+            {"customcolor", "CustomColor" },
+            {"customdisplay", "CustomDisplay" },
+            {"displayoffset", "DisplayOffset" },
+            {"deepness", "Deepness" },
+            {"ownerrig", "OwnerRig" },
+            {"guideplaceholder", "GuidePlaceHolder" },
+            {"rule", "Rule" },
+            {"absoluteoffset", "AbsoluteOffset" },
+            {"absoluteoffsetcompensation", "AbsoluteOffsetCompensation" },
+            {"absoluteoffsetmirror", "AbsoluteOffsetMirror" },
+            {"trans", "Trans" }
+        };
+
+        public static Dictionary<string, string> propertyElementParamsPossibilities = new Dictionary<string, string>()
+        {
+
+
+        };
+
+        public static Dictionary<string, string> propertyElementDisplayPossibilities = new Dictionary<string, string>()
+        {
+
         };
 
         public static Dictionary<string, string> propertyLinkPossibilities = new Dictionary<string, string>()
@@ -3373,7 +3474,7 @@ namespace TK.NodalEditor
         {
             return GetAliases(inProperty, propertyElementPossibilities);
         }
-
+        
         public static string GetLinkPropertyPossibilities(string inProperty)
         {
             return GetAliases(inProperty, propertyLinkPossibilities);
@@ -3698,7 +3799,7 @@ namespace TK.NodalEditor
         /// </summary>
         /// <param name="inNodeName">Node name</param>
         /// <param name="inPropertyName">Property name : "Name", "CustomColor", "Freezed", "Path"</param>
-        /// <returns></returns>
+        /// <returns>Node property value</returns>
         public static object GetProperty(string inNodeName, string inPropertyName)
         {
             if (_instance.manager == null)
@@ -3750,7 +3851,7 @@ namespace TK.NodalEditor
         /// <param name="inPortName">Port name</param>
         /// <param name="inIsOutput">True if Port is an output port, False otherwise</param>
         /// <param name="inPropertyName">Property name</param>
-        /// <returns></returns>
+        /// <returns>Port property value</returns>
         public static object GetPortProperty(string inNodeName, string inPortName, bool inIsOutput, string inPropertyName)
         {
             if (_instance.manager == null)
@@ -3805,6 +3906,76 @@ namespace TK.NodalEditor
             {
                 throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Get Port Property \"{0}\"", inPropertyName));
             }
+        }
+
+        /// <summary>
+        /// Get Element property
+        /// </summary>
+        /// <param name="inNodeName">Node name</param>
+        /// <param name="inPortObjName">PortObj name</param>
+        /// <param name="inPropertyName">Property name</param>
+        /// <returns>Element property value</returns>
+        public static object GetElementProperty(string inNodeName, string inPortObjName, string inPropertyName)
+        {
+            if (_instance.manager == null)
+                return false;
+
+            string nom_fct = string.Format("GetElementProperty(\"{0}\", \"{1}\", \"{2}\");", inNodeName, inPortObjName, inPropertyName);
+
+            if (_instance.verbose)
+                Info(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            PortObj portObjIn = nodeIn.GetElement(inPortObjName);
+
+            if (portObjIn == null)
+            {
+                string inPortObjName2 = string.Format("{0}_{1}", inNodeName, inPortObjName);
+                portObjIn = nodeIn.GetElement(inPortObjName2);
+                if (portObjIn == null)
+                {
+                    throw new NodalDirectorException(nom_fct + "\n" + string.Format("PortObj \"{0}\" from \"{1}\" does not exist!", inNodeName, inPortObjName));
+                }
+            }
+
+            string value = GetElementPropertyPossibilities(inPropertyName);
+            if (value != null)
+            {
+                inPropertyName = value;
+            }
+            PropertyInfo prop = portObjIn.GetType().GetProperty(inPropertyName, BindingFlags.Public | BindingFlags.Instance);
+
+            if (prop != null && prop.CanWrite)
+            {
+                Console.WriteLine(prop.GetValue(portObjIn));
+                return prop.GetValue(portObjIn);
+            }
+            else
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Get Element Property with property \"{0}\"", inPropertyName));
+            }
+
+            //switch (inPropertyName)
+            //{
+            //    case "Visible":
+            //        if (inValue.GetType() == typeof(Boolean))
+            //        {
+            //            portIn.Visible = (bool)inValue;
+            //        }
+            //        else
+            //        {
+            //            throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Set Port Property \"{0}\" with value {1}", inPropertyName, inValue));
+            //        }
+            //        break;
+            //    default:
+            //        throw new NodalDirectorException(nom_fct + "\n" + string.Format("Cannot Set Port Property with property \"{0}\"", inPropertyName));
+            //}
         }
 
         /// <summary>
