@@ -4002,7 +4002,7 @@ namespace TK.NodalEditor.NodesLayout
 
             NodalDirector.Paste(Offset.X, Offset.Y);
         }
-        
+
         //private void pasteRenamedToolStripMenuItem_Click(object sender, EventArgs e)
         //{
         //    RichDialogResult rslt = TKMessageBox.ShowInput(InputTypes.String, "Please provide string to search", "Paste renamed search string");
