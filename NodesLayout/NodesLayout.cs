@@ -1005,6 +1005,19 @@ namespace TK.NodalEditor.NodesLayout
             }
         }
 
+        internal void RestoreState()
+        {
+            //Connect
+            overlay.ConnectArrow = new Point[0];
+            CurConnection = -1;
+            Invalidate();
+
+            //Reconnect
+            ShiftVisibility = false;
+            detachLink = null;
+            reconnecting = Reconnecting.None;
+        }
+
         private void NodesLayout_MouseMove(object sender, MouseEventArgs e)
         {
             if (OnLinkLookup == false)

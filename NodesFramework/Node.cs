@@ -1074,89 +1074,128 @@ namespace TK.NodalEditor
         {
             List<Node> Depend = new List<Node>();
             int count = 0;
-            GetConnectionNodes(this, RecursiveCompound, inDepth, Depend, this.Parent, ref count, inSource, inDestination);
+            Depend = GetConnectionNodes(this, RecursiveCompound, inDepth, this.Parent, ref count, inSource, inDestination);
+            //Depend.Add(this);
 
             return Depend;
         }
 
-        private static void GetConnectionNodes(Node curNode, bool RecursiveCompound, int inDepth, List<Node> Depend, Compound inParent, ref int count, bool inSource, bool inDestination)
+        private static List<Node> GetConnectionNodes(Node curNode, bool RecursiveCompound, int inDepth, Compound inParent, ref int count, bool inSource, bool inDestination)
         {
-            if (inSource)
+            List<Node> Nodes = new List<Node>();
+            if (inSource && inDestination)
             {
-                foreach (Link link in curNode.InDependencies)
+                ConnectionNodes(curNode, RecursiveCompound, inDepth, inParent, ref count, true, Nodes);
+                ConnectionNodes(curNode, RecursiveCompound, inDepth, inParent, ref count, false, Nodes);
+            }
+            else if (inSource && !inDestination)
+            {
+                ConnectionNodes(curNode, RecursiveCompound, inDepth, inParent, ref count, true, Nodes);
+            }
+            else if (!inSource && inDestination)
+            {
+                ConnectionNodes(curNode, RecursiveCompound, inDepth,inParent, ref count, false, Nodes);
+            }
+
+            return Nodes;
+        }
+
+        private static void ConnectionNodes(Node curNode, bool RecursiveCompound, int inDepth, Compound inParent, ref int count, bool isSource, List<Node> inResult)
+        {
+            List<Link> links = new List<Link>();
+            Node node = new Node();
+            if (isSource)
+            {
+                links = curNode.InDependencies;
+            }
+            else
+            {
+                links = curNode.OutDependencies;
+            }
+
+            foreach (Link link in links)
+            {
+
+                if (isSource)
                 {
-                    Node source = link.Source.Owner;
-                    if (source.Parent == inParent)
+                    node = link.Source.Owner;
+                }
+                else
+                {
+                    node = link.Target.Owner;
+                }
+
+                if (node.Parent == inParent)
+                {
+                    if (!inResult.Contains(node))
                     {
-                        if (!Depend.Contains(source))
+                        if (inDepth == 0)
+                        {
+                            inResult.Add(curNode);
+                            break;
+                        }
+                        else
+                        {
+                            inResult.Add(node);
+                            if (inDepth == -1)
+                            {
+                                ConnectionNodes(node, RecursiveCompound, inDepth, inParent, ref count, isSource, inResult);
+                            }
+                            else if (inDepth == 1)
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                if (count < (inDepth - 1))
+                                {
+                                    count++;
+                                    ConnectionNodes(node, RecursiveCompound, inDepth, inParent, ref count, isSource, inResult);
+                                    count = 0;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (RecursiveCompound)
+                {
+                    //Compound parent = source.Level(inParent) as Compound;
+                    Compound parent = node.Parent as Compound;
+                    if (parent != null)
+                    {
+                        if (!inResult.Contains(node))
                         {
                             if (inDepth == 0)
                             {
-                                Depend.Add(curNode);
+                                inResult.Add(curNode);
                                 break;
                             }
                             else
                             {
-                                Depend.Add(source);
+                                inResult.Add(node);
                                 if (inDepth == -1)
                                 {
-                                    GetConnectionNodes(source, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination);
+                                    ConnectionNodes(node, true, inDepth, inParent, ref count, isSource, inResult);
                                 }
                                 else if (inDepth == 1)
                                 {
-                                    continue;
+                                    continue; ;
                                 }
                                 else
                                 {
                                     if (count < (inDepth - 1))
                                     {
                                         count++;
-                                        GetConnectionNodes(source, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination);
+                                        ConnectionNodes(node, RecursiveCompound, inDepth, inParent, ref count, isSource, inResult);
                                         count = 0;
                                     }
                                     else
                                     {
                                         continue;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (RecursiveCompound)
-                    {
-                        Compound parent = source.Level(inParent) as Compound;
-                        if (parent != null)
-                        {
-                            if (!Depend.Contains(source))
-                            {
-                                if (inDepth == 0)
-                                {
-                                    Depend.Add(curNode);
-                                    break;
-                                }
-                                else
-                                {
-                                    Depend.Add(source);
-                                    if (inDepth == -1)
-                                    {
-                                        GetConnectionNodes(source, true, inDepth, Depend, inParent, ref count, inSource, inDestination);
-                                    }
-                                    else if (inDepth == 1)
-                                    {
-                                        continue; ;
-                                    }
-                                    else
-                                    {
-                                        if (count < (inDepth - 1))
-                                        {
-                                            count++;
-                                            GetConnectionNodes(source, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination);
-                                            count = 0;
-                                        }
-                                        else
-                                        {
-                                            continue;
-                                        }
                                     }
                                 }
                             }
@@ -1165,89 +1204,7 @@ namespace TK.NodalEditor
                 }
             }
 
-            if (inDestination)
-            {
-                foreach (Link link in curNode.OutDependencies)
-                {
-                    Node target = link.Target.Owner;
-                    if (target.Parent == inParent)
-                    {
-                        if (!Depend.Contains(target))
-                        {
-                            if (inDepth == 0)
-                            {
-                                Depend.Add(curNode);
-                                break;
-                            }
-                            else
-                            {
-                                Depend.Add(target);
-                                if (inDepth == -1)
-                                {
-                                    GetConnectionNodes(target, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination);
-                                }
-                                else if (inDepth == 1)
-                                {
-                                    continue;
-                                }
-                                else
-                                {
-                                    if (count < (inDepth - 1))
-                                    {
-                                        count++;
-                                        GetConnectionNodes(target, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination);
-                                        count = 0;
-                                    }
-                                    else
-                                    {
-                                        continue;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (RecursiveCompound)
-                    {
-                        Compound parent = target.Level(inParent) as Compound;
-                        if (parent != null)
-                        {
-                            if (!Depend.Contains(target))
-                            {
-                                if (inDepth == 0)
-                                {
-                                    Depend.Add(curNode);
-                                    break;
-                                }
-                                else
-                                {
-                                    Depend.Add(target);
-                                    if (inDepth == -1)
-                                    {
-                                        GetConnectionNodes(target, true, inDepth, Depend, inParent, ref count, inSource, inDestination);
-                                    }
-                                    else if (inDepth == 1)
-                                    {
-                                        continue; ;
-                                    }
-                                    else
-                                    {
-                                        if (count < (inDepth - 1))
-                                        {
-                                            count++;
-                                            GetConnectionNodes(target, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination);
-                                            count = 0;
-                                        }
-                                        else
-                                        {
-                                            continue;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+
         }
 
         public List<List<List<string>>> GetConnectionNodesAndPorts(bool RecursiveCompound, int inDepth, bool inSource, bool inDestination)
@@ -1259,417 +1216,6 @@ namespace TK.NodalEditor
 
             return NodeAndPort;
         }
-
-        //GetConnectionNodesAndPorts avec des doublons quand inSource et inTarget sont true
-        //private static void GetConnectionNodesAndPorts(Node curNode, bool RecursiveCompound, int inDepth, Dictionary<Node, List<Port>> Depend, Compound inParent, ref int count, bool inSource, bool inDestination, List<List<List<string>>> inResult)
-        //{
-        //    List<Port> temp = new List<Port>();
-        //    //if(inSource && inDestination)
-        //    //{
-        //    //    inDestination = false;
-        //    //}
-        //    if (inSource)
-        //    {
-        //        foreach (Link link in curNode.InDependencies)
-        //        {
-        //            Node source = link.Source.Owner;
-        //            if (source.Parent == inParent)
-        //            {
-        //                if (!Depend.ContainsKey(source))
-        //                {
-        //                    temp.Add(link.Source);
-        //                    if (inDepth == 0)
-        //                    {
-        //                        Depend.Add(curNode, null);
-        //                        break;
-        //                    }
-        //                    else
-        //                    {
-        //                        if (Depend.ContainsKey(source))
-        //                        {
-        //                            Depend[source] = temp;
-        //                        }
-        //                        else
-        //                        {
-        //                            Depend.Add(source, temp);
-        //                        }
-
-        //                        inResult.Add(new List<List<string>> { new List<string> { source.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
-
-        //                        if (inDepth == -1)
-        //                        {
-        //                            GetConnectionNodesAndPorts(source, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                        }
-        //                        else if (inDepth == 1)
-        //                        {
-        //                            continue;
-        //                        }
-        //                        else
-        //                        {
-        //                            if (count < (inDepth - 1))
-        //                            {
-        //                                count++;
-        //                                GetConnectionNodesAndPorts(source, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                count = 0;
-        //                            }
-        //                            else
-        //                            {
-        //                                continue;
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    if (!Depend[source].Contains(link.Source))
-        //                    {
-        //                        if (inDepth == 0)
-        //                        {
-        //                            Depend.Add(curNode, null);
-        //                            break;
-        //                        }
-        //                        else
-        //                        {
-        //                            temp.Add(link.Source);
-        //                            if (Depend.ContainsKey(source))
-        //                            {
-        //                                Depend[source] = temp;
-        //                            }
-        //                            else
-        //                            {
-        //                                Depend.Add(source, temp);
-        //                            }
-
-        //                            inResult.Add(new List<List<string>> { new List<string> { source.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
-
-        //                            if (inDepth == -1)
-        //                            {
-        //                                GetConnectionNodesAndPorts(source, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                            }
-        //                            else if (inDepth == 1)
-        //                            {
-        //                                continue;
-        //                            }
-        //                            else
-        //                            {
-        //                                if (count < (inDepth - 1))
-        //                                {
-        //                                    count++;
-        //                                    GetConnectionNodesAndPorts(source, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                    count = 0;
-        //                                }
-        //                                else
-        //                                {
-        //                                    continue;
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            else if (RecursiveCompound)
-        //            {
-        //                Compound parent = source.Level(inParent) as Compound;
-        //                if (parent != null)
-        //                {
-        //                    if (!Depend.ContainsKey(source))
-        //                    {
-        //                        temp.Add(link.Source);
-        //                        if (inDepth == 0)
-        //                        {
-        //                            Depend.Add(curNode, null);
-        //                            break;
-        //                        }
-        //                        else
-        //                        {
-        //                            if (Depend.ContainsKey(source))
-        //                            {
-        //                                Depend[source] = temp;
-        //                            }
-        //                            else
-        //                            {
-        //                                Depend.Add(source, temp);
-        //                            }
-
-        //                            inResult.Add(new List<List<string>> { new List<string> { source.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
-
-        //                            if (inDepth == -1)
-        //                            {
-        //                                GetConnectionNodesAndPorts(source, true, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                            }
-        //                            else if (inDepth == 1)
-        //                            {
-        //                                continue; ;
-        //                            }
-        //                            else
-        //                            {
-        //                                if (count < (inDepth - 1))
-        //                                {
-        //                                    count++;
-        //                                    GetConnectionNodesAndPorts(source, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                    count = 0;
-        //                                }
-        //                                else
-        //                                {
-        //                                    continue;
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        if (!Depend[source].Contains(link.Source))
-        //                        {
-        //                            temp.Add(link.Source);
-        //                            if (inDepth == 0)
-        //                            {
-        //                                Depend.Add(curNode, null);
-        //                                break;
-        //                            }
-        //                            else
-        //                            {
-        //                                if (Depend.ContainsKey(source))
-        //                                {
-        //                                    Depend[source] = temp;
-        //                                }
-        //                                else
-        //                                {
-        //                                    Depend.Add(source, temp);
-        //                                }
-
-        //                                inResult.Add(new List<List<string>> { new List<string> { source.FullName, link.Source.FullName }, new List<string> { link.Target.Owner.FullName, link.Target.FullName } });
-
-        //                                if (inDepth == -1)
-        //                                {
-        //                                    GetConnectionNodesAndPorts(source, true, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                }
-        //                                else if (inDepth == 1)
-        //                                {
-        //                                    continue; ;
-        //                                }
-        //                                else
-        //                                {
-        //                                    if (count < (inDepth - 1))
-        //                                    {
-        //                                        count++;
-        //                                        GetConnectionNodesAndPorts(source, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                        count = 0;
-        //                                    }
-        //                                    else
-        //                                    {
-        //                                        continue;
-        //                                    }
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        inSource = false;
-        //        inDestination = true;
-        //    }
-
-        //    if (inDestination)
-        //    {
-        //        foreach (Link link in curNode.OutDependencies)
-        //        {
-        //            Node target = link.Target.Owner;
-        //            if (target.Parent == inParent)
-        //            {
-        //                if (!Depend.ContainsKey(target))
-        //                {
-        //                    temp.Add(link.Target);
-        //                    if (inDepth == 0)
-        //                    {
-        //                        Depend.Add(curNode, null);
-        //                        break;
-        //                    }
-        //                    else
-        //                    {
-        //                        if (Depend.ContainsKey(target))
-        //                        {
-        //                            Depend[target] = temp;
-        //                        }
-        //                        else
-        //                        {
-        //                            Depend.Add(target, temp);
-        //                        }
-
-        //                        inResult.Add(new List<List<string>> { new List<string> { link.Source.Owner.FullName, link.Source.FullName }, new List<string> { target.FullName, link.Target.FullName } });
-
-        //                        if (inDepth == -1)
-        //                        {
-        //                            GetConnectionNodesAndPorts(target, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                        }
-        //                        else if (inDepth == 1)
-        //                        {
-        //                            continue;
-        //                        }
-        //                        else
-        //                        {
-        //                            if (count < (inDepth - 1))
-        //                            {
-        //                                count++;
-        //                                GetConnectionNodesAndPorts(target, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                count = 0;
-        //                            }
-        //                            else
-        //                            {
-        //                                continue;
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    if (!Depend[target].Contains(link.Target))
-        //                    {
-        //                        if (inDepth == 0)
-        //                        {
-        //                            Depend.Add(curNode, null);
-        //                            break;
-        //                        }
-        //                        else
-        //                        {
-        //                            temp.Add(link.Target);
-        //                            if (Depend.ContainsKey(target))
-        //                            {
-        //                                Depend[target] = temp;
-        //                            }
-        //                            else
-        //                            {
-        //                                Depend.Add(target, temp);
-        //                            }
-
-        //                            inResult.Add(new List<List<string>> { new List<string> { link.Source.Owner.FullName, link.Source.FullName }, new List<string> { target.FullName, link.Target.FullName } });
-
-        //                            if (inDepth == -1)
-        //                            {
-        //                                GetConnectionNodesAndPorts(target, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                            }
-        //                            else if (inDepth == 1)
-        //                            {
-        //                                continue;
-        //                            }
-        //                            else
-        //                            {
-        //                                if (count < (inDepth - 1))
-        //                                {
-        //                                    count++;
-        //                                    GetConnectionNodesAndPorts(target, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                    count = 0;
-        //                                }
-        //                                else
-        //                                {
-        //                                    continue;
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            else if (RecursiveCompound)
-        //            {
-        //                Compound parent = target.Level(inParent) as Compound;
-        //                if (parent != null)
-        //                {
-        //                    if (!Depend.ContainsKey(target))
-        //                    {
-        //                        temp.Add(link.Target);
-        //                        if (inDepth == 0)
-        //                        {
-        //                            Depend.Add(curNode, null);
-        //                            break;
-        //                        }
-        //                        else
-        //                        {
-        //                            if (Depend.ContainsKey(target))
-        //                            {
-        //                                Depend[target] = temp;
-        //                            }
-        //                            else
-        //                            {
-        //                                Depend.Add(target, temp);
-        //                            }
-
-        //                            inResult.Add(new List<List<string>> { new List<string> { link.Source.Owner.FullName, link.Source.FullName }, new List<string> { target.FullName, link.Target.FullName } });
-
-        //                            if (inDepth == -1)
-        //                            {
-        //                                GetConnectionNodesAndPorts(target, true, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                            }
-        //                            else if (inDepth == 1)
-        //                            {
-        //                                continue; ;
-        //                            }
-        //                            else
-        //                            {
-        //                                if (count < (inDepth - 1))
-        //                                {
-        //                                    count++;
-        //                                    GetConnectionNodesAndPorts(target, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                    count = 0;
-        //                                }
-        //                                else
-        //                                {
-        //                                    continue;
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        if (!Depend[target].Contains(link.Target))
-        //                        {
-        //                            temp.Add(link.Target);
-        //                            if (inDepth == 0)
-        //                            {
-        //                                Depend.Add(curNode, null);
-        //                                break;
-        //                            }
-        //                            else
-        //                            {
-        //                                if (Depend.ContainsKey(target))
-        //                                {
-        //                                    Depend[target] = temp;
-        //                                }
-        //                                else
-        //                                {
-        //                                    Depend.Add(target, temp);
-        //                                }
-
-        //                                inResult.Add(new List<List<string>> { new List<string> { link.Source.Owner.FullName, link.Source.FullName }, new List<string> { target.FullName, link.Target.FullName } });
-
-        //                                if (inDepth == -1)
-        //                                {
-        //                                    GetConnectionNodesAndPorts(target, true, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                }
-        //                                else if (inDepth == 1)
-        //                                {
-        //                                    continue; ;
-        //                                }
-        //                                else
-        //                                {
-        //                                    if (count < (inDepth - 1))
-        //                                    {
-        //                                        count++;
-        //                                        GetConnectionNodesAndPorts(target, RecursiveCompound, inDepth, Depend, inParent, ref count, inSource, inDestination, inResult);
-        //                                        count = 0;
-        //                                    }
-        //                                    else
-        //                                    {
-        //                                        continue;
-        //                                    }
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
 
         private static List<List<List<string>>> GetConnectionNodesAndPorts(Node curNode, bool RecursiveCompound, int inDepth, Dictionary<Node, List<Port>> Depend, Compound inParent, ref int count, bool inSource, bool inDestination)
         {
