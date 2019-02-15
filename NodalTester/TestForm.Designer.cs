@@ -42,6 +42,7 @@
             this.redoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.sillyMethodToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.scriptstoolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.collapsibleGroup1 = new TK.GraphComponents.CollapsibleGroup();
@@ -52,6 +53,7 @@
             this.pyEditControl = new DevExpress.XtraRichEdit.RichEditControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.nodalExecuteBT = new System.Windows.Forms.ToolStripButton();
+            this.propertyGridControl1 = new DevExpress.XtraVerticalGrid.PropertyGridControl();
             this.tK_NodalEditorUCtrl1 = new TK.NodalEditor.NodesLayout.TK_NodalEditorUCtrl();
             this.menuStrip1.SuspendLayout();
             this.collapsibleGroup1.SuspendLayout();
@@ -59,6 +61,7 @@
             this.csInterpreterTab.SuspendLayout();
             this.pyInterpreterTab.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.propertyGridControl1)).BeginInit();
             this.SuspendLayout();
             // 
             // tgvImageList
@@ -71,7 +74,8 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.editToolStripMenuItem});
+            this.editToolStripMenuItem,
+            this.scriptstoolStripMenuItem});
             resources.ApplyResources(this.menuStrip1, "menuStrip1");
             this.menuStrip1.Name = "menuStrip1";
             // 
@@ -140,6 +144,12 @@
             this.sillyMethodToolStripMenuItem.Name = "sillyMethodToolStripMenuItem";
             resources.ApplyResources(this.sillyMethodToolStripMenuItem, "sillyMethodToolStripMenuItem");
             this.sillyMethodToolStripMenuItem.Click += new System.EventHandler(this.sillyMethodToolStripMenuItem_Click);
+            // 
+            // scriptstoolStripMenuItem
+            // 
+            this.scriptstoolStripMenuItem.Name = "scriptstoolStripMenuItem";
+            resources.ApplyResources(this.scriptstoolStripMenuItem, "scriptstoolStripMenuItem");
+            this.scriptstoolStripMenuItem.Click += new System.EventHandler(this.scriptstoolStripMenuItem_Click);
             // 
             // saveFileDialog1
             // 
@@ -230,6 +240,11 @@
             this.nodalExecuteBT.Name = "nodalExecuteBT";
             this.nodalExecuteBT.Click += new System.EventHandler(this.nodalExecuteBT_Click);
             // 
+            // propertyGridControl1
+            // 
+            resources.ApplyResources(this.propertyGridControl1, "propertyGridControl1");
+            this.propertyGridControl1.Name = "propertyGridControl1";
+            // 
             // tK_NodalEditorUCtrl1
             // 
             resources.ApplyResources(this.tK_NodalEditorUCtrl1, "tK_NodalEditorUCtrl1");
@@ -239,6 +254,7 @@
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.propertyGridControl1);
             this.Controls.Add(this.tK_NodalEditorUCtrl1);
             this.Controls.Add(this.collapsibleGroup1);
             this.Controls.Add(this.menuStrip1);
@@ -253,6 +269,7 @@
             this.pyInterpreterTab.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.propertyGridControl1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -283,5 +300,7 @@
         private System.Windows.Forms.TabPage pyInterpreterTab;
         private DevExpress.XtraRichEdit.RichEditControl pyEditControl;
         private DevExpress.XtraRichEdit.RichEditControl csEditControl;
+        private DevExpress.XtraVerticalGrid.PropertyGridControl propertyGridControl1;
+        private System.Windows.Forms.ToolStripMenuItem scriptstoolStripMenuItem;
     }
 }

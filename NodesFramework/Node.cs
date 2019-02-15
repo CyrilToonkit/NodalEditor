@@ -1597,13 +1597,14 @@ namespace TK.NodalEditor
 
         }
 
+        Color mColor = Color.Transparent;
         /// <summary>
         /// Define a custom Color for this Node (Transparent mean no override)
         /// </summary>
         public virtual Color CustomColor
         {
-            get { return Color.Transparent; }
-            set { }
+            get { return mColor; }
+            set { mColor = value; }
         }
 
         /// <summary>

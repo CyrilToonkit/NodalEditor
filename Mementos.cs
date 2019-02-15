@@ -106,7 +106,6 @@ namespace TK.NodalEditor
 
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
-            //Link disconected = target.manager.
             IMemento<NodalDirector> inverse = new DisconnectMemento(link);
             target._Disconnect(link);
             return inverse;
@@ -128,10 +127,8 @@ namespace TK.NodalEditor
         {
             this.nodeNameIn = inNodeName;
             this.nodeNameOut = outNodeName;
-
             this.PortNameIn = inPortName;
             this.PortNameOut = outPortName;
-
             this.reconnected = inLink;
             this.Mode = inMode;
         }
@@ -139,12 +136,9 @@ namespace TK.NodalEditor
         {
             Node inNode = target.manager.GetNode(nodeNameIn);
             Node outNode = target.manager.GetNode(nodeNameOut);
-
             int inPort = inNode.GetPort(PortNameIn, false).Index;
-
             int outPort = outNode.GetPort(PortNameOut, true).Index;
 
-            
             IMemento<NodalDirector> inverse = new ReconnectMemento(reconnected.Target.Owner.FullName, reconnected.Source.Owner.FullName, reconnected.Target.FullName, reconnected.Source.FullName, reconnected, Mode);
             target._ReConnect(inNode, outNode, inPort, outPort, reconnected, Mode);
             return inverse;
@@ -154,32 +148,14 @@ namespace TK.NodalEditor
 
     class CopyLinkMemento : NodalEditorMemento
     {
-        private string nodeNameIn;
-        private string nodeNameOut;
-        private string PortNameIn;
-        private string PortNameOut;
         private Link copyReconnected;
-        private string Mode;
-        public CopyLinkMemento(string inNodeName, string outNodeName, string inPortName, string outPortName, Link inLink, string inMode)
+
+        public CopyLinkMemento(Link inLink)
         {
-            this.nodeNameIn = inNodeName;
-            this.nodeNameOut = outNodeName;
-
-            this.PortNameIn = inPortName;
-            this.PortNameOut = outPortName;
-
             this.copyReconnected = inLink;
-            this.Mode = inMode;
         }
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
-            Node inNode = target.manager.GetNode(nodeNameIn);
-            Node outNode = target.manager.GetNode(nodeNameOut);
-
-            int inPort = inNode.GetPort(PortNameIn, false).Index;
-            int outPort = outNode.GetPort(PortNameOut, true).Index;
-
-
             IMemento<NodalDirector> inverse = new DisconnectMemento(copyReconnected);
             target._Disconnect(copyReconnected);
             return inverse;
@@ -199,7 +175,6 @@ namespace TK.NodalEditor
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
             Node Node = target.manager.GetNode(NodeName);
-            Compound Compound = target.manager.GetNode(CompoundName) as Compound;
             IMemento<NodalDirector> inverse = new UnParentMemento(NodeName, CompoundName);
             target._UnParent(Node);
             return inverse;
@@ -236,8 +211,6 @@ namespace TK.NodalEditor
 
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
-            //Compound Compound = target.manager.GetNode(Nodes[0].Parent.FullName) as Compound;
-
             IMemento<NodalDirector> inverse = new ExplodeMemento(Compound, Nodes);
             target._Explode(Compound);
             return inverse;
@@ -287,7 +260,7 @@ namespace TK.NodalEditor
         private Node Node;
         private int x, y;
 
-        public MoveNodeMemento(Node inNode, int inX, int inY)
+        public MoveNodeMemento(Node inNode)
         {
             this.Node = inNode;
             this.x = (int)inNode.UIx;
@@ -295,31 +268,49 @@ namespace TK.NodalEditor
         }
         public override IMemento<NodalDirector> Restore(NodalDirector target)
         {
-            IMemento<NodalDirector> inverse = new MoveNodeMemento(Node, (int)(x *  target.layout.LayoutSize), (int)(y * target.layout.LayoutSize));
+            IMemento<NodalDirector> inverse = new MoveNodeMemento(Node);
             target._MoveNode(Node, (int)(x * target.layout.LayoutSize), (int)(y * target.layout.LayoutSize));
             return inverse;
         }
     }
 
-    //class PasteMemento : NodalEditorMemento
-    //{
-    //    private Node Node;
-    //    private int XOffset, YOffset;
-    //    private string search, replace;
+    class SetPropetyMemento : NodalEditorMemento
+    {
+        private Node Node;
+        private string propertyName;
+        private object value;
 
-    //    public PasteMemento(Node inNode, int inXOffset, int inYOffset, string inSearch, string inReplace)
-    //    {
-    //        this.Node = inNode;
-    //        this.XOffset = inXOffset;
-    //        this.YOffset = inYOffset;
-    //        this.search = inSearch;
-    //        this.replace = inReplace;
-    //    }
-    //    public override IMemento<NodalDirector> Restore(NodalDirector target)
-    //    {
-    //        IMemento<NodalDirector> inverse = new DeleteNodeMemento();
-    //        target._DeleteNode();
-    //        return inverse;
-    //    }
-    //}
+        public SetPropetyMemento(Node inNode, string inPropertyName)
+        {
+            this.Node = inNode;
+            this.propertyName = inPropertyName;
+            this.value = inNode.GetType().GetProperty(inPropertyName).GetValue(inNode);
+        }
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            IMemento<NodalDirector> inverse = new SetPropetyMemento(Node, propertyName);
+            target._SetProperty(Node, propertyName, value);
+            return inverse;
+        }
+    }
+
+    class SetPortPropetyMemento : NodalEditorMemento
+    {
+        private Port Port;
+        private string propertyName;
+        private object value;
+
+        public SetPortPropetyMemento(Port inPort, string inPropertyName)
+        {
+            this.Port = inPort;
+            this.propertyName = inPropertyName;
+            this.value = Port.GetType().GetProperty(inPropertyName).GetValue(Port);
+        }
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            IMemento<NodalDirector> inverse = new SetPortPropetyMemento(Port, propertyName);
+            target._SetPortProperty(Port, propertyName, value);
+            return inverse;
+        }
+    }
 }

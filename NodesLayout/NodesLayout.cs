@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.IO;
+using System.Runtime.InteropServices;
 using TK.BaseLib.CustomData;
 using TK.NodalEditor.Tags;
 using TK.GraphComponents.CustomData;
@@ -1095,10 +1096,6 @@ namespace TK.NodalEditor.NodesLayout
                                     overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / (LayoutSize)), (int)(HitPoint.Y / (LayoutSize))), new Point((int)(e.Location.X / (LayoutSize)), (int)(e.Location.Y / (LayoutSize))) };
                                 else
                                     overlay.ConnectCutter[1] = new Point((int)(e.Location.X / (LayoutSize)), (int)(e.Location.Y / (LayoutSize)));
-
-                                //overlay.ConnectCutter = new Point[] { HitPoint, e.Location };
-                                //overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / 1/*(LayoutSize)*/), (int)(HitPoint.Y / 1/*(LayoutSize)*/)), new Point((int)(e.Location.X / (LayoutSize)), (int)(e.Location.Y / (LayoutSize))) };
-                                //overlay.ConnectCutter = new Point[] { new Point((int)(HitPoint.X / (LayoutSize)), (int)(HitPoint.Y / (LayoutSize))), e.Location };
                             }
                             else
                             {
@@ -1758,6 +1755,54 @@ namespace TK.NodalEditor.NodesLayout
                     nodeLookUpEdit.Focus();
                 }
             }
+
+            if (e.KeyData == (Keys.Control | Keys.Alt | Keys.Z))
+            {
+                if (NodalDirector.CanUndoUI())
+                {
+                    NodalDirector.UndoUI();
+                }
+                else
+                {
+                    NodalDirector.Error("Nothing to undo !");
+                }
+            }
+
+            if (e.KeyData == (Keys.Control | Keys.Alt | Keys.Y))
+            {
+                if (NodalDirector.CanRedoUI())
+                {
+                    NodalDirector.RedoUI();
+                }
+                else
+                {
+                    NodalDirector.Error("Nothing to redo !");
+                }
+            }
+
+            if (e.KeyData == (Keys.Control | Keys.Z) && e.KeyData != Keys.Alt)
+            {
+                if (NodalDirector.CanUndo())
+                {
+                    NodalDirector.Undo();
+                }
+                else
+                {
+                    NodalDirector.Error("Nothing to undo !");
+                }
+            }
+
+            if(e.KeyData == (Keys.Control | Keys.Y) && e.KeyData != Keys.Alt)
+            {
+                if (NodalDirector.CanRedo())
+                {
+                    NodalDirector.Redo();
+                }
+                else
+                {
+                    NodalDirector.Error("Nothing to redo !");
+                }
+            }
             Invalidate();
         }
 
@@ -2216,16 +2261,16 @@ namespace TK.NodalEditor.NodesLayout
                             {
                                 case Keys.Shift:
                                     //Selection.AddToSelection(ConnectedNode);
-                                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Add);
+                                    NodalDirector.SelectNodes(nodesName, "Add");
                                     break;
 
                                 case Keys.Control:
                                     //Selection.ToggleSelection(ConnectedNode);
-                                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Toggle);
+                                    NodalDirector.SelectNodes(nodesName, "Toggle");
                                     break;
                                 default:
                                     //Selection.Select(ConnectedNode);
-                                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
+                                    NodalDirector.SelectNodes(nodesName, "Default");
                                     break;
                             }
 
@@ -3724,7 +3769,6 @@ namespace TK.NodalEditor.NodesLayout
         //        Frame(Manager.CurCompound.Nodes);
         //}
 
-
         private void createCompoundToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<string> nodesName = NodalDirector.GetSelectedNodes();
@@ -3925,7 +3969,7 @@ namespace TK.NodalEditor.NodesLayout
                 }
             }
             //Selection.Select(affectedNodes);
-            NodalDirector.SelectNodes(affectedNodesName, TypeOfSelection.Default);
+            NodalDirector.SelectNodes(affectedNodesName, "Default");
             ChangeFocus(false);
         }
 
@@ -3933,6 +3977,7 @@ namespace TK.NodalEditor.NodesLayout
         {
             List<string> nodesName = NodalDirector.GetSelectedNodes();
             NodalDirector.Copy(nodesName);
+
             //Manager.ClipBoard = Selection.GetSelectedNodes();
         }
 
@@ -4003,6 +4048,18 @@ namespace TK.NodalEditor.NodesLayout
             Point Offset = new Point((int)(toClient.X / LayoutSize) - (int)Manager.ClipBoard[0].UIx, (int)(toClient.Y / LayoutSize) - (int)Manager.ClipBoard[0].UIy);
 
             NodalDirector.Paste(Offset.X, Offset.Y, search, replace);
+        }
+
+        private void copyLinkstoolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
+            NodalDirector.CopyLinks(nodesName[0]);
+        }
+
+        private void pasteLinkstoolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            List<string> nodesName = NodalDirector.GetSelectedNodes();
+            NodalDirector.PasteLinks(nodesName[0]);
         }
 
         //private void exposeAllPortsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4200,7 +4257,7 @@ namespace TK.NodalEditor.NodesLayout
                     nodesName.Add(nodeName);
                 }
 
-                NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
+                NodalDirector.SelectNodes(nodesName, "Default");
                 Invalidate();
                 OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
                 OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
@@ -5001,6 +5058,128 @@ namespace TK.NodalEditor.NodesLayout
             return line;
         }
 
+        public static void CreateScriptsMenu(ToolStripMenuItem inMenuItem, string inScriptsFolder, EventHandler inReloadHandler)
+        {
+            inMenuItem.DropDownItems.Clear();
+            inMenuItem.Tag = inScriptsFolder;
+            
+            //Reload item
+            ToolStripMenuItem item = new ToolStripMenuItem();
+            item.Name = string.Format("item_reload");
+            item.Text = "Reload";
+            item.Tag = "ReloadMenuItemClickHandler";
+            item.Click += new EventHandler(inReloadHandler);
+            inMenuItem.DropDownItems.Add(item);
+            inMenuItem.DropDownItems.Add(new ToolStripSeparator());
 
+
+            if (Directory.Exists(inScriptsFolder)) // This path is a directory
+            {
+                CreateScriptsMenuRecursive(inMenuItem, inScriptsFolder, inReloadHandler);
+            }
+            else
+            {
+                TKMessageBox.ShowError(string.Format("{0} is not a valid file or directory.", inScriptsFolder), "Script Menu Error");
+            }
+        }
+
+
+        public static void CreateScriptsMenuRecursive(ToolStripMenuItem inMenuItem, string inScriptsFolder, EventHandler inReloadHandler)
+        {
+            ToolStripMenuItem item;
+
+            // Process the list of files found in the directory.
+            string[] fileEntries = Directory.GetFiles(inScriptsFolder);
+            string[] subdirectoryEntries = Directory.GetDirectories(inScriptsFolder);
+
+            //Concatenation 
+            string[] Entries = new string[fileEntries.Length + subdirectoryEntries.Length];
+            fileEntries.CopyTo(Entries, 0);
+            subdirectoryEntries.CopyTo(Entries, fileEntries.Length);
+
+            Array.Sort(Entries);
+
+            foreach (string stringName in Entries)
+            {
+                if(File.Exists(stringName))
+                {
+                    if (stringName.Contains("___")) //Separator
+                    {
+                        inMenuItem.DropDownItems.Add(new ToolStripSeparator());
+                    }
+                    else
+                    {
+                        if (stringName.EndsWith(".cs") || stringName.EndsWith(".py"))
+                        {
+                            item = new ToolStripMenuItem();
+                            item.Name = string.Format("item_{0}", stringName);
+                            item.Tag = stringName;
+                            //Remove path
+                            string rsl = stringName.Substring(inScriptsFolder.Length + 1);
+                            //Remove "_Number_
+                            string regex = "^_?[0-9]*_";
+                            rsl = Regex.Replace(rsl, regex, "");
+                            //Remove extension
+                            if (rsl.EndsWith(".py") || rsl.EndsWith(".cs"))
+                            {
+                                rsl = rsl.Substring(0, rsl.Length - 3);
+                            }
+                            //CamelCase and minuscule
+                            string r = "((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))";
+                            rsl = Regex.Replace(rsl, r, " $1").ToLower();
+                            //Replace _ by " " and majuscule on first letter
+                            rsl = rsl.Replace("_", " ");
+                            rsl = char.ToUpper(rsl[0]) + rsl.Substring(1);
+                            item.Text = rsl;
+                            item.Click += new EventHandler(inReloadHandler);
+                            inMenuItem.DropDownItems.Add(item);
+                        }
+                        else
+                        {
+                            item = new ToolStripMenuItem();
+                            item.Name = string.Format("item_{0}", stringName);
+                            item.Tag = stringName;
+                            //Remove path
+                            string rsl = stringName.Substring(inScriptsFolder.Length + 1);
+                            //Remove "_Number_
+                            string regex = "^_?[0-9]*_";
+                            rsl = Regex.Replace(rsl, regex, "");
+                            //Remove extension
+                            if (rsl.Contains("."))
+                            {
+                                rsl = Path.GetFileNameWithoutExtension(rsl);
+                            }
+                            //CamelCase and minuscule
+                            string r = "((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))";
+                            rsl = Regex.Replace(rsl, r, " $1").ToLower();
+                            //Replace _ by " " and majuscule on first letter
+                            rsl = rsl.Replace("_", " ");
+                            rsl = char.ToUpper(rsl[0]) + rsl.Substring(1);
+                            item.Text = rsl;
+                            inMenuItem.DropDownItems.Add(item);
+                        }
+                    }
+                }
+                else if(Directory.Exists(stringName))//Directories
+                {
+                    // Recurse into subdirectories of this directory.
+                    item = new ToolStripMenuItem();
+                    item.Name = string.Format("item_{0}", stringName);
+                    item.Tag = stringName;
+                    //Make name nicest
+                    string rsl = stringName.Substring(inScriptsFolder.Length + 1);
+                    string regex = "^_?[0-9]*_";
+                    rsl = Regex.Replace(rsl, regex, "");
+                    string r = "((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))";
+                    rsl = Regex.Replace(rsl, r, " $1").ToLower();
+                    rsl = rsl.Replace("_", " ");
+                    rsl = char.ToUpper(rsl[0]) + rsl.Substring(1);
+                    item.Text = rsl;
+
+                    inMenuItem.DropDownItems.Add(item);
+                    CreateScriptsMenuRecursive(item, stringName, inReloadHandler);  
+                }
+            }
+        }
     }
 }

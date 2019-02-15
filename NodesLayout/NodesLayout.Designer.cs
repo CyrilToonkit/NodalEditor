@@ -96,6 +96,8 @@ namespace TK.NodalEditor.NodesLayout
             this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pasteRenamedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.customToolTip = new TK.GraphComponents.CustomToolTip();
+            this.copyLinkstoolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pasteLinkstoolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.portLookUpEdit = new TK.NodalEditor.nodeLookUpEditNoTab();
             this.nodeLookUpEdit = new TK.NodalEditor.nodeLookUpEditNoTab();
             this.nodeMenuStrip.SuspendLayout();
@@ -121,6 +123,8 @@ namespace TK.NodalEditor.NodesLayout
             this.explodeCompoundToolStripMenuItem,
             this.toolStripMenuItem1,
             this.copyToolStripMenuItem,
+            this.copyLinkstoolStripMenuItem,
+            this.pasteLinkstoolStripMenuItem,
             this.instanceToolStripMenuItem,
             this.toolStripSeparator2,
             this.createCompoundToolStripMenuItem,
@@ -146,14 +150,14 @@ namespace TK.NodalEditor.NodesLayout
             this.exposeOutputsToolStripMenuItem,
             this.unexposeOutputsToolStripMenuItem});
             this.nodeMenuStrip.Name = "contextMenuStrip1";
-            this.nodeMenuStrip.Size = new System.Drawing.Size(184, 552);
+            this.nodeMenuStrip.Size = new System.Drawing.Size(185, 626);
             // 
             // enterCompoundToolStripMenuItem
             // 
             this.enterCompoundToolStripMenuItem.Image = global::TK.NodalEditor.Properties.Resources.EnterCompound;
             this.enterCompoundToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.enterCompoundToolStripMenuItem.Name = "enterCompoundToolStripMenuItem";
-            this.enterCompoundToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.enterCompoundToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.enterCompoundToolStripMenuItem.Text = "Enter Compound";
             this.enterCompoundToolStripMenuItem.Click += new System.EventHandler(this.enterCompoundToolStripMenuItem_Click);
             // 
@@ -162,21 +166,21 @@ namespace TK.NodalEditor.NodesLayout
             this.explodeCompoundToolStripMenuItem.Image = global::TK.NodalEditor.Properties.Resources.ExplodeCompound;
             this.explodeCompoundToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.explodeCompoundToolStripMenuItem.Name = "explodeCompoundToolStripMenuItem";
-            this.explodeCompoundToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.explodeCompoundToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.explodeCompoundToolStripMenuItem.Text = "Explode Compound";
             this.explodeCompoundToolStripMenuItem.Click += new System.EventHandler(this.explodeCompoundToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(181, 6);
             // 
             // copyToolStripMenuItem
             // 
             this.copyToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("copyToolStripMenuItem.Image")));
             this.copyToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.copyToolStripMenuItem.Text = "Copy";
             this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
@@ -185,7 +189,7 @@ namespace TK.NodalEditor.NodesLayout
             this.instanceToolStripMenuItem.Image = global::TK.NodalEditor.Properties.Resources.Instance;
             this.instanceToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
-            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.instanceToolStripMenuItem.Text = "Instance";
             this.instanceToolStripMenuItem.Visible = false;
             this.instanceToolStripMenuItem.Click += new System.EventHandler(this.instanceToolStripMenuItem_Click);
@@ -193,66 +197,66 @@ namespace TK.NodalEditor.NodesLayout
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(180, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(181, 6);
             // 
             // createCompoundToolStripMenuItem
             // 
             this.createCompoundToolStripMenuItem.Image = global::TK.NodalEditor.Properties.Resources.CreateCompound;
             this.createCompoundToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.createCompoundToolStripMenuItem.Name = "createCompoundToolStripMenuItem";
-            this.createCompoundToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.createCompoundToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.createCompoundToolStripMenuItem.Text = "Create Compound";
             this.createCompoundToolStripMenuItem.Click += new System.EventHandler(this.createCompoundToolStripMenuItem_Click);
             // 
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(180, 6);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(181, 6);
             // 
             // unparentToolStripMenuItem
             // 
             this.unparentToolStripMenuItem.Name = "unparentToolStripMenuItem";
-            this.unparentToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.unparentToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.unparentToolStripMenuItem.Text = "Unparent";
             this.unparentToolStripMenuItem.Click += new System.EventHandler(this.unparentToolStripMenuItem_Click);
             // 
             // parentToolStripMenuItem
             // 
             this.parentToolStripMenuItem.Name = "parentToolStripMenuItem";
-            this.parentToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.parentToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.parentToolStripMenuItem.Text = "Parent";
             this.parentToolStripMenuItem.Click += new System.EventHandler(this.parentToolStripMenuItem_Click);
             // 
             // toolStripMenuItem6
             // 
             this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(180, 6);
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(181, 6);
             // 
             // exposeAllPortsToolStripMenuItem
             // 
             this.exposeAllPortsToolStripMenuItem.Name = "exposeAllPortsToolStripMenuItem";
-            this.exposeAllPortsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.exposeAllPortsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.exposeAllPortsToolStripMenuItem.Text = "Expose all ports";
             this.exposeAllPortsToolStripMenuItem.Click += new System.EventHandler(this.exposeAllPortsToolStripMenuItem_Click);
             // 
             // hideAllPortsToolStripMenuItem
             // 
             this.hideAllPortsToolStripMenuItem.Name = "hideAllPortsToolStripMenuItem";
-            this.hideAllPortsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.hideAllPortsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.hideAllPortsToolStripMenuItem.Text = "Hide all ports";
             this.hideAllPortsToolStripMenuItem.Click += new System.EventHandler(this.hideAllPortsToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(180, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
             // 
             // disconnectAllToolStripMenuItem
             // 
             this.disconnectAllToolStripMenuItem.Image = global::TK.NodalEditor.Properties.Resources.Disconnect;
             this.disconnectAllToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.disconnectAllToolStripMenuItem.Name = "disconnectAllToolStripMenuItem";
-            this.disconnectAllToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.disconnectAllToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.disconnectAllToolStripMenuItem.Text = "Disconnect all";
             this.disconnectAllToolStripMenuItem.Click += new System.EventHandler(this.disconnectAllToolStripMenuItem_Click);
             // 
@@ -261,7 +265,7 @@ namespace TK.NodalEditor.NodesLayout
             this.disconnectInputsToolStripMenuItem.Image = global::TK.NodalEditor.Properties.Resources.Disconnect;
             this.disconnectInputsToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.disconnectInputsToolStripMenuItem.Name = "disconnectInputsToolStripMenuItem";
-            this.disconnectInputsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.disconnectInputsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.disconnectInputsToolStripMenuItem.Text = "Disconnect Inputs";
             this.disconnectInputsToolStripMenuItem.Click += new System.EventHandler(this.disconnectInputsToolStripMenuItem_Click);
             // 
@@ -270,47 +274,47 @@ namespace TK.NodalEditor.NodesLayout
             this.disconnectOutputsToolStripMenuItem.Image = global::TK.NodalEditor.Properties.Resources.Disconnect;
             this.disconnectOutputsToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.disconnectOutputsToolStripMenuItem.Name = "disconnectOutputsToolStripMenuItem";
-            this.disconnectOutputsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.disconnectOutputsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.disconnectOutputsToolStripMenuItem.Text = "DisconnectOutputs";
             this.disconnectOutputsToolStripMenuItem.Click += new System.EventHandler(this.disconnectOutputsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(180, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(181, 6);
             // 
             // deleteNodeToolStripMenuItem
             // 
             this.deleteNodeToolStripMenuItem.Image = global::TK.NodalEditor.Properties.Resources.DeleteNode;
             this.deleteNodeToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.deleteNodeToolStripMenuItem.Name = "deleteNodeToolStripMenuItem";
-            this.deleteNodeToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.deleteNodeToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.deleteNodeToolStripMenuItem.Text = "Delete nodes";
             this.deleteNodeToolStripMenuItem.Click += new System.EventHandler(this.deleteNodeToolStripMenuItem_Click);
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(180, 6);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(181, 6);
             // 
             // manageInputsToolStripMenuItem
             // 
             this.manageInputsToolStripMenuItem.Name = "manageInputsToolStripMenuItem";
-            this.manageInputsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.manageInputsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.manageInputsToolStripMenuItem.Text = "Manage Inputs";
             this.manageInputsToolStripMenuItem.Click += new System.EventHandler(this.manageInputsToolStripMenuItem_Click);
             // 
             // manageOutputsToolStripMenuItem
             // 
             this.manageOutputsToolStripMenuItem.Name = "manageOutputsToolStripMenuItem";
-            this.manageOutputsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.manageOutputsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.manageOutputsToolStripMenuItem.Text = "Manage Outputs";
             this.manageOutputsToolStripMenuItem.Click += new System.EventHandler(this.manageOutputsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem7
             // 
             this.toolStripMenuItem7.Name = "toolStripMenuItem7";
-            this.toolStripMenuItem7.Size = new System.Drawing.Size(180, 6);
+            this.toolStripMenuItem7.Size = new System.Drawing.Size(181, 6);
             // 
             // exposeInputsToolStripMenuItem
             // 
@@ -322,7 +326,7 @@ namespace TK.NodalEditor.NodesLayout
             this.placeHoldersToolStripMenuItem,
             this.parametersToolStripMenuItem});
             this.exposeInputsToolStripMenuItem.Name = "exposeInputsToolStripMenuItem";
-            this.exposeInputsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.exposeInputsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.exposeInputsToolStripMenuItem.Text = "Expose Inputs";
             this.exposeInputsToolStripMenuItem.Visible = false;
             // 
@@ -372,7 +376,7 @@ namespace TK.NodalEditor.NodesLayout
             this.placeHoldersToolStripMenuItem1,
             this.parametersToolStripMenuItem1});
             this.unexposeInputsToolStripMenuItem.Name = "unexposeInputsToolStripMenuItem";
-            this.unexposeInputsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.unexposeInputsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.unexposeInputsToolStripMenuItem.Text = "Unexpose Inputs";
             this.unexposeInputsToolStripMenuItem.Visible = false;
             // 
@@ -415,7 +419,7 @@ namespace TK.NodalEditor.NodesLayout
             // toolStripMenuItem8
             // 
             this.toolStripMenuItem8.Name = "toolStripMenuItem8";
-            this.toolStripMenuItem8.Size = new System.Drawing.Size(180, 6);
+            this.toolStripMenuItem8.Size = new System.Drawing.Size(181, 6);
             // 
             // exposeOutputsToolStripMenuItem
             // 
@@ -427,7 +431,7 @@ namespace TK.NodalEditor.NodesLayout
             this.placeHoldersToolStripMenuItem2,
             this.parametersToolStripMenuItem2});
             this.exposeOutputsToolStripMenuItem.Name = "exposeOutputsToolStripMenuItem";
-            this.exposeOutputsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.exposeOutputsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.exposeOutputsToolStripMenuItem.Text = "Expose Outputs";
             this.exposeOutputsToolStripMenuItem.Visible = false;
             // 
@@ -477,7 +481,7 @@ namespace TK.NodalEditor.NodesLayout
             this.placeHoldersToolStripMenuItem3,
             this.parametersToolStripMenuItem3});
             this.unexposeOutputsToolStripMenuItem.Name = "unexposeOutputsToolStripMenuItem";
-            this.unexposeOutputsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.unexposeOutputsToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.unexposeOutputsToolStripMenuItem.Text = "Unexpose Outputs";
             this.unexposeOutputsToolStripMenuItem.Visible = false;
             // 
@@ -608,6 +612,20 @@ namespace TK.NodalEditor.NodesLayout
             this.customToolTip.Size = new System.Drawing.Size(200, 100);
             this.customToolTip.TabIndex = 4;
             this.customToolTip.Visible = false;
+            // 
+            // copyLinkstoolStripMenuItem
+            // 
+            this.copyLinkstoolStripMenuItem.Name = "copyLinkstoolStripMenuItem";
+            this.copyLinkstoolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.copyLinkstoolStripMenuItem.Text = "Copy links";
+            this.copyLinkstoolStripMenuItem.Click += new System.EventHandler(this.copyLinkstoolStripMenuItem_Click);
+            // 
+            // pasteLinkstoolStripMenuItem
+            // 
+            this.pasteLinkstoolStripMenuItem.Name = "pasteLinkstoolStripMenuItem";
+            this.pasteLinkstoolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.pasteLinkstoolStripMenuItem.Text = "Paste links";
+            this.pasteLinkstoolStripMenuItem.Click += new System.EventHandler(this.pasteLinkstoolStripMenuItem_Click);
             // 
             // portLookUpEdit
             // 
@@ -742,5 +760,7 @@ namespace TK.NodalEditor.NodesLayout
         public System.Windows.Forms.ContextMenuStrip nodeMenuStrip;
         private nodeLookUpEditNoTab nodeLookUpEdit;
         private nodeLookUpEditNoTab portLookUpEdit;
+        private System.Windows.Forms.ToolStripMenuItem copyLinkstoolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pasteLinkstoolStripMenuItem;
     }
 }

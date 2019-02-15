@@ -156,20 +156,20 @@ namespace TK.NodalEditor.NodesLayout
             {
                 case Keys.Shift:
                     //AddToSelection(Node);
-                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Add);
+                    NodalDirector.SelectNodes(nodesName, "Add");
                     break;
 
                 case Keys.Control:
                     //ToggleSelection(Node);
-                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Toggle);
+                    NodalDirector.SelectNodes(nodesName, "Toggle");
                     break;
                 case Keys.Alt:
                     //RemoveFromSelection(Node);
-                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.RemoveFrom);
+                    NodalDirector.SelectNodes(nodesName, "RemoveFrom");
                     break;
                 default:
                     //Select(Node);
-                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
+                    NodalDirector.SelectNodes(nodesName, "Default");
                     break;
             }
         }
@@ -188,7 +188,7 @@ namespace TK.NodalEditor.NodesLayout
                     //{
                     //    AddToSelection(Node);
                     //}
-                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Add);
+                    NodalDirector.SelectNodes(nodesName, "Add");
                     break;
 
                 case Keys.Control:
@@ -196,18 +196,18 @@ namespace TK.NodalEditor.NodesLayout
                     //{
                     //    ToggleSelection(Node);
                     //}
-                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Toggle);
+                    NodalDirector.SelectNodes(nodesName, "Toggle");
                     break;
                 case Keys.Alt:
                     //foreach (Node Node in Nodes)
                     //{
                     //    RemoveFromSelection(Node);
                     //}
-                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.RemoveFrom);
+                    NodalDirector.SelectNodes(nodesName, "RemoveFrom");
                     break;
                 default:
                     //Select(Nodes);
-                    NodalDirector.SelectNodes(nodesName, TypeOfSelection.Default);
+                    NodalDirector.SelectNodes(nodesName, "Default");
                     break;
             }
         }
