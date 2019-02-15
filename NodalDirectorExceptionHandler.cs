@@ -30,6 +30,8 @@ namespace TK.NodalEditor
         public virtual void Application_ThreadException(
             object sender, ThreadExceptionEventArgs e)
         {
+            NodalDirector.ClearHistory();
+
             if(e.Exception is NodalDirectorException)
             {
                 string[] stacks = e.Exception.StackTrace.Split("\n".ToCharArray());
