@@ -1,3 +1,5 @@
 *.suo
 obj
 bin
+_site
+/log.txt
