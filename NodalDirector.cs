@@ -52,6 +52,11 @@ namespace TK.NodalEditor
         #region Singleton declaration, getters and constructor
         protected static NodalDirector _instance = null;
 
+        public void Elevate(NodalDirector inInstance)
+        {
+            _instance = inInstance;
+        }
+
         protected NodalDirector()
         {
             history = new UndoRedoHistory<NodalDirector>(this);
@@ -78,6 +83,11 @@ namespace TK.NodalEditor
         }
 
         #endregion
+
+        protected virtual IMemento<NodalDirector> GetDeletePortMemento(string nom_fct, string inverse_nom_fct, Port portIn)
+        {
+            return new DeletePortMemento(nom_fct, inverse_nom_fct, portIn);
+        }
 
         #region undoRedo
         /// <summary>
@@ -106,6 +116,26 @@ namespace TK.NodalEditor
         public static bool CanRedoUI()
         {
             return _instance.historyUI.CanRedo;
+        }
+
+        public static string GetUndoName()
+        {
+            return _instance.history.PeekUndo().GetName();
+        }
+
+        public static string GetRedoName()
+        {
+            return _instance.history.PeekRedo().GetName();
+        }
+
+        public static string GetUndoUIName()
+        {
+            return _instance.historyUI.PeekUndo().GetName();
+        }
+
+        public static string GetRedoUIName()
+        {
+            return _instance.historyUI.PeekRedo().GetName();
         }
 
         /// <summary>
@@ -224,6 +254,16 @@ namespace TK.NodalEditor
             _instance.layout.Selection.Selection.Clear();
             _instance.layout.ChangeFocus(true);
             _instance.manager.Companion.EndProcess();
+        }
+
+        public void _AddPort(Port inPort)
+        {
+            inPort.Owner.AddDynamicPort(inPort.PortObj);
+
+            if (_instance.layout == null)
+                return;
+
+            _instance.layout.Invalidate();
         }
 
         public void _DeletePort(Port inPort)
@@ -524,7 +564,6 @@ namespace TK.NodalEditor
             _instance.layout.Invalidate();
         }
 
-
         #endregion
 
         #region Logging
@@ -770,7 +809,7 @@ namespace TK.NodalEditor
                 return false;
 
             string nom_fct = string.Format("DeletePort(\"{0}\", \"{1}\");", inNodeName, inPortName);
-
+            
             if (_instance.verbose)
                 Info(nom_fct);
 
@@ -793,7 +832,10 @@ namespace TK.NodalEditor
                 }
             }
 
+            string inverse_nom_fct = string.Format("NewPort(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", inNodeName, inPortName, true, portIn.GetPortParams(), new List<string>());
+
             nodeIn.RemovePort(portIn);
+            _instance.history.Do(_instance.GetDeletePortMemento(nom_fct, inverse_nom_fct, portIn));
 
             if (_instance.layout == null)
                 return true;
@@ -803,6 +845,46 @@ namespace TK.NodalEditor
             _instance.haveChanged = true;
             _instance.ChangeOnStatus();
             return true;
+        }
+
+        public static string NewPort(string inNodeName, string inPortName, bool isOutput, object[] Params, List<string> TypeMetaData)
+        {
+            if (_instance.manager == null)
+                return null;
+
+            string nom_fct = string.Format("NewPort(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\");", inNodeName, inPortName, isOutput, Params, TypeMetaData);
+
+            if (_instance.verbose)
+                Info(nom_fct);
+
+            Node nodeIn = _instance.manager.GetNode(inNodeName);
+
+            if (nodeIn == null)
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + string.Format("input Node \"{0}\" does not exist!", inNodeName));
+            }
+
+            string inverse_nom_fct = string.Format("DeletePort(\"{0}\", \"{1}\");", inNodeName, inPortName);
+
+            Port port = new Port();
+            if (nodeIn.AllowAddPorts)
+            {
+                port = nodeIn.NewPort(inPortName, "Expression", isOutput, Params, TypeMetaData);
+                _instance.history.Do(new AddPortMemento(nom_fct, inverse_nom_fct, nodeIn, port));
+            }
+            else
+            {
+                throw new NodalDirectorException(nom_fct + "\n" + "Cannot had a new port");
+            }
+
+            if (_instance.layout == null)
+                return null;
+
+            _instance.layout.Invalidate();
+
+            _instance.haveChanged = true;
+            _instance.ChangeOnStatus();
+            return port.FullName;
         }
 
         /// <summary>
@@ -4149,9 +4231,13 @@ namespace TK.NodalEditor
                 bool isconfirmed = TKMessageBox.Confirm("Current file have unsaved modifications, Are you sure you want to lose modifications ?", "WARNING");
                 if (!isconfirmed)
                 {
-                    throw new NodalDirectorException(nom_fct + "\n" + "New has been canceled");
+                    Logger.Log(string.Format("{0} cancelled !", nom_fct), LogSeverities.Warning);
+                    return false;
                 }
             }
+
+            //Flush undos
+            NodalDirector.ClearHistory();
 
             _instance.manager.NewLayout();
             _instance.layout.Invalidate();

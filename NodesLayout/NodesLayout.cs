@@ -1770,7 +1770,7 @@ namespace TK.NodalEditor.NodesLayout
                     nodeLookUpEdit.Focus();
                 }
             }
-
+            /*
             if (e.KeyData == (Keys.Control | Keys.Alt | Keys.Z))
             {
                 if (NodalDirector.CanUndoUI())
@@ -1817,7 +1817,7 @@ namespace TK.NodalEditor.NodesLayout
                 {
                     NodalDirector.Error("Nothing to redo !");
                 }
-            }
+            }*/
             Invalidate();
         }
 
@@ -3667,8 +3667,9 @@ namespace TK.NodalEditor.NodesLayout
                 }
                 else
                 {
-                    Manager.AddNode(toImport, Manager.CurCompound, (int)((toClient.X - 30) / LayoutSize), (int)((toClient.Y - 10) / LayoutSize), true);
-                    ChangeFocus(false);
+                    NodalDirector.AddNode(toImport.NativeName, Manager.CurCompound.FullName, (int)((toClient.X - 30) / LayoutSize), (int)((toClient.Y - 10) / LayoutSize));
+                    //Manager.AddNode(toImport, Manager.CurCompound, (int)((toClient.X - 30) / LayoutSize), (int)((toClient.Y - 10) / LayoutSize), true);
+                    //ChangeFocus(false);
                 }
             }
         }

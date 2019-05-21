@@ -209,6 +209,51 @@ namespace TK.NodalEditor
         }
     }
 
+    public class DeletePortMemento : NodalEditorMemento
+    {
+        protected string name_fct;
+        protected string inverse_name_fct;
+        protected Port port;
+        public DeletePortMemento(string inNameFct, string inInverseNameFct, Port inPort)
+        {
+            this.name_fct = inNameFct;
+            this.inverse_name_fct = inInverseNameFct;
+            this.Name = name_fct;
+            this.port = inPort;
+        }
+
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+                IMemento<NodalDirector> inverse = new AddPortMemento(inverse_name_fct, name_fct, port.Owner, port);
+                target._AddPort(port);
+                return inverse;
+        }
+    }
+
+    public class AddPortMemento : NodalEditorMemento
+    {
+        private string name_fct;
+        private string inverse_name_fct;
+        private Node node;
+        private Port port;
+        public AddPortMemento(string inNameFct, string inInverseNameFct, Node inNode, Port inPort)
+        {
+            this.name_fct = inNameFct;
+            this.inverse_name_fct = inInverseNameFct;
+            this.Name = name_fct;
+            this.node = inNode;
+            this.port = inPort;
+        }
+
+        public override IMemento<NodalDirector> Restore(NodalDirector target)
+        {
+            port = node.GetPort(port.FullName, true);
+            IMemento<NodalDirector> inverse = new DeletePortMemento(inverse_name_fct, name_fct, port);
+            target._DeletePort(port);
+            return inverse;
+        }
+    }
+
     class ParentMemento : NodalEditorMemento
     {
         private string name_fct;
