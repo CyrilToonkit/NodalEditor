@@ -7,9 +7,20 @@ using TK.NodalEditor.NodesFramework;
 
 namespace TK.NodalEditor
 {
-    abstract class NodalEditorMemento : IMemento<NodalDirector>
+    public abstract class NodalEditorMemento : IMemento<NodalDirector>
     {
+        private string _name;// = "GenericMemento";
+
         public abstract IMemento<NodalDirector> Restore(NodalDirector target);
+        public virtual string GetName()
+        {
+            return _name;
+        }
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; }
+        }
     }
 
     class ReAddNodeMemento : NodalEditorMemento
