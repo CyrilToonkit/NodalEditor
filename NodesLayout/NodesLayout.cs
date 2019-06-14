@@ -2542,6 +2542,8 @@ namespace TK.NodalEditor.NodesLayout
             {
                 Selection.DeselectAll();
                 Selection.DeselectLinks();
+                OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
+                OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
             }
 
             Inputs.SetPorts(Manager.CurCompound);
