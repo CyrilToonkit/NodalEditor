@@ -60,6 +60,8 @@ namespace TK.NodalEditor
             set { _nativeName = value; }
         }
 
+
+
         /// <summary>
         /// Indicates if the link was just created or if it's an "old" link we just need to recreate.
         /// @todo We should be able to get rid of this
@@ -76,6 +78,8 @@ namespace TK.NodalEditor
         /// Target Port (That will be "driven" by the Source)
         /// </summary>
         protected Port _target;
+
+        protected bool _isHierachicallyInteresting = true;
 
         /// <summary>
         /// Polygon used as a collision object for link selection in the UI
@@ -556,11 +560,16 @@ namespace TK.NodalEditor
 
         #endregion
 
+
         public virtual bool IsHierachicallyInteresting
         {
             get
             {
-                return true;
+                return _isHierachicallyInteresting;
+            }
+            set
+            {
+                _isHierachicallyInteresting = value;
             }
         }
 
