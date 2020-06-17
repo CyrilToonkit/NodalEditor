@@ -6,11 +6,12 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using TK.BaseLib;
+using TK.GraphComponents;
 using TK.GraphComponents.Dialogs;
 
 namespace TK.NodalEditor.NodesLayout
 {
-    public partial class newPort : Form
+    public partial class newPort : PlaceableForm
     {
         public newPort()
         {

@@ -477,199 +477,7 @@ namespace TK.NodalEditor.NodesLayout
                 }
             }
         }
-
-        //private void ReconnectingLink(string inNodeName, string inPortName, string outNodeName, string outPortName,
-        //    string newinNodeName, string newinPortName, string newoutNodeName, string newoutPortName, Point point)
-        //{
-        //    Node HitCtrl = Manager.GetNode(newinNodeName);
-        //    Port connectPort = detachNode.GetPort(CurConnection2);
-
-
-        //    Point TransPos = new Point(point.X - (int)(HitCtrl.UIx * LayoutSize), point.Y - (int)(HitCtrl.UIy * LayoutSize));
-        //    int portIndex = GetPortClick(HitCtrl, TransPos.X, TransPos.Y);
-        //    if (portIndex > -1)
-        //    {
-        //        //Check
-        //        Port depositPort = HitCtrl.GetPort(portIndex);
-
-        //        string Error = "";
-        //        if (depositPort != null)
-        //        {
-        //            //Change display port Compound if Node is in Compound 
-        //            if (HitCtrl.IsIn(Manager.CurCompound))
-        //            {
-        //                if (depositPort.IsOutput)
-        //                {
-        //                    Outputs.GetPort(depositPort).Visible = true;
-        //                }
-        //                else
-        //                {
-        //                    Inputs.GetPort(depositPort).Visible = true;
-        //                }
-        //                RefreshPorts();
-        //            }
-
-        //            if (!depositPort.IsOutput && connectPort.IsOutput)
-        //            {
-
-        //                if (reconnecting == Reconnecting.Input)
-        //                {
-
-        //                    if (ShiftVisibility == true)
-        //                    {
-        //                        NodalDirector.CopyLink(inNodeName, inPortName, outNodeName, outPortName,
-        //                                                newinNodeName, newinPortName, newoutNodeName, newoutPortName);
-        //                    }
-        //                    else
-        //                    {
-        //                        Console.WriteLine("Reconnection hhhh");
-        //                        NodalDirector.ReConnect(inNodeName, inPortName, outNodeName, outPortName,
-        //                                                newinNodeName, newinPortName, newoutNodeName, newoutPortName);
-        //                    }
-        //                }
-        //                else if (reconnecting == Reconnecting.Output)
-        //                {
-        //                    if (ShiftVisibility == true)
-        //                    {
-        //                        NodalDirector.CopyLink(detachLink.Source.Owner.FullName, detachLink.Source.FullName, outNodeName, outPortName,
-        //                                                newinNodeName, newinPortName, newoutNodeName, newoutPortName);
-        //                    }
-        //                    else
-        //                    {
-        //                        NodalDirector.ReConnect(detachLink.Source.Owner.FullName, detachLink.Source.FullName, outNodeName, outPortName,
-        //                                                newinNodeName, newinPortName, newoutNodeName, newoutPortName);
-        //                    }
-        //                }
-        //            }
-        //            else
-        //            {
-        //                if (depositPort.IsOutput && !connectPort.IsOutput)
-        //                {
-        //                    if (reconnecting == Reconnecting.Input)
-        //                    {
-        //                        if (ShiftVisibility == true)
-        //                        {
-        //                            NodalDirector.CopyLink(inNodeName, inPortName, outNodeName, outPortName,
-        //                                                newoutNodeName, newoutPortName, newinNodeName, newinPortName);
-        //                        }
-        //                        else
-        //                        {
-        //                            NodalDirector.ReConnect(inNodeName, inPortName, outNodeName, outPortName,
-        //                                                newoutNodeName, newoutPortName, newinNodeName, newinPortName);
-        //                        }
-        //                    }
-        //                    else if (reconnecting == Reconnecting.Output)
-        //                    {
-        //                        if (ShiftVisibility == true)
-        //                        {
-        //                            NodalDirector.CopyLink(outNodeName, outPortName, detachLink.Source.Owner.FullName, detachLink.Source.FullName,
-        //                                                newoutNodeName, newoutPortName, newinNodeName, newinPortName);
-        //                        }
-        //                        else
-        //                        {
-        //                            Console.WriteLine("Reconnection 2");
-        //                            NodalDirector.ReConnect(outNodeName, outPortName, detachLink.Source.Owner.FullName, detachLink.Source.FullName,
-        //                                                newoutNodeName, newoutPortName, newinNodeName, newinPortName);
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        else
-        //        {
-        //            //plug in new Port
-        //            if (HitCtrl.GetPortTypes().Contains(connectPort.NodeElementType))
-        //            {
-        //                if (connectPort.IsOutput)
-        //                {
-        //                    DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
-        //                    if (result == DialogResult.OK)
-        //                    {
-        //                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, true, newPortForm.CustomParams, newPortForm.TypeMetaData);
-        //                        if (depositPort != null)
-        //                        {
-        //                            if (reconnecting == Reconnecting.Input)
-        //                            {
-        //                                if (ShiftVisibility == true)
-        //                                {
-        //                                    NodalDirector.CopyLink(inNodeName, inPortName, outNodeName, outPortName,
-        //                                                        newinNodeName, newinPortName, newoutNodeName, newoutPortName);
-        //                                }
-        //                                else
-        //                                {
-        //                                    NodalDirector.ReConnect(inNodeName, inPortName, outNodeName, outPortName,
-        //                                                        newinNodeName, newinPortName, newoutNodeName, newoutPortName);
-        //                                }
-        //                            }
-        //                            else if (reconnecting == Reconnecting.Output)
-        //                            {
-        //                                if (ShiftVisibility == true)
-        //                                {
-        //                                    NodalDirector.CopyLink(detachLink.Source.Owner.FullName, detachLink.Source.FullName, outNodeName, outPortName,
-        //                                                        newinNodeName, newinPortName, newoutNodeName, newoutPortName);
-        //                                }
-        //                                else
-        //                                {
-        //                                    NodalDirector.ReConnect(detachLink.Source.Owner.FullName, detachLink.Source.FullName, outNodeName, outPortName,
-        //                                                        newinNodeName, newinPortName, newoutNodeName, newoutPortName);
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
-        //                    if (result == DialogResult.OK)
-        //                    {
-        //                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, false, newPortForm.CustomParams, newPortForm.TypeMetaData);
-        //                        if (depositPort != null)
-        //                        {
-        //                            if (reconnecting == Reconnecting.Input)
-        //                            {
-        //                                if (ShiftVisibility == true)
-        //                                {
-        //                                    NodalDirector.CopyLink(inNodeName, inPortName, outNodeName, outPortName,
-        //                                                        newoutNodeName, newoutPortName, newinNodeName, newinPortName);
-        //                                }
-        //                                else
-        //                                {
-        //                                    NodalDirector.ReConnect(inNodeName, inPortName, outNodeName, outPortName,
-        //                                                        newoutNodeName, newoutPortName, newinNodeName, newinPortName);
-        //                                }
-        //                            }
-        //                            else if (reconnecting == Reconnecting.Output)
-        //                            {
-        //                                if (ShiftVisibility == true)
-        //                                {
-        //                                    NodalDirector.CopyLink(detachLink.Source.Owner.FullName, detachLink.Source.FullName, outNodeName, outPortName,
-        //                                                        newoutNodeName, newoutPortName, newinNodeName, newinPortName);
-        //                                }
-        //                                else
-        //                                {
-        //                                    NodalDirector.ReConnect(detachLink.Source.Owner.FullName, detachLink.Source.FullName, outNodeName, outPortName,
-        //                                                        newoutNodeName, newoutPortName, newinNodeName, newinPortName);
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            else
-        //            {
-        //                log.AddLog(HitCtrl.Name + " disallow adding ports of type " + connectPort.NodeElementType, 15, 2);
-        //            }
-        //        }
-
-        //        if (Error != "")
-        //        {
-        //            log.AddLog(Error, 15, 2);
-        //        }
-        //    }
-
-
-        //}
-
+        
         private void NodesLayout_MouseUp(object sender, MouseEventArgs e)
         {
             if (OnLinkLookup == false)
@@ -826,6 +634,7 @@ namespace TK.NodalEditor.NodesLayout
                                             {
                                                 if (connectPort.IsOutput)
                                                 {
+                                                    newPortForm.SetDesiredStartLocation();
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
@@ -863,6 +672,7 @@ namespace TK.NodalEditor.NodesLayout
                                                 }
                                                 else
                                                 {
+                                                    newPortForm.SetDesiredStartLocation();
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
@@ -1859,7 +1669,7 @@ namespace TK.NodalEditor.NodesLayout
                                             {
                                                 if (connectPort.IsOutput)
                                                 {
-
+                                                    newPortForm.SetDesiredStartLocation();
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
@@ -1872,6 +1682,7 @@ namespace TK.NodalEditor.NodesLayout
                                                 }
                                                 else
                                                 {
+                                                    newPortForm.SetDesiredStartLocation();
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
@@ -2337,6 +2148,7 @@ namespace TK.NodalEditor.NodesLayout
                         {
                             if (PortClick >= 1000)
                             {
+                                newPortForm.SetDesiredStartLocation();
                                 DialogResult result = newPortForm.ShowDialog("new_port", Node);
                                 if (result == DialogResult.OK)
                                 {
@@ -2346,6 +2158,7 @@ namespace TK.NodalEditor.NodesLayout
                             }
                             else
                             {
+                                newPortForm.SetDesiredStartLocation();
                                 DialogResult result = newPortForm.ShowDialog("new_port", Node);
                                 if (result == DialogResult.OK)
                                 {
@@ -4173,6 +3986,9 @@ namespace TK.NodalEditor.NodesLayout
             PreferencesForm prefsForm = new PreferencesForm();
             prefsForm.PrefChanged += new PreferencesForm.PrefChangedEventHandler(prefsForm_PrefChanged);
             prefsForm.Owner = owner;
+
+            prefsForm.SetDesiredStartLocation(Cursor.Position.X, Cursor.Position.Y);
+
             prefsForm.Show();
             prefsForm.Init("TK_NodalEditor Preferences", Preferences, RootPath + "\\Preferences", "Preferences.xml");
         }
@@ -4181,6 +3997,8 @@ namespace TK.NodalEditor.NodesLayout
         {
             PreferencesForm prefsForm = new PreferencesForm();
             prefsForm.PrefChanged += new PreferencesForm.PrefChangedEventHandler(prefsForm_PrefChanged);
+
+            prefsForm.SetDesiredStartLocation(Cursor.Position.X, Cursor.Position.Y);
 
             prefsForm.Show();
             prefsForm.Init("TK_NodalEditor Preferences", Preferences, RootPath + "\\Preferences", "Preferences.xml");
