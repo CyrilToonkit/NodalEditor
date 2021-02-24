@@ -223,7 +223,7 @@ namespace TK.NodalEditor.NodesLayout
         public Pen GridPen = new Pen(Color.LightGray);
         public Pen FramePen = new Pen(Color.Black);
         public Pen WhitePen = new Pen(Color.White);
-        public Pen widenPen = new Pen(Color.Black, 10f);
+        public Pen widenPen = new Pen(Color.Black, 16f);
         public Pen HoverPen = new Pen(Color.LightSteelBlue, 3f);
 
         public Pen LinkPen = new Pen(Color.Red);
@@ -304,6 +304,7 @@ namespace TK.NodalEditor.NodesLayout
         int CurConnection = -1;
         int CurConnection2 = -1;
         bool IsDragging = false;
+        bool IsZooming = false;
         bool IsPanning = false;
         bool InMiniMap = false;
         bool HasMoved = false;
@@ -466,6 +467,12 @@ namespace TK.NodalEditor.NodesLayout
                                             InMiniMap = true;
                                         }
                                     }
+                                }
+                                break;
+                            case MouseButtons.Right: // Zoom else if (!IsZooming && e.Button == MouseButtons.Right && ModifierKeys == Keys.Alt)
+                                if (!IsZooming && ModifierKeys == Keys.Alt)
+                                {
+                                    IsZooming = true;
                                 }
                                 break;
                         }
@@ -795,6 +802,7 @@ namespace TK.NodalEditor.NodesLayout
                         }
 
                         IsDragging = false;
+                        IsZooming = false;
                         IsPanning = false;
                         InMiniMap = false;
 
@@ -1492,6 +1500,30 @@ namespace TK.NodalEditor.NodesLayout
                                     Invalidate();
                                 }
                             }
+                            else if (IsZooming)
+                            {
+                                double delta = (e.Y - HitPoint.Y) * -0.01;
+                                double NewSize = LayoutSize + delta;
+
+                                if (NewSize < Preferences.MinimumZoom)
+                                {
+                                    NewSize = Preferences.MinimumZoom;
+                                }
+                                else
+                                {
+                                    if (NewSize > Preferences.MaximumZoom)
+                                    {
+                                        NewSize = Preferences.MaximumZoom;
+                                    }
+                                }
+
+                                double NewWidth = (double)BaseWidth * NewSize;
+                                double Factor = (double)NewWidth / (double)Width;
+                                Point Loc = new Point((int)Math.Min(0, Location.X + (HitPoint.X - HitPoint.X * Factor)), (int)Math.Min(0, Location.Y + (HitPoint.Y - HitPoint.Y * Factor)));
+                                SetSize(NewSize, Loc);
+
+                                HitPoint = e.Location;
+                            }
                         }
                     }
 
@@ -1867,6 +1899,7 @@ namespace TK.NodalEditor.NodesLayout
                 hitNode = null;
             }
             IsDragging = false;
+            IsZooming = false;
             HasMoved = false;
 
         }
