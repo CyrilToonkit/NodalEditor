@@ -550,6 +550,31 @@ namespace TK.NodalEditor
         }
 
         /// <summary>
+        /// Gets the links "constraining" this Node
+        /// </summary>
+        [BrowsableAttribute(false)]
+        public List<Link> InInterestingDependencies
+        {
+            get
+            {
+                List<Link> deps = new List<Link>();
+
+                foreach (Port port in Inputs)
+                {
+                    foreach (Link dep in port.RealPort.Dependencies)
+                    {
+                        if(dep.IsHierachicallyInteresting)
+                            deps.Add(dep);
+                    }
+                }
+
+                return deps;
+            }
+        }
+
+        
+
+        /// <summary>
         /// Gets the links "constrained" to Node
         /// </summary>
         [BrowsableAttribute(false)]
@@ -570,6 +595,30 @@ namespace TK.NodalEditor
                 return deps;
             }
         }
+
+        /// <summary>
+        /// Gets the links "constrained" to Node
+        /// </summary>
+        [BrowsableAttribute(false)]
+        public List<Link> OutInterestingDependencies
+        {
+            get
+            {
+                List<Link> deps = new List<Link>();
+
+                foreach (Port port in Outputs)
+                {
+                    foreach (Link dep in port.RealPort.Dependencies)
+                    {
+                        if (dep.IsHierachicallyInteresting)
+                            deps.Add(dep);
+                    }
+                }
+
+                return deps;
+            }
+        }
+
 
         /// <summary>
         /// Deepness in the graph (calculated if needed)

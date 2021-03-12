@@ -92,6 +92,13 @@ namespace TK.NodalEditor
             get { return _processes.Count > 0; }
         }
 
+        List<Node> _forcedNodes = new List<Node>();
+        public List<Node> ForcedNodes
+        {
+            get { return _forcedNodes; }
+            set { _forcedNodes = value; }
+        }
+
 
         #endregion
 
@@ -214,6 +221,7 @@ namespace TK.NodalEditor
                         RestoreEnvironment();
                         HideProgressBar();
                         ProgressBarIsShowing = false;
+                        _forcedNodes.Clear();
                     }
                 }
 
