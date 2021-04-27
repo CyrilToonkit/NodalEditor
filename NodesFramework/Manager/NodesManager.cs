@@ -1024,20 +1024,20 @@ namespace TK.NodalEditor
         {
             Compound currentRoot = All ? Root : CurCompound;
 
-            List<Link> links = new List<Link>();
+            HashSet<Link> links = new HashSet<Link>();
             Compound parent;
             foreach (Link link in currentRoot.InDependencies)
             {
                 if (link.Source.Owner != null)
                 {
-                    if (All && !links.Contains(link))
+                    if (All)
                     {
                         links.Add(link);
                     }
                     else
                     {
                         parent = GetCommonParent(link.Source.Owner, link.Target.Owner);
-                        if ((parent == CurCompound || CurCompound.IsIn(parent)) && !links.Contains(link))
+                        if (parent == CurCompound || CurCompound.IsIn(parent))
                         {
                             links.Add(link);
                         }
@@ -1052,7 +1052,7 @@ namespace TK.NodalEditor
                     if (link.Source.Owner != null)
                     {
                         parent = GetCommonParent(link.Source.Owner, link.Target.Owner);
-                        if ((parent == CurCompound || CurCompound.IsIn(parent)) && !links.Contains(link))
+                        if (parent == CurCompound || CurCompound.IsIn(parent))
                         {
                             links.Add(link);
                         }
@@ -1060,7 +1060,7 @@ namespace TK.NodalEditor
                 }
             }
 
-            return links;
+            return new List<Link>(links);
         }
 
         /// <summary>
