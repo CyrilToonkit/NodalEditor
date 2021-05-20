@@ -1705,7 +1705,7 @@ namespace TK.NodalEditor.NodesLayout
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
-                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, true, newPortForm.CustomParams, newPortForm.TypeMetaData);
+                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, false, newPortForm.CustomParams, newPortForm.TypeMetaData);
                                                         if (depositPort != null)
                                                         {
                                                             NodalDirector.Connect(HitCtrl.FullName, depositPort.FullName, Node.FullName, connectPort.FullName, ModifierKeys.ToString());
@@ -1718,7 +1718,7 @@ namespace TK.NodalEditor.NodesLayout
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
-                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, false, newPortForm.CustomParams, newPortForm.TypeMetaData);
+                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, true, newPortForm.CustomParams, newPortForm.TypeMetaData);
                                                         if (depositPort != null)
                                                         {
                                                             NodalDirector.Connect(Node.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName, ModifierKeys.ToString());

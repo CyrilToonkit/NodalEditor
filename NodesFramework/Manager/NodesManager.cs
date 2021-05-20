@@ -885,7 +885,7 @@ namespace TK.NodalEditor
         {
             if (index < AvailableNodes.Count)
             {
-                return AddNode(AvailableNodes[index], CurCompound, X, Y, true, name);
+                return AddNode(AvailableNodes[index], inParent, X, Y, true, name);
             }
 
             return null;
