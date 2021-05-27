@@ -3073,11 +3073,11 @@ namespace TK.NodalEditor.NodesLayout
         public void DrawNode(Graphics graphics, Node Ctrl, float inX, float inY, double inSize)
         {
             Brush toUse = GetBrush(Ctrl);
-            DrawSmoothRectangle(graphics, Ctrl.Selected ? FatPen : FramePen, toUse, (int)(inX * inSize), (int)(inY * inSize), (int)(Ctrl.UIWidth * inSize), (int)(Ctrl.UIHeight * inSize), (int)(15 * inSize));
+            DrawSmoothRectangle(graphics, Ctrl.Selected ? FatPen : FramePen, toUse, (int)(inX * inSize), (int)(inY * inSize), Math.Max(3, (int)(Ctrl.UIWidth * inSize)), Math.Max(3, (int)(Ctrl.UIHeight * inSize)), Math.Max(1, (int)(15 * inSize)));
 
             if (Ctrl.Selected)
             {
-                DrawSmoothRectangle(graphics, WhitePen, null, (int)(inX * inSize), (int)(inY * inSize), (int)(Ctrl.UIWidth * inSize), (int)(Ctrl.UIHeight * inSize), (int)(15 * inSize));
+                DrawSmoothRectangle(graphics, WhitePen, null, (int)(inX * inSize), (int)(inY * inSize), Math.Max(3, (int)(Ctrl.UIWidth * inSize)), Math.Max(3, (int)(Ctrl.UIHeight * inSize)), Math.Max(1, (int)(15 * inSize)));
             }
 
             //Custom Icons

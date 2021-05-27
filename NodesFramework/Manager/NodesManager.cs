@@ -388,17 +388,12 @@ namespace TK.NodalEditor
 
         public PortObj GetElement(string FullName)
         {
-            foreach (Node node in Root.Nodes)
+            foreach (Node node in Root.GetChildren(true))
             {
-                if(!(node is Compound))
+                PortObj elem = node.GetElement(FullName);
+                if(elem != null)
                 {
-                    foreach (PortObj elem in node.Elements)
-                    {
-                        if (elem.FullName == FullName)
-                        {
-                            return elem;
-                        }
-                    }
+                    return elem;
                 }
             }
 

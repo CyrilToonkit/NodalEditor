@@ -74,11 +74,11 @@
             this.collapsibleGroup1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.collapsibleGroup1.DockingChanges = TK.GraphComponents.DockingPossibilities.None;
             this.collapsibleGroup1.ForeColor = System.Drawing.Color.White;
-            this.collapsibleGroup1.Location = new System.Drawing.Point(0, 446);
+            this.collapsibleGroup1.Location = new System.Drawing.Point(0, 445);
             this.collapsibleGroup1.Name = "collapsibleGroup1";
             this.collapsibleGroup1.OpenedBaseHeight = 40;
             this.collapsibleGroup1.OpenedBaseWidth = 200;
-            this.collapsibleGroup1.Size = new System.Drawing.Size(508, 40);
+            this.collapsibleGroup1.Size = new System.Drawing.Size(508, 41);
             this.collapsibleGroup1.TabIndex = 7;
             this.collapsibleGroup1.TabStop = false;
             this.collapsibleGroup1.Text = "Log";
@@ -94,7 +94,7 @@
             logPreferences1.ShowWarnings = true;
             this.logUCtrl1.LoggingPreferences = logPreferences1;
             this.logUCtrl1.Name = "logUCtrl1";
-            this.logUCtrl1.Size = new System.Drawing.Size(502, 21);
+            this.logUCtrl1.Size = new System.Drawing.Size(502, 22);
             this.logUCtrl1.TabIndex = 5;
             // 
             // outputsPad

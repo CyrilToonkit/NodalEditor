@@ -111,6 +111,9 @@ namespace TK.NodalEditor.NodesLayout
 
         public void AddToSelection(NodeBase CurItem)
         {
+            if (CurItem.Selected)
+                return;
+
             Selection.Add(CurItem);
             UpdateSelection();
         }
@@ -127,6 +130,9 @@ namespace TK.NodalEditor.NodesLayout
 
         public void RemoveFromSelection(NodeBase CurItem)
         {
+            if (!CurItem.Selected)
+                return;
+
             Selection.Remove(CurItem);
             UpdateSelection();
         }
