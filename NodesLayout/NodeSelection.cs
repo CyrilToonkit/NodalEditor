@@ -54,7 +54,7 @@ namespace TK.NodalEditor.NodesLayout
 
         public void PutToFalse()
         {
-            foreach (NodeBase CurItem in Manager.CurCompound.Nodes)
+            foreach (NodeBase CurItem in Manager.Root.GetChildren(false))
             {
                 CurItem.Selected = false;
             }
@@ -62,10 +62,7 @@ namespace TK.NodalEditor.NodesLayout
 
         public void DeselectAll()
         {
-            foreach (NodeBase CurItem in Manager.CurCompound.Nodes)
-            {
-                CurItem.Selected = false;
-            }
+            PutToFalse();
             Selection.Clear();
         }
 
@@ -114,6 +111,9 @@ namespace TK.NodalEditor.NodesLayout
 
         public void AddToSelection(NodeBase CurItem)
         {
+            if (CurItem.Selected)
+                return;
+
             Selection.Add(CurItem);
             UpdateSelection();
         }
@@ -130,6 +130,9 @@ namespace TK.NodalEditor.NodesLayout
 
         public void RemoveFromSelection(NodeBase CurItem)
         {
+            if (!CurItem.Selected)
+                return;
+
             Selection.Remove(CurItem);
             UpdateSelection();
         }

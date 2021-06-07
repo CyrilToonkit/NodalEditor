@@ -108,7 +108,7 @@ namespace TK.NodalEditor
             get { return Name; }
         }
 
-        
+        const string underscore = "_";
         /// <summary>
         /// Give the port a FullName, considering several nodes could have ports with the same FullName
         /// </summary>
@@ -117,7 +117,7 @@ namespace TK.NodalEditor
         {
             get 
             {
-                return Owner == null ? string.Empty : Owner.FullName + "_" + Name;
+                return Owner == null ? string.Empty : Owner.FullName + underscore + Name;
             }
         }
 

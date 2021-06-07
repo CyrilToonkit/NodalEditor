@@ -388,17 +388,12 @@ namespace TK.NodalEditor
 
         public PortObj GetElement(string FullName)
         {
-            foreach (Node node in Root.Nodes)
+            foreach (Node node in Root.GetChildren(true))
             {
-                if(!(node is Compound))
+                PortObj elem = node.GetElement(FullName);
+                if(elem != null)
                 {
-                    foreach (PortObj elem in node.Elements)
-                    {
-                        if (elem.FullName == FullName)
-                        {
-                            return elem;
-                        }
-                    }
+                    return elem;
                 }
             }
 
@@ -885,7 +880,7 @@ namespace TK.NodalEditor
         {
             if (index < AvailableNodes.Count)
             {
-                return AddNode(AvailableNodes[index], CurCompound, X, Y, true, name);
+                return AddNode(AvailableNodes[index], inParent, X, Y, true, name);
             }
 
             return null;
@@ -1024,20 +1019,20 @@ namespace TK.NodalEditor
         {
             Compound currentRoot = All ? Root : CurCompound;
 
-            List<Link> links = new List<Link>();
+            HashSet<Link> links = new HashSet<Link>();
             Compound parent;
             foreach (Link link in currentRoot.InDependencies)
             {
                 if (link.Source.Owner != null)
                 {
-                    if (All && !links.Contains(link))
+                    if (All)
                     {
                         links.Add(link);
                     }
                     else
                     {
                         parent = GetCommonParent(link.Source.Owner, link.Target.Owner);
-                        if ((parent == CurCompound || CurCompound.IsIn(parent)) && !links.Contains(link))
+                        if (parent == CurCompound || CurCompound.IsIn(parent))
                         {
                             links.Add(link);
                         }
@@ -1052,7 +1047,7 @@ namespace TK.NodalEditor
                     if (link.Source.Owner != null)
                     {
                         parent = GetCommonParent(link.Source.Owner, link.Target.Owner);
-                        if ((parent == CurCompound || CurCompound.IsIn(parent)) && !links.Contains(link))
+                        if (parent == CurCompound || CurCompound.IsIn(parent))
                         {
                             links.Add(link);
                         }
@@ -1060,7 +1055,7 @@ namespace TK.NodalEditor
                 }
             }
 
-            return links;
+            return new List<Link>(links);
         }
 
         /// <summary>

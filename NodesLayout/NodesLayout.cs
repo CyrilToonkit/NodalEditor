@@ -218,7 +218,7 @@ namespace TK.NodalEditor.NodesLayout
         public Pen GridPen = new Pen(Color.LightGray);
         public Pen FramePen = new Pen(Color.Black);
         public Pen WhitePen = new Pen(Color.White);
-        public Pen widenPen = new Pen(Color.Black, 10f);
+        public Pen widenPen = new Pen(Color.Black, 16f);
         public Pen HoverPen = new Pen(Color.LightSteelBlue, 3f);
 
         public Pen LinkPen = new Pen(Color.Red);
@@ -299,6 +299,7 @@ namespace TK.NodalEditor.NodesLayout
         int CurConnection = -1;
         int CurConnection2 = -1;
         bool IsDragging = false;
+        bool IsZooming = false;
         bool IsPanning = false;
         bool InMiniMap = false;
         bool HasMoved = false;
@@ -461,6 +462,12 @@ namespace TK.NodalEditor.NodesLayout
                                             InMiniMap = true;
                                         }
                                     }
+                                }
+                                break;
+                            case MouseButtons.Right: // Zoom else if (!IsZooming && e.Button == MouseButtons.Right && ModifierKeys == Keys.Alt)
+                                if (!IsZooming && ModifierKeys == Keys.Alt)
+                                {
+                                    IsZooming = true;
                                 }
                                 break;
                         }
@@ -628,6 +635,7 @@ namespace TK.NodalEditor.NodesLayout
                                             {
                                                 if (connectPort.IsOutput)
                                                 {
+                                                    newPortForm.SetDesiredStartLocation();
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
@@ -665,6 +673,7 @@ namespace TK.NodalEditor.NodesLayout
                                                 }
                                                 else
                                                 {
+                                                    newPortForm.SetDesiredStartLocation();
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
@@ -787,6 +796,7 @@ namespace TK.NodalEditor.NodesLayout
                         }
 
                         IsDragging = false;
+                        IsZooming = false;
                         IsPanning = false;
                         InMiniMap = false;
 
@@ -1497,6 +1507,30 @@ namespace TK.NodalEditor.NodesLayout
                                     Invalidate();
                                 }
                             }
+                            else if (IsZooming)
+                            {
+                                double delta = (e.Y - HitPoint.Y) * -0.01;
+                                double NewSize = LayoutSize + delta;
+
+                                if (NewSize < Preferences.MinimumZoom)
+                                {
+                                    NewSize = Preferences.MinimumZoom;
+                                }
+                                else
+                                {
+                                    if (NewSize > Preferences.MaximumZoom)
+                                    {
+                                        NewSize = Preferences.MaximumZoom;
+                                    }
+                                }
+
+                                double NewWidth = (double)BaseWidth * NewSize;
+                                double Factor = (double)NewWidth / (double)Width;
+                                Point Loc = new Point((int)Math.Min(0, Location.X + (HitPoint.X - HitPoint.X * Factor)), (int)Math.Min(0, Location.Y + (HitPoint.Y - HitPoint.Y * Factor)));
+                                SetSize(NewSize, Loc);
+
+                                HitPoint = e.Location;
+                            }
                         }
                     }
 
@@ -1674,11 +1708,11 @@ namespace TK.NodalEditor.NodesLayout
                                             {
                                                 if (connectPort.IsOutput)
                                                 {
-
+                                                    newPortForm.SetDesiredStartLocation();
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
-                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, true, newPortForm.CustomParams, newPortForm.TypeMetaData);
+                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, false, newPortForm.CustomParams, newPortForm.TypeMetaData);
                                                         if (depositPort != null)
                                                         {
                                                             NodalDirector.Connect(HitCtrl.FullName, depositPort.FullName, Node.FullName, connectPort.FullName, ModifierKeys.ToString());
@@ -1687,10 +1721,11 @@ namespace TK.NodalEditor.NodesLayout
                                                 }
                                                 else
                                                 {
+                                                    newPortForm.SetDesiredStartLocation();
                                                     DialogResult result = newPortForm.ShowDialog(connectPort.Name, HitCtrl, connectPort);
                                                     if (result == DialogResult.OK)
                                                     {
-                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, false, newPortForm.CustomParams, newPortForm.TypeMetaData);
+                                                        depositPort = HitCtrl.NewPort(newPortForm.PortName, newPortForm.PortType, true, newPortForm.CustomParams, newPortForm.TypeMetaData);
                                                         if (depositPort != null)
                                                         {
                                                             NodalDirector.Connect(Node.FullName, connectPort.FullName, HitCtrl.FullName, depositPort.FullName, ModifierKeys.ToString());
@@ -1871,6 +1906,7 @@ namespace TK.NodalEditor.NodesLayout
                 hitNode = null;
             }
             IsDragging = false;
+            IsZooming = false;
             HasMoved = false;
 
         }
@@ -2152,6 +2188,7 @@ namespace TK.NodalEditor.NodesLayout
                         {
                             if (PortClick >= 1000)
                             {
+                                newPortForm.SetDesiredStartLocation();
                                 DialogResult result = newPortForm.ShowDialog("new_port", Node);
                                 if (result == DialogResult.OK)
                                 {
@@ -2161,6 +2198,7 @@ namespace TK.NodalEditor.NodesLayout
                             }
                             else
                             {
+                                newPortForm.SetDesiredStartLocation();
                                 DialogResult result = newPortForm.ShowDialog("new_port", Node);
                                 if (result == DialogResult.OK)
                                 {
@@ -2357,6 +2395,8 @@ namespace TK.NodalEditor.NodesLayout
             {
                 Selection.DeselectAll();
                 Selection.DeselectLinks();
+                OnLinkSelectionChanged(new LinkSelectionChangedEventArgs(null));
+                OnSelectionChanged(new SelectionChangedEventArgs(Selection.Selection));
             }
 
             Inputs.SetPorts(Manager.CurCompound);
@@ -3040,11 +3080,11 @@ namespace TK.NodalEditor.NodesLayout
         public void DrawNode(Graphics graphics, Node Ctrl, float inX, float inY, double inSize)
         {
             Brush toUse = GetBrush(Ctrl);
-            DrawSmoothRectangle(graphics, Ctrl.Selected ? FatPen : FramePen, toUse, (int)(inX * inSize), (int)(inY * inSize), (int)(Ctrl.UIWidth * inSize), (int)(Ctrl.UIHeight * inSize), (int)(15 * inSize));
+            DrawSmoothRectangle(graphics, Ctrl.Selected ? FatPen : FramePen, toUse, (int)(inX * inSize), (int)(inY * inSize), Math.Max(3, (int)(Ctrl.UIWidth * inSize)), Math.Max(3, (int)(Ctrl.UIHeight * inSize)), Math.Max(1, (int)(15 * inSize)));
 
             if (Ctrl.Selected)
             {
-                DrawSmoothRectangle(graphics, WhitePen, null, (int)(inX * inSize), (int)(inY * inSize), (int)(Ctrl.UIWidth * inSize), (int)(Ctrl.UIHeight * inSize), (int)(15 * inSize));
+                DrawSmoothRectangle(graphics, WhitePen, null, (int)(inX * inSize), (int)(inY * inSize), Math.Max(3, (int)(Ctrl.UIWidth * inSize)), Math.Max(3, (int)(Ctrl.UIHeight * inSize)), Math.Max(1, (int)(15 * inSize)));
             }
 
             //Custom Icons
@@ -3987,6 +4027,9 @@ namespace TK.NodalEditor.NodesLayout
             PreferencesForm prefsForm = new PreferencesForm();
             prefsForm.PrefChanged += new PreferencesForm.PrefChangedEventHandler(prefsForm_PrefChanged);
             prefsForm.Owner = owner;
+
+            prefsForm.SetDesiredStartLocation(Cursor.Position.X, Cursor.Position.Y);
+
             prefsForm.Show();
             prefsForm.Init("TK_NodalEditor Preferences", Preferences, RootPath + "\\Preferences", "Preferences.xml");
         }
@@ -3995,6 +4038,8 @@ namespace TK.NodalEditor.NodesLayout
         {
             PreferencesForm prefsForm = new PreferencesForm();
             prefsForm.PrefChanged += new PreferencesForm.PrefChangedEventHandler(prefsForm_PrefChanged);
+
+            prefsForm.SetDesiredStartLocation(Cursor.Position.X, Cursor.Position.Y);
 
             prefsForm.Show();
             prefsForm.Init("TK_NodalEditor Preferences", Preferences, RootPath + "\\Preferences", "Preferences.xml");

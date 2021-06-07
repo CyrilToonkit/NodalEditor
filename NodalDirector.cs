@@ -2286,7 +2286,6 @@ namespace TK.NodalEditor
 
             string nom_fct = string.Format("CreateCompound(new List<string>{{\"{0}\"}});", TypesHelper.Join(inNodeNames, "\",\""));
 
-
             if (_instance.verbose)
                 Info(nom_fct);
 
