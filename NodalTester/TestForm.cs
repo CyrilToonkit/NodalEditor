@@ -640,11 +640,15 @@ namespace NodalTester
             {
                 if (tabControl1.SelectedIndex == 0)
                 {
+                    NodalDirector.Get().history.BeginCompoundDo();
                     NodalDirector.Evaluate(csEditControl.Text.Replace("\f", "\n"));
+                    NodalDirector.Get().history.EndCompoundDo();
                 }
                 else
                 {
+                    NodalDirector.Get().history.BeginCompoundDo();
                     NodalDirector.EvaluatePython(pyEditControl.Text.Replace("\f", "\n"));
+                    NodalDirector.Get().history.EndCompoundDo();
                 }
             }
             catch
