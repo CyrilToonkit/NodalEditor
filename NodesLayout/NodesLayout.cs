@@ -225,6 +225,9 @@ namespace TK.NodalEditor.NodesLayout
         public Pen FatPen = new Pen(Color.Black, 3f);
         public Brush LinkBrush = Brushes.Red;
 
+        public Brush OpaqueBrush = new SolidBrush(Color.FromArgb(70, 0, 0, 0));
+        public Brush TransparentBrush = new SolidBrush(Color.FromArgb(45, 0, 0, 0));
+
         public Brush NodeBrush = Brushes.DodgerBlue;
         public Brush NodeSelectedBrush = Brushes.DeepSkyBlue;
         public Brush CompoundBrush = Brushes.SandyBrown;
@@ -3080,11 +3083,11 @@ namespace TK.NodalEditor.NodesLayout
         public void DrawNode(Graphics graphics, Node Ctrl, float inX, float inY, double inSize)
         {
             Brush toUse = GetBrush(Ctrl);
-            DrawSmoothRectangle(graphics, Ctrl.Selected ? FatPen : FramePen, toUse, (int)(inX * inSize), (int)(inY * inSize), Math.Max(3, (int)(Ctrl.UIWidth * inSize)), Math.Max(3, (int)(Ctrl.UIHeight * inSize)), Math.Max(1, (int)(15 * inSize)));
+            DrawSmoothRectangle(graphics, Ctrl.Selected ? FatPen : FramePen, toUse, OpaqueBrush, (int)(inX * inSize), (int)(inY * inSize), Math.Max(3, (int)(Ctrl.UIWidth * inSize)), Math.Max(3, (int)(Ctrl.UIHeight * inSize)), Math.Max(1, (int)(15 * inSize)));
 
             if (Ctrl.Selected)
             {
-                DrawSmoothRectangle(graphics, WhitePen, null, (int)(inX * inSize), (int)(inY * inSize), Math.Max(3, (int)(Ctrl.UIWidth * inSize)), Math.Max(3, (int)(Ctrl.UIHeight * inSize)), Math.Max(1, (int)(15 * inSize)));
+                DrawSmoothRectangle(graphics, WhitePen, null, null, (int)(inX * inSize), (int)(inY * inSize), Math.Max(3, (int)(Ctrl.UIWidth * inSize)), Math.Max(3, (int)(Ctrl.UIHeight * inSize)), Math.Max(1, (int)(15 * inSize)));
             }
 
             //Custom Icons
@@ -3114,11 +3117,19 @@ namespace TK.NodalEditor.NodesLayout
                 graphics.DrawEllipse(FramePen, rect);
             }
 
-            //Label
-            graphics.DrawString(Ctrl.FullName, strongFont, strongFontBrush, new PointF((float)((inX + Ctrl.UILabelX) * inSize), (float)((inY + Ctrl.UILabelY / 3) * inSize)));
-
             //Display Icon
-            graphics.DrawImage(mDisplayIcon, new Rectangle((int)((inX + 6) * inSize), (int)((inY + 6) * inSize), (int)(101 * inSize), (int)(11 * inSize)));
+            graphics.DrawImage(mDisplayIcon, new Rectangle((int)((inX + 6) * inSize), (int)((inY + 6) * inSize), (int)(13.5 * inSize), (int)(11 * inSize)));
+
+            //Label
+            PointF labelOrigin = new PointF((float)((inX + Ctrl.UILabelX) * inSize), (float)((inY + Ctrl.UILabelY / 2.25) * inSize));
+            graphics.DrawString(Ctrl.FullName, strongFont, strongFontBrush, labelOrigin);
+
+            /* Text with outline does not really work
+            GraphicsPath p = new GraphicsPath();
+            p.AddString(Ctrl.FullName, strongFont.FontFamily, (int)strongFont.Style, (int)(graphics.DpiY * strongFont.SizeInPoints / 72.0), labelOrigin, new StringFormat());
+            graphics.FillPath(strongFontBrush, p);
+            graphics.DrawPath(new Pen(lightFontBrush, .5f), p);
+            */
 
             //Inputs
             float Offset = 0f;
@@ -3218,10 +3229,15 @@ namespace TK.NodalEditor.NodesLayout
             }
         }
 
-        public void DrawSmoothRectangle(Graphics graphics, Pen pen, Brush brush, int inX, int inY, int inWidth, int inHeight, int Smoothness)
+        public void DrawSmoothRectangle(Graphics graphics, Pen pen, Brush brush, Brush captionBrush, int inX, int inY, int inWidth, int inHeight, int Smoothness)
         {
+            Rectangle nodeRect = new Rectangle(inX, inY, inWidth, inHeight);
+
+            GraphicsPath path = NodesLayout.RoundedRect(nodeRect, Smoothness);
+
             if (brush != null)
             {
+                /*
                 graphics.FillPie(brush, inX, inY, 2 * Smoothness, 2 * Smoothness, 180, 90);
                 graphics.FillPie(brush, inX + inWidth - 2 * Smoothness - 1, inY, 2 * Smoothness, 2 * Smoothness, -90, 90);
                 graphics.FillPie(brush, inX, inY + inHeight - 2 * Smoothness - 1, 2 * Smoothness, 2 * Smoothness, 180, -90);
@@ -3229,9 +3245,11 @@ namespace TK.NodalEditor.NodesLayout
 
                 graphics.FillRectangle(brush, inX, inY + Smoothness, inWidth - 1, inHeight - 2 * Smoothness - 1);
                 graphics.FillRectangle(brush, inX + Smoothness, inY, inWidth - 2 * Smoothness - 1, inHeight - 1);
+                */
 
+                graphics.FillPath(brush, path);
             }
-
+            /*
             graphics.DrawArc(pen, inX, inY, 2 * Smoothness, 2 * Smoothness, 180, 90);
             graphics.DrawArc(pen, inX + inWidth - 2 * Smoothness - 1, inY, 2 * Smoothness, 2 * Smoothness, -90, 90);
             graphics.DrawArc(pen, inX, inY + inHeight - 2 * Smoothness - 1, 2 * Smoothness, 2 * Smoothness, 180, -90);
@@ -3241,6 +3259,73 @@ namespace TK.NodalEditor.NodesLayout
             graphics.DrawLine(pen, inX + inWidth - 1, inY + Smoothness, inX + inWidth - 1, inY + inHeight - Smoothness - 1);
             graphics.DrawLine(pen, inX + Smoothness, inY, inX + inWidth - Smoothness - 1, inY);
             graphics.DrawLine(pen, inX + Smoothness, inY + inHeight - 1, inX + inWidth - Smoothness - 1, inY + inHeight - 1);
+            */
+            graphics.DrawPath(pen, path);
+
+            if (captionBrush != null)
+            {
+                path = NodesLayout.RoundedCaption(nodeRect, Smoothness);
+                graphics.FillPath(captionBrush, path);
+            }
+        }
+
+        public static GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        {
+            int diameter = radius * 2;
+            Size size = new Size(diameter, diameter);
+            Rectangle arc = new Rectangle(bounds.Location, size);
+            GraphicsPath path = new GraphicsPath();
+
+            if (radius == 0)
+            {
+                path.AddRectangle(bounds);
+                return path;
+            }
+
+            // top left arc  
+            path.AddArc(arc, 180, 90);
+
+            // top right arc  
+            arc.X = bounds.Right - diameter;
+            path.AddArc(arc, 270, 90);
+
+            // bottom right arc  
+            arc.Y = bounds.Bottom - diameter;
+            path.AddArc(arc, 0, 90);
+
+            // bottom left arc 
+            arc.X = bounds.Left;
+            path.AddArc(arc, 90, 90);
+
+            path.CloseFigure();
+            return path;
+        }
+
+        public static GraphicsPath RoundedCaption(Rectangle bounds, int radius)
+        {
+            int diameter = radius * 2;
+            Size size = new Size(diameter, diameter);
+            Rectangle arc = new Rectangle(bounds.Location, size);
+            GraphicsPath path = new GraphicsPath();
+
+            if (radius == 0)
+            {
+                path.AddRectangle(bounds);
+                return path;
+            }
+
+            // top left arc  
+            path.AddArc(arc, 180, 90);
+
+            // top right arc  
+            arc.X = bounds.Right - diameter;
+            path.AddArc(arc, 270, 90);
+
+            // bottom
+            path.AddLine(bounds.Right, bounds.Top + radius + 5, bounds.Left, bounds.Top + radius + 5);
+
+            path.CloseFigure();
+            return path;
         }
 
         public void DrawPortPlug(Graphics graphics, Brush brush, int inX, int inY, int Size)
