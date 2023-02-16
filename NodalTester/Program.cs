@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows.Forms;
+using TK.GraphComponents;
 using TK.NodalEditor;
 
 namespace NodalTester
@@ -23,6 +24,8 @@ namespace NodalTester
                     handler.Application_ThreadException);
                     */
             //Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+
+            Application.AddMessageFilter(new DropDownMenuScrollWheelHandler());
 
             TestForm form = new TestForm();
             Application.Run(form);
