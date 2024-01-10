@@ -30,7 +30,7 @@ namespace TK.NodalEditor
         }
         private void nd_ChangeOnStatus(bool newStatus)
         {
-            Console.WriteLine("Have changed " + newStatus);
+            //Console.WriteLine("Have changed " + newStatus);
         }
         //public event HaveChangedEventHandler HaveChangedEvent;
         //public delegate void HaveChangedEventHandler(object sender, NodesChangedEventArgs e);

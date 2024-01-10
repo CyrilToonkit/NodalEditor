@@ -285,10 +285,19 @@ namespace TK.NodalEditor
         // Log
 
         /// <summary>
-        /// Log a verbose message 
+        /// Log a message 
         /// </summary>
         /// <param name="p">The message</param>
         public virtual void Log(string p)
+        {
+
+        }
+
+        /// <summary>
+        /// Log a verbose message 
+        /// </summary>
+        /// <param name="p">The message</param>
+        public virtual void Verbose(string p)
         {
 
         }
@@ -390,10 +399,7 @@ namespace TK.NodalEditor
         /// <param name="p">The message to be logged</param>
         public void LogDebug(string p)
         {
-            if (DEBUG)
-            {
-                Log("DEBUG - " + p);
-            }
+            Verbose(p);
         }
 
         /// <summary>

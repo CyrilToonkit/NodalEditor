@@ -756,13 +756,10 @@ namespace TK.NodalEditor
             {
                 JumpCompound(0);
 
-                if (Root != null)
+                if (Root != null && inNode != null)
                 {
                     Root.Remove(true);
                 }
-            }
-            else
-            {
             }
 
             if (inNode == null)
