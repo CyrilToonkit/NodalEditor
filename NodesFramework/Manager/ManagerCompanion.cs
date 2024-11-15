@@ -447,7 +447,10 @@ namespace TK.NodalEditor
             TRACECOMMANDS = TRACECOMMANDSOLDVALUE;
 
             Tracer.Instance.Active = false;
-            Log(Tracer.Instance.GetText());
+            foreach (string text in Tracer.Instance.GetTexts())
+            {
+                Log(text);
+            }
         }
 
         #endregion

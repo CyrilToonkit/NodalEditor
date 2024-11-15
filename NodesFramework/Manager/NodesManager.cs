@@ -1591,6 +1591,27 @@ namespace TK.NodalEditor
             Companion.Log(message);
         }
 
+        /// <summary>
+        /// Substitute a node with another one, checking for port names that fits for remapping
+        /// </summary>
+        /// <param name="inNode">Existing Node to be sustituted</param>
+        /// <param name="index">Index of the new node from the library</param>
+        public void SubstituteNode(Node inNode, string inNewNodeTypeName)
+        {
+            Node newNode = AddNode(inNewNodeTypeName, inNode.Parent, (int)inNode.UIx, (int)inNode.UIy);
+            //Base properties
+
+            //Wait to apply the Name
+            string oldName = inNode.Name;
+            inNode.UpdateBeforeCopy();
+            string message = inNode.Substitute(newNode);
+
+            inNode.Parent.RemoveNode(inNode, true);
+            newNode.Name = oldName;
+
+            Companion.Log(message);
+        }
+
         #endregion
 
         public int GetBreadCrumbsIndex(Compound comp)
